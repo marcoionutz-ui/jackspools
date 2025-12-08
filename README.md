@@ -1,66 +1,96 @@
-## Foundry
+# JACKs Pools – Autonomous Reward Distribution Protocol on Base
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+JACKs Pools is an autonomous onchain reward distribution system designed for Base.
+The protocol features **permanent, ever-growing liquidity**, a **buyer reward cycle** with a
+4,096-entry circular buffer system, an **LP reward cycle** for top contributors, and a regenerative
+economic model where every interaction (buy, sell, LP add) strengthens the protocol.
 
-Foundry consists of:
+The system is fully non-custodial and non-ruggable:
+- Liquidity is permanent and can only increase  
+- No owner functions remain after initialization  
+- All rewards are claim-based (pull payments)  
+- All logic is deterministic, self-contained, and onchain  
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+---
 
-## Documentation
+##  Architecture Overview
 
-https://book.getfoundry.sh/
+### 1. `JACKsPools.sol` – ERC20 Core
 
-## Usage
+- Buy/sell incentives routed into:
+  - Buyer Reward Vault (ETH rewards for buyers)
+  - LP Reward Vault (ETH rewards for liquidity providers)
+  - Burn address (supply reduction)
+- Auto-liquidity engine on Base
+- Dynamic stages based on total LP value:
+  - min buy
+  - max wallet (removed at high LP)
+  - reward thresholds
+- Cooldown between buys, sell lock and slippage constraints
 
-### Build
+### 2. `JACKsVault.sol` – Buyer Reward Vault
 
-```shell
-$ forge build
-```
+- 8 × 512 circular entry buffers (4,096 total entries)
+- Round-based reward cycles:
+  - entries added only if buy size & token balance meet stage requirements
+  - one active entry per address per round
+- Snapshot + delayed reveal for entropy separation
+- Time-based entry expiry
+- Pull-payment reward claiming with safety limits
 
-### Test
+### 3. `JACKsLPVault.sol` – LP Reward Vault
 
-```shell
-$ forge test
-```
+- Lifetime LP contribution tracking
+- Max 400 active participants per reward cycle (buffer capacity)
+- Eviction algorithm:
+  - when buffer is full, the lowest contributor can be replaced by a bigger contributor
+- Top-100 contributors receive proportional ETH rewards per cycle
+- Snapshot → finalization → claim lifecycle
+- Claim deadline + accounting for unclaimed rewards
 
-### Format
+### 4. `JACKsLPManager.sol`
 
-```shell
-$ forge fmt
-```
+- Helper contract for adding LP via the router
+- Registers LP contributions into the LP Reward Vault
+- Keeps LP flow standardized and onchain
 
-### Gas Snapshots
+---
 
-```shell
-$ forge snapshot
-```
+##  Integration Simulations (Foundry Scripts)
 
-### Anvil
+Instead of classical unit tests, the repo uses full integration simulations running on a Base mainnet fork.
 
-```shell
-$ anvil
-```
+### `script/TestBaseCompleteFork.s.sol`
 
-### Deploy
+16-phase end-to-end simulation:
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+- Deployment and wiring of all contracts
+- Initial liquidity
+- Multiple buyer reward cycles
+- Multiple LP contribution cycles
+- Stage transitions based on LP value
+- Buy cooldown / sell lock behavior
+- Reward snapshots, finalization and claims
+- Safety and cleanup paths
 
-### Cast
+### `script/TestBaseAdvanced.s.sol`
 
-```shell
-$ cast <subcommand>
-```
+High-LP environment simulation:
 
-### Help
+- 25 ETH initial LP (Stage 5)
+- Multiple consecutive buyer reward cycles
+- LP buffer saturation and eviction
+- Full LP reward distribution cycle
+- Stress-testing permanent LP growth logic
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+### How to run the simulations
+
+```bash
+forge install
+forge build
+
+forge script script/TestBaseCompleteFork.s.sol:TestBaseCompleteFork \
+  --fork-url $BASE_RPC_MAINNET -vvv
+
+forge script script/TestBaseAdvanced.s.sol:TestBaseAdvanced \
+  --fork-url $BASE_RPC_MAINNET -vvv
