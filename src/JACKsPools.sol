@@ -649,8 +649,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 	}
 	
 	/**
-	 * @notice Check if address is a PancakeSwap pair contract
-	 * @dev Works with any Uniswap V2 fork (PancakeSwap uses same interface)
+	 * @notice Check if address is a Uniswap V2 pair contract
+	 * @dev Works with any Uniswap V2 fork
 	 */
 	function _isPair(address account) private view returns (bool) {
 		if (account.code.length == 0) return false; // Not a contract
@@ -699,7 +699,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
         emit OwnershipRenounced();
     }
     
-    // Recovery function for stuck BNB (owner only, before renounce)
+    // Recovery function for stuck ETH (owner only, before renounce)
     function recoverEth() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "No ETH");
@@ -724,7 +724,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 	
 	/**
      * @notice Process accumulated taxes manually (anyone can call)
-     * @dev Caller receives 0.3% reward from generated BNB
+     * @dev Caller receives 0.3% reward from generated ETH
      */
     function processTaxes() external nonReentrant {
         require(_balances[address(this)] >= minSwapTokens, "Not enough tokens");
