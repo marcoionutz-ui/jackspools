@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.25;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -125,6 +125,7 @@ contract JACKsVault is ReentrancyGuard {
     event RoundReady(uint256 poolBalance, uint256 eligibleBuyers, uint256 round);
     event RewardDistributed(address indexed recipient, uint256 amount, uint256 round);
     event Claimed(address indexed recipient, uint256 amount);
+	event SnapshotReset(uint256 indexed round, string reason);
     event EmergencyPauseSet(bool paused);
     event OwnershipRenounced();
     
@@ -265,6 +266,12 @@ contract JACKsVault is ReentrancyGuard {
 		));
 		
 		emit BuyerAdded(buyer, ethAmount, currentRound);
+	
+		// Auto-reset snapshot if stuck for 7 days (safety mechanism)
+		if (snapshotTaken && block.timestamp > snapshotTimestamp + 7 days) {
+			snapshotTaken = false;
+			emit SnapshotReset(snapshotRound, "7 day timeout");
+		}
 		
 		// Check if snapshot needed (auto-snapshot when threshold reached)
 		uint256 pot = address(this).balance - _getTotalPendingClaims();
@@ -311,25 +318,39 @@ contract JACKsVault is ReentrancyGuard {
 		BufferSet storage snapshotBuffer = buffers[snapshotBufferNum];
 		uint256 snapshotSize = snapshotBuffer.size;
 		
-		uint256 cutoffTime = snapshotTimestamp - ENTRY_EXPIRY;
+		// Prevent underflow if snapshot taken early after deploy
+		uint256 cutoffTime = snapshotTimestamp > ENTRY_EXPIRY 
+			? snapshotTimestamp - ENTRY_EXPIRY 
+			: 0;
+		
+		// Calculate start position in circular buffer
+		uint256 startPos = snapshotBuffer.size < BUFFER_CAPACITY 
+			? 0 
+			: (snapshotBuffer.index + BUFFER_CAPACITY - snapshotBuffer.size) % BUFFER_CAPACITY;
+		
 		uint256 validCount = 0;
 		
-		// Count valid entries (not expired)
+		// Count valid entries (iterate correctly through circular buffer)
 		for (uint256 i = 0; i < snapshotSize; i++) {
-			if (snapshotBuffer.entries[i].timestamp >= cutoffTime) {
+			uint256 pos = (startPos + i) % BUFFER_CAPACITY;  // CIRCULAR READ
+			if (snapshotBuffer.entries[pos].timestamp >= cutoffTime) {
 				validCount++;
 			}
 		}
 		
-		require(validCount > 0, "No valid entries");
+		// Return empty array if no valid entries (instead of revert)
+		if (validCount == 0) {
+			return new BuyEntry[](0);
+		}
 		
 		// Build valid entries array
 		BuyEntry[] memory validEntries = new BuyEntry[](validCount);
 		uint256 index = 0;
 		
 		for (uint256 i = 0; i < snapshotSize; i++) {
-			if (snapshotBuffer.entries[i].timestamp >= cutoffTime) {
-				validEntries[index] = snapshotBuffer.entries[i];
+			uint256 pos = (startPos + i) % BUFFER_CAPACITY;  // CIRCULAR READ
+			if (snapshotBuffer.entries[pos].timestamp >= cutoffTime) {
+				validEntries[index] = snapshotBuffer.entries[pos];
 				index++;
 			}
 		}
@@ -352,6 +373,11 @@ contract JACKsVault is ReentrancyGuard {
 		
 		if (pot >= getCurrentThreshold() && activeSize > 0) {
 			emit RoundReady(pot, activeSize, currentRound);
+		
+			// Auto-snapshot if not already taken
+			if (!snapshotTaken) {
+				_takeSnapshot();
+			}
 		}
 	}
        
@@ -361,11 +387,16 @@ contract JACKsVault is ReentrancyGuard {
 	function finalizeRound() external nonReentrant notPaused {
 		require(snapshotTaken, "No snapshot taken");
 		
-		// Reset snapshot flag immediately to prevent double finalization
-		snapshotTaken = false;
-		
 		uint256 pot = address(this).balance - _getTotalPendingClaims();
 		require(pot >= getCurrentThreshold(), "Threshold not met");
+		
+		// Prevent stale blockhash (blockhash only works for last 256 blocks)
+		if (block.number > snapshotBlockNumber + 256) {
+			snapshotTaken = false;
+			emit SnapshotReset(snapshotRound, "Snapshot expired - take new snapshot");
+			return;
+		}
+
 		
 		// Prevent rapid consecutive finalizations
 		require(
@@ -376,18 +407,25 @@ contract JACKsVault is ReentrancyGuard {
 		// Get valid entries from snapshot buffer
 		BuyEntry[] memory validEntries = _getValidSnapshotEntries();
 		
+		// If no valid entries, reset snapshot and exit
+		if (validEntries.length == 0) {
+			snapshotTaken = false;
+			emit SnapshotReset(snapshotRound, "No valid entries");
+			return;
+		}
+		
 		// Verify reveal block reached
 		require(block.number >= snapshotRevealBlock, "Wait for reveal block");
-
-		// Generate random winner with multi-source entropy
+				
+		// Generate base random seed with multi-source entropy
 		uint256 randomSeed = uint256(keccak256(abi.encodePacked(
-			// PAST blocks (at snapshot time)
-			blockhash(snapshotBlockNumber - 1),
-			blockhash(snapshotBlockNumber - 3),
+			// PAST blocks (at snapshot time) - safe checks for underflow
+			snapshotBlockNumber > 0 ? blockhash(snapshotBlockNumber - 1) : bytes32(0),
+			snapshotBlockNumber > 2 ? blockhash(snapshotBlockNumber - 3) : bytes32(0),
 			
 			// FUTURE blocks (unknown at snapshot)
 			blockhash(snapshotRevealBlock),
-			blockhash(block.number - 1),
+			block.number > 0 ? blockhash(block.number - 1) : bytes32(0),
 			
 			// Current state
 			block.timestamp,
@@ -406,13 +444,46 @@ contract JACKsVault is ReentrancyGuard {
 			msg.sender,
 			tx.gasprice
 		)));
-		
-		uint256 selectedIndex = randomSeed % validEntries.length;
-		address recipient = validEntries[selectedIndex].buyer;
-		
-		// Verify winner still eligible
-		require(TOKEN.balanceOf(recipient) >= getMinEligibilityTokens(), "Recipient not eligible");
-		
+
+		// TRY TO FIND ELIGIBLE WINNER (bounded retries)
+		address recipient;
+		bool found = false;
+		uint256 maxAttempts = validEntries.length < 20 ? validEntries.length : 20;
+
+		for (uint256 attempt = 0; attempt < maxAttempts && !found; attempt++) {
+			// Re-hash seed with attempt counter
+			uint256 attemptSeed = uint256(keccak256(abi.encodePacked(randomSeed, attempt)));
+			uint256 selectedIndex = attemptSeed % validEntries.length;
+			address candidate = validEntries[selectedIndex].buyer;
+			
+			// Check if eligible
+			if (TOKEN.balanceOf(candidate) >= getMinEligibilityTokens()) {
+				recipient = candidate;
+				found = true;
+			}
+		}
+
+		// FALLBACK: Linear scan for first eligible (if random failed)
+		if (!found) {
+			for (uint256 i = 0; i < validEntries.length; i++) {
+				if (TOKEN.balanceOf(validEntries[i].buyer) >= getMinEligibilityTokens()) {
+					recipient = validEntries[i].buyer;
+					found = true;
+					break;
+				}
+			}
+		}
+
+		// If STILL not found, round has NO eligible winners
+		if (!found) {
+			snapshotTaken = false;
+			emit SnapshotReset(snapshotRound, "No eligible winners");
+			return;
+		}
+
+		// NOW safe to reset snapshot (after guaranteed valid recipient)
+		snapshotTaken = false;
+
 		uint256 rewardAmount = pot; // 100% to winner
 		
 		// Record round info
@@ -746,14 +817,7 @@ contract JACKsVault is ReentrancyGuard {
         // Reset first (prevent reentrancy)
         claimable[msg.sender] = 0;
         totalClaimed += amount;
-        
-        // Update round claimed status
-        for (uint256 i = 0; i < round; i++) {
-            if (rounds[i].recipient == msg.sender && !rounds[i].claimed) {
-                rounds[i].claimed = true;
-            }
-        }
-        
+                
         // Transfer prize
         (bool success,) = msg.sender.call{value: amount}("");
         require(success, "Transfer failed");
@@ -825,72 +889,138 @@ contract JACKsVault is ReentrancyGuard {
         owner = address(0);
         emit OwnershipRenounced();
     }
-    
-    /**
-     * @notice Emergency claim for stuck funds after 30 days (safety mechanism)
-     */
-    function emergencyClaim(address recipient) external nonReentrant {
+      
+	/**
+	 * @notice Emergency claim for stuck funds after 30 days (safety mechanism)
+	 * @dev Gas-limited: only checks last 100 rounds to prevent out-of-gas
+	 */
+	function emergencyClaim(address recipient) external nonReentrant {
 		require(claimable[recipient] > 0, "No claim");
 		
-		// Find and mark ALL expired unclaimed rounds for this recipient
-		bool hasOldUnclaimed = false;
-		for (uint256 i = 0; i < round; i++) {
+		// Limit to last 100 rounds to prevent gas issues
+		uint256 startRound = round > 100 ? round - 100 : 0;
+		
+		// Calculate and mark expired unclaimed rounds for this recipient
+		uint256 expiredAmount = 0;
+		for (uint256 i = startRound; i < round; i++) {
 			if (rounds[i].recipient == recipient && 
 				!rounds[i].claimed && 
 				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
-				hasOldUnclaimed = true;
+				expiredAmount += rounds[i].amount;
 				rounds[i].claimed = true;
 			}
 		}
 		
-		require(hasOldUnclaimed, "No emergency claim");
+		require(expiredAmount > 0, "No emergency claim");
 		
-		uint256 amount = claimable[recipient];
-		claimable[recipient] = 0;
-		totalClaimed += amount;
+		// Only pay expired amount, not entire claimable
+		claimable[recipient] -= expiredAmount;
+		totalClaimed += expiredAmount;
 		
-		(bool success,) = recipient.call{value: amount}("");
+		(bool success,) = recipient.call{value: expiredAmount}("");
 		require(success, "Transfer failed");
 		
-		emit Claimed(recipient, amount);
+		emit Claimed(recipient, expiredAmount);
 	}
 	
 	/**
-	 * @notice Cleanup expired unclaimed rewards (anyone can call)
-	 * @dev Marks expired claims as processed, freeing accounting
-	 * @return recovered Amount of ETH freed for future rounds
+	 * @notice Cleanup expired claims for a specific round (gas-efficient)
+	 * @param roundId Round to cleanup
+	 * @return recovered Amount of ETH freed
+	 */
+	function cleanupExpiredClaimsForRound(uint256 roundId) public returns (uint256 recovered) {
+		require(roundId < round, "Invalid round");
+		
+		RoundInfo storage info = rounds[roundId];
+		
+		// Skip if already claimed or not expired
+		if (info.claimed || block.timestamp <= info.timestamp + MAX_CLAIM_DELAY) {
+			return 0;
+		}
+		
+		address recipient = info.recipient;
+		
+		// If this round's recipient has any unclaimed amount
+		if (claimable[recipient] > 0) {
+			uint256 amountToRecover = claimable[recipient] >= info.amount 
+				? info.amount 
+				: claimable[recipient];
+			
+			// Mark as claimed and update accounting
+			info.claimed = true;
+			claimable[recipient] -= amountToRecover;
+			totalClaimed += amountToRecover;
+			recovered = amountToRecover;
+		}
+		
+		return recovered;
+	}
+
+	/**
+	 * @notice Cleanup expired claims for multiple rounds (batched)
+	 * @param startRound First round to cleanup (inclusive)
+	 * @param endRound Last round to cleanup (inclusive)
+	 * @return recovered Total amount of ETH freed
+	 */
+	function cleanupExpiredClaimsBatch(uint256 startRound, uint256 endRound) external returns (uint256 recovered) {
+		require(startRound <= endRound, "Invalid range");
+		require(endRound < round, "Invalid end round");
+		
+		recovered = 0;
+		
+		for (uint256 i = startRound; i <= endRound; i++) {
+			recovered += cleanupExpiredClaimsForRound(i);
+		}
+		
+		return recovered;
+	}
+
+	/**
+	 * @notice Cleanup all expired claims (backwards compatible)
+	 * @dev Gas-optimized: only checks last 100 rounds max to prevent out-of-gas
+	 * @return recovered Amount of ETH freed
 	 */
 	function cleanupExpiredClaims() external returns (uint256 recovered) {
 		recovered = 0;
 		
+		// Limit to prevent gas issues
+		uint256 startRound = round > 100 ? round - 100 : 0;
+		
+		for (uint256 i = startRound; i < round; i++) {
+			recovered += cleanupExpiredClaimsForRound(i);
+		}
+		
+		return recovered;
+	}
+
+	/**
+	 * @notice Get list of rounds that need cleanup
+	 * @return roundIds Array of round IDs with expired unclaimed rewards
+	 */
+	function getExpiredRounds() external view returns (uint256[] memory roundIds) {
+		uint256 count = 0;
+		
 		for (uint256 i = 0; i < round; i++) {
-			RoundInfo storage info = rounds[i];
-			
-			// Skip if already claimed or not expired
-			if (info.claimed || block.timestamp <= info.timestamp + MAX_CLAIM_DELAY) {
-				continue;
-			}
-			
-			// Use stored recipient from RoundInfo
-			address recipient = info.recipient;
-			
-			// If this round's recipient has any unclaimed amount
-			if (claimable[recipient] > 0) {
-				// Recover whatever amount is available (handles edge cases)
-				uint256 amountToRecover = claimable[recipient] >= info.amount 
-					? info.amount 
-					: claimable[recipient];
-				
-				// Mark as claimed and update accounting
-				info.claimed = true;
-				claimable[recipient] -= amountToRecover;
-				totalClaimed += amountToRecover;
-				recovered += amountToRecover;
+			if (!rounds[i].claimed && 
+				rounds[i].amount > 0 &&
+				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
+				count++;
 			}
 		}
 		
-		// Recovered funds stay in contract for future rounds
-		return recovered;
+		roundIds = new uint256[](count);
+		uint256 index = 0;
+		
+		for (uint256 i = 0; i < round; i++) {
+			if (!rounds[i].claimed && 
+				rounds[i].amount > 0 &&
+				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
+				roundIds[index] = i;
+				index++;
+			}
+		}
+		
+		return roundIds;
 	}
 	
     /**

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
-contract DeployBaseFork is Script {
+contract DeployBaseSepolia is Script {
     
-    address constant ROUTER = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
+    address constant ROUTER = 0x1689E7B1F10000AE47eBfE339a4f69dECd19F602;
     
     address public token;
     address public vault;
@@ -112,10 +112,12 @@ contract DeployBaseFork is Script {
         
         // 6. Add Initial Liquidity
         console.log("");
-        console.log("6. Adding initial liquidity (0.5 ETH)...");
-        (success,) = token.call{value: 0.5 ether}(abi.encodeWithSignature("addInitialLiquidity()"));
-        require(success, "addInitialLiquidity failed");
-        console.log("   Liquidity added: 0.5 ETH + 1B tokens");
+        console.log("6. Adding initial liquidity (0.02 ETH)...");
+		(success,) = token.call{value: 0.02 ether}(abi.encodeWithSignature("addInitialLiquidity()"));
+		require(success, "addInitialLiquidity failed"); 
+		console.log("   Liquidity added: 0.02 ETH + 1B tokens");
+        console.log("   LP Value: 0.04 ETH");
+		console.log("   Stage: 5 (MATURE)");
         
         // 7. Enable Trading
         console.log("");
@@ -133,7 +135,7 @@ contract DeployBaseFork is Script {
         console.log("=================================");
         console.log("");
         console.log("System Status: READY FOR TESTING");
-        console.log("- Liquidity: 0.5 ETH added");
+        console.log("- Liquidity: 0.02 ETH added");
         console.log("- Trading: ENABLED");
         console.log("");
         console.log("Export these addresses:");

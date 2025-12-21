@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.25;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -449,7 +449,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     }
     
     function _processTaxes() private lockSwap {
-    
+
 		// Save to locals first
 		uint256 localReward = _rewardTokens;
 		uint256 localLp = _lpTokens;
@@ -458,35 +458,47 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 		uint256 tokensToProcess = localReward + localLp + localLpReward;
 		if (tokensToProcess == 0) return;
 		
-		// Reset storage (ONLY AFTER we confirm we have tokens)
-		_rewardTokens = 0;
-		_lpTokens = 0;
-		_lpRewardTokens = 0;
-		  
 		// Use available contract balance
 		uint256 contractBalance = _balances[address(this)];
+
+		// Adjust locals proportionally if insufficient balance
 		if (tokensToProcess > contractBalance) {
+			uint256 adjustmentRatio = (contractBalance * BPS) / tokensToProcess;
+			localReward = (localReward * adjustmentRatio) / BPS;
+			localLp = (localLp * adjustmentRatio) / BPS;
+			localLpReward = (localLpReward * adjustmentRatio) / BPS;
 			tokensToProcess = contractBalance;
 		}
 		
 		if (tokensToProcess == 0) return;
 		
-		// Calculate split proportionally
+		// EXPLICIT swap composition
 		uint256 totalTokens = localReward + localLp + localLpReward;
 		uint256 lpHalf = (localLp * tokensToProcess) / totalTokens / 2;
-		uint256 tokensToSwap = tokensToProcess - lpHalf;
+		
+		// What actually gets swapped to ETH
+		uint256 swapReward = (localReward * tokensToProcess) / totalTokens;
+		uint256 swapLpReward = (localLpReward * tokensToProcess) / totalTokens;
+		uint256 swapLpPart = ((localLp * tokensToProcess) / totalTokens) - lpHalf;
+		uint256 tokensToSwap = swapReward + swapLpReward + swapLpPart;
 				
 		if (tokensToSwap > 0) {
 			uint256 initialBalance = address(this).balance;
 			
-			// Calculate minimum output with slippage protection
+			// Calculate minimum output with slippage protection (CAN REVERT)
 			uint256 minOutput = _calculateMinOutput(tokensToSwap);
 			
 			address[] memory path = new address[](2);
 			path[0] = address(this);
 			path[1] = WETH;
 			
+			// Approve router (CAN REVERT)
 			_approve(address(this), address(ROUTER), tokensToSwap);
+			
+			// RESET STORAGE NOW - after all revert-prone operations outside try-catch
+			_rewardTokens = 0;
+			_lpTokens = 0;
+			_lpRewardTokens = 0;
 			
 			try ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(
 				tokensToSwap,
@@ -498,10 +510,13 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 				uint256 ethReceived = address(this).balance - initialBalance;
 
 				if (ethReceived > 0) {
-					// Calculate proportional split 
-					uint256 ethForReward = (ethReceived * localReward) / tokensToSwap;
-					uint256 ethForLpReward = (ethReceived * localLpReward) / tokensToSwap;
-					uint256 ethForLp = ethReceived - ethForReward - ethForLpReward;
+					// Calculate proportional split (safe from underflow)
+					uint256 ethForReward = (ethReceived * swapReward) / tokensToSwap;
+					uint256 ethForLpReward = (ethReceived * swapLpReward) / tokensToSwap;
+					
+					// Use REMAINDER for ethForLp (prevents underflow from rounding)
+					uint256 allocated = ethForReward + ethForLpReward;
+					uint256 ethForLp = ethReceived > allocated ? ethReceived - allocated : 0;
 
 					// Send to buyer reward round
 					if (ethForReward > 0 && address(VAULT) != address(0)) {
@@ -510,7 +525,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 
 					// Send to LP reward round
 					if (ethForLpReward > 0 && address(LP_VAULT) != address(0)) {
-						try LP_VAULT.onLpTaxReceived{value: ethForLpReward}() {} catch {}					}
+						try LP_VAULT.onLpTaxReceived{value: ethForLpReward}() {} catch {}
+					}
 
 					// Add liquidity
 					if (ethForLp > 0 && lpHalf > 0) {
@@ -521,7 +537,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 							lpHalf,
 							0,
 							0,
-							DEAD, // Burn LP tokens
+							DEAD,
 							block.timestamp
 						) returns (uint256 tokenUsed, uint256 ethUsed, uint256 liquidity) {
 							emit AutoLiquify(tokenUsed, ethUsed, liquidity);
@@ -531,7 +547,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 					emit TaxProcessed(ethForReward + ethForLpReward, ethForLp, 0);
 				}
 			} catch {
-				// RESTORE variables if swap failed!
+				// RESTORE variables if swap failed
 				_rewardTokens = localReward;
 				_lpTokens = localLp;
 				_lpRewardTokens = localLpReward;

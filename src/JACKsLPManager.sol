@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.25;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -99,7 +99,7 @@ contract JACKsLPManager is ReentrancyGuard {
 			"Approval failed"
 		);
         
-        // Add liquidity (LP tokens go to user)
+        // Add liquidity (LP tokens are sent to DEAD)
 		(addedTokens, addedEth, liquidity) = ROUTER.addLiquidityETH{value: msg.value}(
 			address(TOKEN),
 			tokenAmount,

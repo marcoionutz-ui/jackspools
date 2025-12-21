@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.25;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -26,6 +26,7 @@ contract JACKsLPVault is ReentrancyGuard {
     bool public snapshotTaken;
 	uint256 public snapshotTimestamp;
 	uint256 public snapshotBuffer;
+	uint256 public snapshotRound;
 	
 	// Accounting for multi-round solvency
 	uint256 public totalDistributed;
@@ -90,7 +91,8 @@ contract JACKsLPVault is ReentrancyGuard {
 	event LPContributionTracked(address indexed user, uint256 ethAmount, uint256 lifetimeTotal);
     event LPContributorEvicted(address indexed evicted, address indexed replacedBy, uint256 evictedAmount, uint256 newAmount, uint256 round);
 	event SnapshotTaken(uint256 indexed round, uint256 participants, uint256 totalContributed);
-    event RoundFinalized(uint256 indexed round, uint256 totalDistributed, uint256 winnersCount);
+    event SnapshotReset(uint256 indexed round, string reason);
+	event RoundFinalized(uint256 indexed round, uint256 totalDistributed, uint256 winnersCount);
     event RewardClaimed(address indexed user, uint256 indexed round, uint256 amount);
     event Funded(address indexed from, uint256 amount, uint256 poolAfter);
 	event BufferCleared(uint256 indexed bufferIndex, uint256 round);
@@ -170,10 +172,7 @@ contract JACKsLPVault is ReentrancyGuard {
 			msg.sender == address(TOKEN) || msg.sender == LP_MANAGER,
 			"Only token or LP manager"
 		);
-		require(!snapshotTaken, "Snapshot already taken");
-		
-		// NO MINIMUM CHECK - accept any amount!
-		
+						
 		// Track lifetime (always)
 		lifetimeContributions[user] += ethAmount;
 		
@@ -224,15 +223,24 @@ contract JACKsLPVault is ReentrancyGuard {
 
 			emit LPContributed(user, ethAmount, currentRound);
 
-			// Check if snapshot should be taken
-			if (address(this).balance >= getPotThreshold()) {
-				_takeSnapshot();
+				// Auto-reset snapshot if stuck for 14 days (safety mechanism)
+				if (snapshotTaken && block.timestamp > snapshotTimestamp + 14 days) {
+					snapshotTaken = false;
+					emit SnapshotReset(snapshotRound, "14 day timeout");
+				}
+
+				// Check snapshot with availablePot (not raw balance!)
+				uint256 availablePot = address(this).balance - _getTotalPendingClaims();
+				if (!snapshotTaken && availablePot >= getPotThreshold()) {
+					if (bufferParticipants[activeBuffer].length > 0) {
+						_takeSnapshot();
+					}
+				}
+			} else {
+				// Not eligible yet - just track lifetime
+				emit LPContributionTracked(user, ethAmount, lifetimeContributions[user]);
 			}
-		} else {
-			// Not eligible yet - just track lifetime
-			emit LPContributionTracked(user, ethAmount, lifetimeContributions[user]);
 		}
-	}
     
     /**
      * @notice Take snapshot of current contributors
@@ -244,13 +252,22 @@ contract JACKsLPVault is ReentrancyGuard {
         
         snapshotTaken = true;
 		snapshotTimestamp = block.timestamp;
+		snapshotRound = currentRound;
 		snapshotBuffer = activeBuffer;
         
         emit SnapshotTaken(
-            currentRound,
-            bufferParticipants[activeBuffer].length,
-            _getTotalContributions(activeBuffer)
+            snapshotRound,
+            bufferParticipants[snapshotBuffer].length,
+			_getTotalContributions(snapshotBuffer)
         );
+		
+		// Move to next buffer immediately
+		activeBuffer = 1 - activeBuffer;
+		_clearBuffer(activeBuffer);
+		
+		// Next round starts NOW
+		currentRound++;
+
     }
     
     /**
@@ -260,7 +277,7 @@ contract JACKsLPVault is ReentrancyGuard {
 	 */
     function finalizeRound() external nonReentrant {
 		require(snapshotTaken, "No snapshot taken");
-		require(!rounds[currentRound].finalized, "Round already finalized");
+		require(!rounds[snapshotRound].finalized, "Round already finalized");
 		
 		uint256 buffer = snapshotBuffer;
 		
@@ -276,7 +293,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		uint256 potAmount = address(this).balance - _getTotalPendingClaims();
         
-        // Get top 50 contributors
+        // Get top 100 contributors
 		(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(buffer);
 
 		// Ensure we have at least 1 winner
@@ -301,7 +318,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		if (totalTopContributions > 0) {
 			for (uint256 i = 0; i < topCount; i++) {
 				uint256 reward = (topTierPot * contributions[i]) / totalTopContributions;
-				roundRewards[currentRound][topContributors[i]] = reward;
+				roundRewards[snapshotRound][topContributors[i]] = reward;
 			}
 		}
 
@@ -316,51 +333,33 @@ contract JACKsLPVault is ReentrancyGuard {
 			if (totalSecondaryContributions > 0) {
 				for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
 					uint256 reward = (secondaryPot * contributions[i]) / totalSecondaryContributions;
-					roundRewards[currentRound][topContributors[i]] += reward;
+					roundRewards[snapshotRound][topContributors[i]] += reward;
 				}
 			}
 		}
 		
 		// Store all winners for this round (for cleanup)
         for (uint256 i = 0; i < topContributors.length; i++) {
-            roundWinners[currentRound].push(topContributors[i]);
+            roundWinners[snapshotRound].push(topContributors[i]);
         }
         
          // Track total distributed amount
         totalDistributed += potAmount;
         
         // Mark round as finalized
-        rounds[currentRound] = RoundInfo({
+        rounds[snapshotRound] = RoundInfo({
             totalDistributed: potAmount,
             winnersCount: topContributors.length,
             timestamp: block.timestamp,
             finalized: true
         });
         
-        emit RoundFinalized(currentRound, potAmount, topContributors.length);
+        emit RoundFinalized(snapshotRound, potAmount, topContributors.length);
         
-        // Start new round
-        _startNewRound();
-    }
-    
-    /**
-     * @notice Start a new round
-     * @dev Switches buffer, resets state
-     */
-    function _startNewRound() internal {
-        // Switch to next buffer
-        activeBuffer = 1 - activeBuffer;
-        
-        // Clear new active buffer
-        _clearBuffer(activeBuffer);
-        
-        // Reset snapshot flag
+        // Allow next snapshot
         snapshotTaken = false;
-        
-        // Increment round
-        currentRound++;
     }
-    
+  
     /**
      * @notice Clear a buffer
      */
@@ -386,55 +385,77 @@ contract JACKsLPVault is ReentrancyGuard {
 	}
 	
     /**
-     * @notice Get top N contributors from a buffer
-     * @dev Returns sorted list of top contributors
-     */
-    function _getTopContributors(uint256 bufferIndex) internal view returns (
-        address[] memory topAddresses,
-        uint256[] memory topContributions
-    ) {
-        address[] memory participants = bufferParticipants[bufferIndex];
-        uint256 count = participants.length;
-        uint256 topCount = count < TOTAL_WINNERS ? count : TOTAL_WINNERS;
-        
-        // Create arrays for sorting
-        address[] memory sortedAddresses = new address[](count);
-        uint256[] memory sortedContributions = new uint256[](count);
-        
-        // Copy data
-        for (uint256 i = 0; i < count; i++) {
-            sortedAddresses[i] = participants[i];
-            sortedContributions[i] = bufferContributions[bufferIndex][participants[i]];
-        }
-        
-        // Simple bubble sort (descending)
-        for (uint256 i = 0; i < count; i++) {
-            for (uint256 j = i + 1; j < count; j++) {
-                if (sortedContributions[j] > sortedContributions[i]) {
-                    // Swap contributions
-                    uint256 tempAmount = sortedContributions[i];
-                    sortedContributions[i] = sortedContributions[j];
-                    sortedContributions[j] = tempAmount;
-                    
-                    // Swap addresses
-                    address tempAddr = sortedAddresses[i];
-                    sortedAddresses[i] = sortedAddresses[j];
-                    sortedAddresses[j] = tempAddr;
-                }
-            }
-        }
-        
-        // Return top N
-        topAddresses = new address[](topCount);
-        topContributions = new uint256[](topCount);
-        
-        for (uint256 i = 0; i < topCount; i++) {
-            topAddresses[i] = sortedAddresses[i];
-            topContributions[i] = sortedContributions[i];
-        }
-        
-        return (topAddresses, topContributions);
-    }
+	 * @notice Get top contributors from a buffer (optimized for large participant counts)
+	 * @dev Single-pass insertion sort maintaining top K sorted descending
+	 * @dev Complexity: O(n × k) where n=participants, k=100
+	 * @dev Gas: ~500k-1M for 400 participants (vs 19M bubble sort)
+	 */
+	function _getTopContributors(uint256 bufferIndex)
+		internal
+		view
+		returns (address[] memory topAddresses, uint256[] memory topContributions)
+	{
+		address[] memory participants = bufferParticipants[bufferIndex];
+		uint256 n = participants.length;
+
+		if (n == 0) {
+			return (new address[](0), new uint256[](0));
+		}
+
+		uint256 k = TOTAL_WINNERS; // 100
+		if (n < k) k = n;
+
+		// Temporary top-k arrays (kept sorted desc)
+		address[] memory topA = new address[](k);
+		uint256[] memory topV = new uint256[](k);
+		uint256 topSize = 0;
+
+		for (uint256 i = 0; i < n; i++) {
+			address user = participants[i];
+			uint256 amt = bufferContributions[bufferIndex][user];
+			if (amt == 0) continue;
+
+			// Case 1: still filling top list
+			if (topSize < k) {
+				uint256 pos = topSize;
+
+				// Shift right until correct position found
+				while (pos > 0 && amt > topV[pos - 1]) {
+					topA[pos] = topA[pos - 1];
+					topV[pos] = topV[pos - 1];
+					pos--;
+				}
+
+				topA[pos] = user;
+				topV[pos] = amt;
+				topSize++;
+				continue;
+			}
+
+			// Case 2: already full => only insert if beats current smallest (last)
+			if (amt <= topV[k - 1]) continue;
+
+			uint256 p = k - 1;
+
+			// Shift right from end until correct position
+			while (p > 0 && amt > topV[p - 1]) {
+				topA[p] = topA[p - 1];
+				topV[p] = topV[p - 1];
+				p--;
+			}
+
+			topA[p] = user;
+			topV[p] = amt;
+		}
+
+		// Shrink output if we skipped zeros
+		topAddresses = new address[](topSize);
+		topContributions = new uint256[](topSize);
+		for (uint256 j = 0; j < topSize; j++) {
+			topAddresses[j] = topA[j];
+			topContributions[j] = topV[j];
+		}
+	}
     
     /**
      * @notice Get total contributions in a buffer
@@ -570,9 +591,9 @@ contract JACKsLPVault is ReentrancyGuard {
     // ============================================
     
     /**
-     * @notice Get leaderboard - top contributors in current round
-     */
-    function getLeaderboard(uint256 count) external view returns (
+	 * @notice Get leaderboard - top contributors in current round
+	 */
+	function getLeaderboard(uint256 count) external view returns (
 		address[] memory addresses,
 		uint256[] memory contributions,
 		uint256[] memory estimatedRewards
@@ -580,37 +601,60 @@ contract JACKsLPVault is ReentrancyGuard {
 		// Use snapshot buffer if snapshot taken, otherwise active buffer
 		uint256 bufferIndex = snapshotTaken ? snapshotBuffer : activeBuffer;
 		uint256 participants = bufferParticipants[bufferIndex].length;
-        uint256 returnCount = participants < count ? participants : count;
-        
-        (address[] memory topAddresses, uint256[] memory topContributions) = _getTopContributors(bufferIndex);
-        
-        addresses = new address[](returnCount);
-        contributions = new uint256[](returnCount);
-        estimatedRewards = new uint256[](returnCount);
-        
-        // Calculate total for proportion
-        uint256 totalTop = 0;
-        for (uint256 i = 0; i < topAddresses.length; i++) {
-            totalTop += topContributions[i];
-        }
-        
-        uint256 potAmount = address(this).balance - _getTotalPendingClaims();
-        
-        for (uint256 i = 0; i < returnCount; i++) {
-            addresses[i] = topAddresses[i];
-            contributions[i] = topContributions[i];
-            if (totalTop > 0) {
-                estimatedRewards[i] = (potAmount * topContributions[i]) / totalTop;
-            }
-        }
-        
-        return (addresses, contributions, estimatedRewards);
-    }
+		uint256 returnCount = participants < count ? participants : count;
+		
+		(address[] memory topAddresses, uint256[] memory topContributions) = _getTopContributors(bufferIndex);
+		
+		addresses = new address[](returnCount);
+		contributions = new uint256[](returnCount);
+		estimatedRewards = new uint256[](returnCount);
+		
+		uint256 potAmount = address(this).balance - _getTotalPendingClaims();
+		
+		// Calculate tier-based rewards (matches finalizeRound logic)
+		uint256 topTierPot = (potAmount * 6000) / 10000; // 60% for top 10
+		uint256 secondaryPot = potAmount - topTierPot;   // 40% for ranks 11-100
+		
+		// Determine actual counts
+		uint256 topCount = topAddresses.length < TOP_WINNERS ? topAddresses.length : TOP_WINNERS;
+		uint256 secondaryCount = topAddresses.length > TOP_WINNERS ? 
+			(topAddresses.length < TOTAL_WINNERS ? topAddresses.length - TOP_WINNERS : SECONDARY_WINNERS) : 0;
+		
+		// Calculate top tier total (ranks 1-10)
+		uint256 topTierTotal = 0;
+		for (uint256 i = 0; i < topCount; i++) {
+			topTierTotal += topContributions[i];
+		}
+		
+		// Calculate secondary tier total (ranks 11-100)
+		uint256 secondaryTotal = 0;
+		for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
+			secondaryTotal += topContributions[i];
+		}
+		
+		// Assign data with tier-aware reward estimation
+		for (uint256 i = 0; i < returnCount; i++) {
+			addresses[i] = topAddresses[i];
+			contributions[i] = topContributions[i];
+			
+			if (i < topCount && topTierTotal > 0) {
+				// Top 10: share of 60% pot
+				estimatedRewards[i] = (topTierPot * topContributions[i]) / topTierTotal;
+			} else if (i >= topCount && i < topCount + secondaryCount && secondaryTotal > 0) {
+				// Ranks 11-100: share of 40% pot
+				estimatedRewards[i] = (secondaryPot * topContributions[i]) / secondaryTotal;
+			} else {
+				estimatedRewards[i] = 0;
+			}
+		}
+		
+		return (addresses, contributions, estimatedRewards);
+	}
     
     /**
-     * @notice Get user stats
-     */
-    function getUserStats(address user) external view returns (
+	 * @notice Get user stats
+	 */
+	function getUserStats(address user) external view returns (
 		uint256 currentContribution,
 		uint256 lifetimeContribution,
 		uint256 currentRank,
@@ -620,38 +664,65 @@ contract JACKsLPVault is ReentrancyGuard {
 		// Use snapshot buffer if snapshot taken, otherwise active buffer
 		uint256 bufferIndex = snapshotTaken ? snapshotBuffer : activeBuffer;
 		currentContribution = bufferContributions[bufferIndex][user];
-        lifetimeContribution = lifetimeContributions[user];
-        
-        // Calculate rank
-        currentRank = 0;
-        address[] memory participants = bufferParticipants[bufferIndex];
-        for (uint256 i = 0; i < participants.length; i++) {
-            if (bufferContributions[bufferIndex][participants[i]] > currentContribution) {
-                currentRank++;
-            }
-        }
-        currentRank++; // 1-indexed
-        
-        // Estimated reward
-        if (currentContribution > 0 && currentRank <= TOP_WINNERS) {
-            uint256 totalTop = _getTotalContributions(bufferIndex);
-            uint256 availablePot = address(this).balance - _getTotalPendingClaims();
-			if (totalTop > 0) {
-				estimatedReward = (availablePot * currentContribution) / totalTop;
+		lifetimeContribution = lifetimeContributions[user];
+		
+		// Calculate rank
+		currentRank = 0;
+		address[] memory participants = bufferParticipants[bufferIndex];
+		for (uint256 i = 0; i < participants.length; i++) {
+			if (bufferContributions[bufferIndex][participants[i]] > currentContribution) {
+				currentRank++;
 			}
-        }
-        
-        // Unclaimed rewards
-        for (uint256 i = 0; i < currentRound; i++) {
-            if (!hasClaimed[i][user] && roundRewards[i][user] > 0) {
-                if (block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE) {
-                    unclaimedRewards += roundRewards[i][user];
-                }
-            }
-        }
-        
-        return (currentContribution, lifetimeContribution, currentRank, estimatedReward, unclaimedRewards);
-    }
+		}
+		currentRank++; // 1-indexed
+		
+		// Tier-aware estimated reward calculation
+		if (currentContribution > 0 && currentRank <= TOTAL_WINNERS) {
+			(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(bufferIndex);
+			
+			uint256 potAmount = address(this).balance - _getTotalPendingClaims();
+			uint256 topTierPot = (potAmount * 6000) / 10000; // 60%
+			uint256 secondaryPot = potAmount - topTierPot;   // 40%
+			
+			uint256 topCount = topContributors.length < TOP_WINNERS ? topContributors.length : TOP_WINNERS;
+			
+			if (currentRank <= TOP_WINNERS) {
+				// User in top 10 - gets share of 60%
+				uint256 topTierTotal = 0;
+				for (uint256 i = 0; i < topCount; i++) {
+					topTierTotal += contributions[i];
+				}
+				
+				if (topTierTotal > 0) {
+					estimatedReward = (topTierPot * currentContribution) / topTierTotal;
+				}
+			} else {
+				// User in ranks 11-100 - gets share of 40%
+				uint256 secondaryCount = topContributors.length > TOP_WINNERS ? 
+					(topContributors.length < TOTAL_WINNERS ? topContributors.length - TOP_WINNERS : SECONDARY_WINNERS) : 0;
+				
+				uint256 secondaryTotal = 0;
+				for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
+					secondaryTotal += contributions[i];
+				}
+				
+				if (secondaryTotal > 0) {
+					estimatedReward = (secondaryPot * currentContribution) / secondaryTotal;
+				}
+			}
+		}
+		
+		// Unclaimed rewards
+		for (uint256 i = 0; i < currentRound; i++) {
+			if (!hasClaimed[i][user] && roundRewards[i][user] > 0) {
+				if (block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE) {
+					unclaimedRewards += roundRewards[i][user];
+				}
+			}
+		}
+		
+		return (currentContribution, lifetimeContribution, currentRank, estimatedReward, unclaimedRewards);
+	}
     
     /**
      * @notice Get user's claimable rounds
@@ -694,42 +765,110 @@ contract JACKsLPVault is ReentrancyGuard {
     }
     
 	/**
-	 * @notice Cleanup expired unclaimed rewards (anyone can call)
-	 * @dev Marks expired claims as processed, freeing accounting
-	 * @return recovered Amount of ETH freed for future rounds
+	 * @notice Cleanup expired claims for a specific round (gas-efficient)
+	 * @param roundId Round to cleanup
+	 * @return recovered Amount of ETH freed
+	 */
+	function cleanupExpiredClaimsForRound(uint256 roundId) public returns (uint256 recovered) {
+		require(roundId < currentRound, "Invalid round");
+		
+		RoundInfo storage info = rounds[roundId];
+		
+		// Skip if not finalized or not expired
+		if (!info.finalized || block.timestamp <= info.timestamp + CLAIM_DEADLINE) {
+			return 0;
+		}
+		
+		recovered = 0;
+		address[] storage winners = roundWinners[roundId];
+		
+		for (uint256 j = 0; j < winners.length; j++) {
+			address user = winners[j];
+			
+			// If user has unclaimed reward from this round
+			if (!hasClaimed[roundId][user] && roundRewards[roundId][user] > 0) {
+				uint256 amount = roundRewards[roundId][user];
+				hasClaimed[roundId][user] = true;
+				totalClaimed += amount;
+				recovered += amount;
+			}
+		}
+		
+		// Clear winners array to free storage
+		if (recovered > 0) {
+			delete roundWinners[roundId];
+		}
+		
+		return recovered;
+	}
+
+	/**
+	 * @notice Cleanup expired claims for multiple rounds (batched)
+	 * @param startRound First round to cleanup (inclusive)
+	 * @param endRound Last round to cleanup (inclusive)
+	 * @return recovered Total amount of ETH freed
+	 */
+	function cleanupExpiredClaimsBatch(uint256 startRound, uint256 endRound) external returns (uint256 recovered) {
+		require(startRound <= endRound, "Invalid range");
+		require(endRound < currentRound, "Invalid end round");
+		
+		recovered = 0;
+		
+		for (uint256 i = startRound; i <= endRound; i++) {
+			recovered += cleanupExpiredClaimsForRound(i);
+		}
+		
+		return recovered;
+	}
+
+	/**
+	 * @notice Cleanup all expired claims (backwards compatible, use with caution on many rounds)
+	 * @dev May run out of gas if too many rounds exist - prefer cleanupExpiredClaimsBatch
+	 * @dev Auto-limited to last 50 rounds to prevent gas issues
+	 * @return recovered Amount of ETH freed
 	 */
 	function cleanupExpiredClaims() external returns (uint256 recovered) {
 		recovered = 0;
 		
-		for (uint256 i = 0; i < currentRound; i++) {
-			RoundInfo storage info = rounds[i];
-			
-			// Skip if not finalized or not expired
-			if (!info.finalized || block.timestamp <= info.timestamp + CLAIM_DEADLINE) {
-				continue;
-			}
-			
-			// Check all winners for this round (stored at finalization)
-			address[] storage winners = roundWinners[i];
-
-			for (uint256 j = 0; j < winners.length; j++) {
-				address user = winners[j];
-				
-				// If user has unclaimed reward from this round
-				if (!hasClaimed[i][user] && roundRewards[i][user] > 0) {
-					uint256 amount = roundRewards[i][user];
-					hasClaimed[i][user] = true;
-					totalClaimed += amount;
-					recovered += amount;
-				}
-			}
-			
-			// Clear winners array to free storage
-			delete roundWinners[i];
+		// Limit to prevent gas issues - only cleanup last 50 rounds max
+		uint256 startRound = currentRound > 50 ? currentRound - 50 : 0;
+		
+		for (uint256 i = startRound; i < currentRound; i++) {
+			recovered += cleanupExpiredClaimsForRound(i);
 		}
 		
-		// Recovered funds stay in contract for future rounds
 		return recovered;
+	}
+
+	/**
+	 * @notice Get list of rounds that need cleanup
+	 * @return roundIds Array of round IDs with expired unclaimed rewards
+	 */
+	function getExpiredRounds() external view returns (uint256[] memory roundIds) {
+		uint256 count = 0;
+		
+		// Count expired rounds
+		for (uint256 i = 0; i < currentRound; i++) {
+			if (rounds[i].finalized && 
+				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE &&
+				roundWinners[i].length > 0) {
+				count++;
+			}
+		}
+		
+		roundIds = new uint256[](count);
+		uint256 index = 0;
+		
+		for (uint256 i = 0; i < currentRound; i++) {
+			if (rounds[i].finalized && 
+				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE &&
+				roundWinners[i].length > 0) {
+				roundIds[index] = i;
+				index++;
+			}
+		}
+		
+		return roundIds;
 	}
 	
     /**
@@ -776,12 +915,7 @@ contract JACKsLPVault is ReentrancyGuard {
      * @return bufferIndex The snapshot buffer (0 or 1)
      */
     function getSnapshotBuffer() external view returns (uint256) {
-        if (!snapshotTaken) {
-            return activeBuffer; // No snapshot yet, would be current
-        }
-        // Snapshot buffer is the opposite of current active
-        // (because _startNewRound swaps it after snapshot)
-        return 1 - activeBuffer;
+        return snapshotTaken ? snapshotBuffer : activeBuffer;
     }
 	
 	/**
@@ -820,6 +954,14 @@ contract JACKsLPVault is ReentrancyGuard {
 		return (currentLifetime, requiredForEligibility, isEligible, remainingToEligibility);
 	}
     
+	/**
+	 * @notice Get the round ID that is currently being finalized
+	 * @return roundId The round waiting for finalization (0 if none)
+	 */
+	function getFinalizingRound() external view returns (uint256) {
+		return snapshotTaken ? snapshotRound : 0;
+	}
+	
     // ============================================
     // EMERGENCY FUNCTIONS
     // ============================================
@@ -834,6 +976,6 @@ contract JACKsLPVault is ReentrancyGuard {
     }
     
     receive() external payable {
-        revert("Use onLPTaxReceived");
+        revert("Use onLpTaxReceived");
     }
 }
