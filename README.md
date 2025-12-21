@@ -56,6 +56,16 @@ The system is fully non-custodial and non-ruggable:
 
 ---
 
+## Security assumptions
+
+- All reward finalization functions are permissionless and can be called by anyone.
+- Time-gated mechanisms are enforced onchain (round durations, finalize delays).
+- ETH rewards are distributed using pull-payment patterns only.
+- No external contracts are trusted for reward calculation.
+- No privileged owner functions exist after initialization.
+- Reward selection logic is deterministic given onchain state.
+- Liquidity is permanent and can only increase over time.
+
 ##  Integration Simulations (Foundry Scripts)
 
 Instead of classical unit tests, the repo uses full integration simulations running on a Base mainnet fork.
@@ -94,3 +104,13 @@ forge script script/TestBaseCompleteFork.s.sol:TestBaseCompleteFork \
 
 forge script script/TestBaseAdvanced.s.sol:TestBaseAdvanced \
   --fork-url $BASE_RPC_MAINNET -vvv
+
+## Environment
+
+The following environment variables are required to run fork-based simulations and deployment scripts:
+
+BASE_RPC_MAINNET – Base mainnet RPC endpoint (used for fork simulations)
+BASE_RPC_SEPOLIA – Base Sepolia RPC endpoint (used for testnet deployments)
+PRIVATE_KEY – Deployer private key (testnet only)
+
+An example configuration is provided in ".env.example".
