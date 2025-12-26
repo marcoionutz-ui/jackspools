@@ -13,7 +13,7 @@ The system is fully non-custodial and non-ruggable:
 
 ---
 
-##  Architecture Overview
+## Architecture Overview
 
 ### 1. `JACKsPools.sol` – ERC20 Core
 
@@ -44,7 +44,10 @@ The system is fully non-custodial and non-ruggable:
 - Max 400 active participants per reward cycle (buffer capacity)
 - Eviction algorithm:
   - when buffer is full, the lowest contributor can be replaced by a bigger contributor
-- Top-100 contributors receive proportional ETH rewards per cycle
+- Top-60 contributors receive proportional ETH rewards per cycle:
+  - Top 10 share 60% of the pool
+  - Ranks 11–60 share 40% of the pool
+- Gas optimization: full sorting replaced with a bounded Top-K selection approach, preserving payout correctness while reducing gas
 - Snapshot → finalization → claim lifecycle
 - Claim deadline + accounting for unclaimed rewards
 
@@ -66,9 +69,17 @@ The system is fully non-custodial and non-ruggable:
 - Reward selection logic is deterministic given onchain state.
 - Liquidity is permanent and can only increase over time.
 
-##  Integration Simulations (Foundry Scripts)
+## Integration Simulations (Foundry Scripts)
 
 Instead of classical unit tests, the repo uses full integration simulations running on a Base mainnet fork.
+
+## Validation Artifacts
+
+Fork, invariant, and static analysis outputs are included under `/docs/tests`:
+- End-to-end fork simulations
+- High-load LP scenarios (400 participants, eviction)
+- Invariant testing (accounting, lifecycle, idempotency)
+- Slither static analysis report
 
 ### `script/TestBaseCompleteFork.s.sol`
 

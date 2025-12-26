@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.26;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -51,12 +51,11 @@ contract JACKsLPVault is ReentrancyGuard {
     mapping(address => uint256) public lifetimeContributions; // Total ever contributed
     mapping(uint256 => mapping(address => uint256)) public roundRewards; // round => user => reward
     mapping(uint256 => mapping(address => bool)) public hasClaimed; // round => user => claimed
-    mapping(uint256 => address[]) public roundWinners;
-	
+    	
     // Constants
     uint256 public constant TOP_WINNERS = 10; // Top 10 contributors (60% of pool)
-	uint256 public constant SECONDARY_WINNERS = 90; // Ranks 11-100 (40% of pool)
-	uint256 public constant TOTAL_WINNERS = 100; // Total winners per round
+	uint256 public constant SECONDARY_WINNERS = 50; // Ranks 11-60 (40% of pool)
+	uint256 public constant TOTAL_WINNERS = 60; // Total winners per round
 	uint256 public constant CLAIM_DEADLINE = 30 days;
 	uint256 public constant MAX_PARTICIPANTS = 400; // Safety limit (gas optimized)
 	
@@ -92,7 +91,7 @@ contract JACKsLPVault is ReentrancyGuard {
     event LPContributorEvicted(address indexed evicted, address indexed replacedBy, uint256 evictedAmount, uint256 newAmount, uint256 round);
 	event SnapshotTaken(uint256 indexed round, uint256 participants, uint256 totalContributed);
     event SnapshotReset(uint256 indexed round, string reason);
-	event RoundFinalized(uint256 indexed round, uint256 totalDistributed, uint256 winnersCount);
+	event RoundFinalized(uint256 indexed round, uint256 totalDistributed, uint256 winnersCount, address[] winners);
     event RewardClaimed(address indexed user, uint256 indexed round, uint256 amount);
     event Funded(address indexed from, uint256 amount, uint256 poolAfter);
 	event BufferCleared(uint256 indexed bufferIndex, uint256 round);
@@ -295,13 +294,8 @@ contract JACKsLPVault is ReentrancyGuard {
         
         // Get top 100 contributors
 		(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(buffer);
-
 		// Ensure we have at least 1 winner
 		require(topContributors.length > 0, "No valid contributions");
-
-		// Calculate pool splits: 60% top 10, 40% rank 11-100
-		uint256 topTierPot = (potAmount * 6000) / 10000; // 60%
-		uint256 secondaryPot = potAmount - topTierPot;   // 40%
 
 		// Determine actual winner counts
 		uint256 topCount = topContributors.length < TOP_WINNERS ? topContributors.length : TOP_WINNERS;
@@ -317,48 +311,46 @@ contract JACKsLPVault is ReentrancyGuard {
 		// Distribute 60% to top 10 (proportional)
 		if (totalTopContributions > 0) {
 			for (uint256 i = 0; i < topCount; i++) {
-				uint256 reward = (topTierPot * contributions[i]) / totalTopContributions;
+				// Combined: (potAmount * 6000 * contrib) / (10000 * total)
+				uint256 reward = (potAmount * 6000 * contributions[i]) / (10000 * totalTopContributions);
 				roundRewards[snapshotRound][topContributors[i]] = reward;
 			}
 		}
 
-		// Calculate total contributions for secondary tier (ranks 11-100)
+		// Calculate total contributions for secondary tier (ranks 11-60)
 		if (secondaryCount > 0) {
 			uint256 totalSecondaryContributions = 0;
 			for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
 				totalSecondaryContributions += contributions[i];
 			}
 			
-			// Distribute 40% to ranks 11-100 (proportional)
+			// Distribute 40% to ranks 11-60 (proportional)
 			if (totalSecondaryContributions > 0) {
 				for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
-					uint256 reward = (secondaryPot * contributions[i]) / totalSecondaryContributions;
+					// Combined: (potAmount * 4000 * contrib) / (10000 * total)
+					uint256 reward = (potAmount * 4000 * contributions[i]) / (10000 * totalSecondaryContributions);
 					roundRewards[snapshotRound][topContributors[i]] += reward;
 				}
 			}
 		}
 		
-		// Store all winners for this round (for cleanup)
-        for (uint256 i = 0; i < topContributors.length; i++) {
-            roundWinners[snapshotRound].push(topContributors[i]);
-        }
+			// Track total distributed amount
+			totalDistributed += potAmount;
+			
+			// Mark round as finalized
+			rounds[snapshotRound] = RoundInfo({
+				totalDistributed: potAmount,
+				winnersCount: topContributors.length,
+				timestamp: block.timestamp,
+				finalized: true
+			});
+			
+			// Emit winners in event 
+			emit RoundFinalized(snapshotRound, potAmount, topContributors.length, topContributors);
         
-         // Track total distributed amount
-        totalDistributed += potAmount;
-        
-        // Mark round as finalized
-        rounds[snapshotRound] = RoundInfo({
-            totalDistributed: potAmount,
-            winnersCount: topContributors.length,
-            timestamp: block.timestamp,
-            finalized: true
-        });
-        
-        emit RoundFinalized(snapshotRound, potAmount, topContributors.length);
-        
-        // Allow next snapshot
-        snapshotTaken = false;
-    }
+			// Allow next snapshot
+			snapshotTaken = false;
+		}
   
     /**
      * @notice Clear a buffer
@@ -611,10 +603,6 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		uint256 potAmount = address(this).balance - _getTotalPendingClaims();
 		
-		// Calculate tier-based rewards (matches finalizeRound logic)
-		uint256 topTierPot = (potAmount * 6000) / 10000; // 60% for top 10
-		uint256 secondaryPot = potAmount - topTierPot;   // 40% for ranks 11-100
-		
 		// Determine actual counts
 		uint256 topCount = topAddresses.length < TOP_WINNERS ? topAddresses.length : TOP_WINNERS;
 		uint256 secondaryCount = topAddresses.length > TOP_WINNERS ? 
@@ -626,23 +614,23 @@ contract JACKsLPVault is ReentrancyGuard {
 			topTierTotal += topContributions[i];
 		}
 		
-		// Calculate secondary tier total (ranks 11-100)
+		// Calculate secondary tier total (ranks 11-60)
 		uint256 secondaryTotal = 0;
 		for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
 			secondaryTotal += topContributions[i];
 		}
 		
-		// Assign data with tier-aware reward estimation
+		// Assign data with tier-aware reward estimation - FIXED: combined multiply-divide
 		for (uint256 i = 0; i < returnCount; i++) {
 			addresses[i] = topAddresses[i];
 			contributions[i] = topContributions[i];
 			
 			if (i < topCount && topTierTotal > 0) {
-				// Top 10: share of 60% pot
-				estimatedRewards[i] = (topTierPot * topContributions[i]) / topTierTotal;
+				// Top 10: share of 60% pot - FIXED: combined operation
+				estimatedRewards[i] = (potAmount * 6000 * topContributions[i]) / (10000 * topTierTotal);
 			} else if (i >= topCount && i < topCount + secondaryCount && secondaryTotal > 0) {
-				// Ranks 11-100: share of 40% pot
-				estimatedRewards[i] = (secondaryPot * topContributions[i]) / secondaryTotal;
+				// Ranks 11-60: share of 40% pot - FIXED: combined operation
+				estimatedRewards[i] = (potAmount * 4000 * topContributions[i]) / (10000 * secondaryTotal);
 			} else {
 				estimatedRewards[i] = 0;
 			}
@@ -676,28 +664,25 @@ contract JACKsLPVault is ReentrancyGuard {
 		}
 		currentRank++; // 1-indexed
 		
-		// Tier-aware estimated reward calculation
+		// Tier-aware estimated reward calculation 
 		if (currentContribution > 0 && currentRank <= TOTAL_WINNERS) {
 			(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(bufferIndex);
 			
 			uint256 potAmount = address(this).balance - _getTotalPendingClaims();
-			uint256 topTierPot = (potAmount * 6000) / 10000; // 60%
-			uint256 secondaryPot = potAmount - topTierPot;   // 40%
-			
 			uint256 topCount = topContributors.length < TOP_WINNERS ? topContributors.length : TOP_WINNERS;
 			
 			if (currentRank <= TOP_WINNERS) {
-				// User in top 10 - gets share of 60%
+				// User in top 10 - FIXED: combined operation
 				uint256 topTierTotal = 0;
 				for (uint256 i = 0; i < topCount; i++) {
 					topTierTotal += contributions[i];
 				}
 				
 				if (topTierTotal > 0) {
-					estimatedReward = (topTierPot * currentContribution) / topTierTotal;
+					estimatedReward = (potAmount * 6000 * currentContribution) / (10000 * topTierTotal);
 				}
 			} else {
-				// User in ranks 11-100 - gets share of 40%
+				// User in ranks 11-60 - FIXED: combined operation
 				uint256 secondaryCount = topContributors.length > TOP_WINNERS ? 
 					(topContributors.length < TOTAL_WINNERS ? topContributors.length - TOP_WINNERS : SECONDARY_WINNERS) : 0;
 				
@@ -707,11 +692,11 @@ contract JACKsLPVault is ReentrancyGuard {
 				}
 				
 				if (secondaryTotal > 0) {
-					estimatedReward = (secondaryPot * currentContribution) / secondaryTotal;
+					estimatedReward = (potAmount * 4000 * currentContribution) / (10000 * secondaryTotal);
 				}
 			}
 		}
-		
+			
 		// Unclaimed rewards
 		for (uint256 i = 0; i < currentRound; i++) {
 			if (!hasClaimed[i][user] && roundRewards[i][user] > 0) {
@@ -765,38 +750,41 @@ contract JACKsLPVault is ReentrancyGuard {
     }
     
 	/**
-	 * @notice Cleanup expired claims for a specific round (gas-efficient)
+	 * @notice Cleanup expired claims for a specific round
+	 * @dev Permissive: processes provided winners, verifies via roundRewards
 	 * @param roundId Round to cleanup
+	 * @param winners Array of winner addresses from RoundFinalized event
 	 * @return recovered Amount of ETH freed
 	 */
-	function cleanupExpiredClaimsForRound(uint256 roundId) public returns (uint256 recovered) {
+	function cleanupExpiredClaimsForRound(
+		uint256 roundId,
+		address[] calldata winners
+	) public returns (uint256 recovered) {
 		require(roundId < currentRound, "Invalid round");
 		
 		RoundInfo storage info = rounds[roundId];
 		
 		// Skip if not finalized or not expired
-		if (!info.finalized || block.timestamp <= info.timestamp + CLAIM_DEADLINE) {
-			return 0;
-		}
+		if (!info.finalized) return 0;
+		if (block.timestamp <= info.timestamp + CLAIM_DEADLINE) return 0;
 		
 		recovered = 0;
-		address[] storage winners = roundWinners[roundId];
 		
-		for (uint256 j = 0; j < winners.length; j++) {
-			address user = winners[j];
+		for (uint256 i = 0; i < winners.length; i++) {
+			address user = winners[i];
 			
-			// If user has unclaimed reward from this round
-			if (!hasClaimed[roundId][user] && roundRewards[roundId][user] > 0) {
-				uint256 amount = roundRewards[roundId][user];
-				hasClaimed[roundId][user] = true;
-				totalClaimed += amount;
-				recovered += amount;
-			}
-		}
-		
-		// Clear winners array to free storage
-		if (recovered > 0) {
-			delete roundWinners[roundId];
+			// Anti-griefing: only process if user actually has a reward
+			uint256 amount = roundRewards[roundId][user];
+			if (amount == 0) continue;
+			
+			// Skip if already claimed
+			if (hasClaimed[roundId][user]) continue;
+			
+			// Mark as handled (prevents future claim)
+			hasClaimed[roundId][user] = true;
+			totalClaimed += amount;
+			
+			recovered += amount;
 		}
 		
 		return recovered;
@@ -804,37 +792,20 @@ contract JACKsLPVault is ReentrancyGuard {
 
 	/**
 	 * @notice Cleanup expired claims for multiple rounds (batched)
-	 * @param startRound First round to cleanup (inclusive)
-	 * @param endRound Last round to cleanup (inclusive)
+	 * @param roundIds Array of round IDs to cleanup
+	 * @param winnersPerRound 2D array: winnersPerRound[i] = winners for roundIds[i]
 	 * @return recovered Total amount of ETH freed
 	 */
-	function cleanupExpiredClaimsBatch(uint256 startRound, uint256 endRound) external returns (uint256 recovered) {
-		require(startRound <= endRound, "Invalid range");
-		require(endRound < currentRound, "Invalid end round");
+	function cleanupExpiredClaimsBatch(
+		uint256[] calldata roundIds,
+		address[][] calldata winnersPerRound
+	) external returns (uint256 recovered) {
+		require(roundIds.length == winnersPerRound.length, "Length mismatch");
 		
 		recovered = 0;
 		
-		for (uint256 i = startRound; i <= endRound; i++) {
-			recovered += cleanupExpiredClaimsForRound(i);
-		}
-		
-		return recovered;
-	}
-
-	/**
-	 * @notice Cleanup all expired claims (backwards compatible, use with caution on many rounds)
-	 * @dev May run out of gas if too many rounds exist - prefer cleanupExpiredClaimsBatch
-	 * @dev Auto-limited to last 50 rounds to prevent gas issues
-	 * @return recovered Amount of ETH freed
-	 */
-	function cleanupExpiredClaims() external returns (uint256 recovered) {
-		recovered = 0;
-		
-		// Limit to prevent gas issues - only cleanup last 50 rounds max
-		uint256 startRound = currentRound > 50 ? currentRound - 50 : 0;
-		
-		for (uint256 i = startRound; i < currentRound; i++) {
-			recovered += cleanupExpiredClaimsForRound(i);
+		for (uint256 i = 0; i < roundIds.length; i++) {
+			recovered += cleanupExpiredClaimsForRound(roundIds[i], winnersPerRound[i]);
 		}
 		
 		return recovered;
@@ -842,6 +813,7 @@ contract JACKsLPVault is ReentrancyGuard {
 
 	/**
 	 * @notice Get list of rounds that need cleanup
+	 * @dev Returns only round IDs - caller must fetch winner lists from RoundFinalized events
 	 * @return roundIds Array of round IDs with expired unclaimed rewards
 	 */
 	function getExpiredRounds() external view returns (uint256[] memory roundIds) {
@@ -850,8 +822,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		// Count expired rounds
 		for (uint256 i = 0; i < currentRound; i++) {
 			if (rounds[i].finalized && 
-				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE &&
-				roundWinners[i].length > 0) {
+				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE) {
 				count++;
 			}
 		}
@@ -861,8 +832,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		for (uint256 i = 0; i < currentRound; i++) {
 			if (rounds[i].finalized && 
-				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE &&
-				roundWinners[i].length > 0) {
+				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE) {
 				roundIds[index] = i;
 				index++;
 			}

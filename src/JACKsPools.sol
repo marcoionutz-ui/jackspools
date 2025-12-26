@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.26;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -436,9 +436,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			block.number > lastProcessBlock
         ) {
 			// Try to process (fails silent if issues)
-            try this.processTaxesInternal() {
-				lastProcessBlock = block.number;
-				} catch {}
+            lastProcessBlock = block.number;
+			try this.processTaxesInternal() {} catch {}
         }
         
         // Add buyer to eligible pool (after balance is confirmed updated)
@@ -492,10 +491,11 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			path[0] = address(this);
 			path[1] = WETH;
 			
-			// Approve router (CAN REVERT)
-			_approve(address(this), address(ROUTER), tokensToSwap);
+			// Approve router for swap + LP in one call (CAN REVERT, CEI pattern)
+			uint256 approveAmount = lpHalf > 0 ? tokensToSwap + lpHalf : tokensToSwap;
+			_approve(address(this), address(ROUTER), approveAmount);
 			
-			// RESET STORAGE NOW - after all revert-prone operations outside try-catch
+			// Reset Storage
 			_rewardTokens = 0;
 			_lpTokens = 0;
 			_lpRewardTokens = 0;
@@ -530,8 +530,6 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 
 					// Add liquidity
 					if (ethForLp > 0 && lpHalf > 0) {
-						_approve(address(this), address(ROUTER), lpHalf);
-						
 						try ROUTER.addLiquidityETH{value: ethForLp}(
 							address(this),
 							lpHalf,
@@ -547,11 +545,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 					emit TaxProcessed(ethForReward + ethForLpReward, ethForLp, 0);
 				}
 			} catch {
-				// RESTORE variables if swap failed
-				_rewardTokens = localReward;
-				_lpTokens = localLp;
-				_lpRewardTokens = localLpReward;
-				
+								
 				// Emit for monitoring/debugging
 				emit TaxProcessingFailed(localReward, localLp, localLpReward, "Swap failed");
 			}

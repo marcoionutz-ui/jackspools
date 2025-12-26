@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.26;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -70,7 +70,7 @@ contract JACKsVault is ReentrancyGuard {
 	// Stage 1: Pot thresholds (LP < 2 ETH)
 	uint256 private constant STAGE_1_POT_THRESHOLD = 0.014 ether;   // $50 @ $3500/ETH
 	uint256 private constant STAGE_1_MIN_BUY = 0.00043 ether;       // $1.50 @ $3500/ETH
-	uint256 private constant STAGE_1_MIN_TOKENS = 1_000_000 * 10**18; // 1M tokens
+	uint256 private constant STAGE_1_MIN_TOKENS = 500_000 * 10**18; // 500k tokens
 
 	// Stage 2: Pot thresholds (LP 2-5 ETH)
 	uint256 private constant STAGE_2_POT_THRESHOLD = 0.057 ether;   // $200 @ $3500/ETH
@@ -90,7 +90,7 @@ contract JACKsVault is ReentrancyGuard {
 	// Stage 5: Pot thresholds (LP > 20 ETH)
 	uint256 private constant STAGE_5_POT_THRESHOLD = 0.714 ether;   // $2,500 @ $3500/ETH
 	uint256 private constant STAGE_5_MIN_BUY = 0.001 ether;         // $3.50 @ $3500/ETH
-	uint256 private constant STAGE_5_MIN_TOKENS = 5 * 10**18;       // 5 tokens
+	uint256 private constant STAGE_5_MIN_TOKENS = 1 * 10**18;       // 1 token
     
     // State
     uint256 public round;
@@ -445,6 +445,15 @@ contract JACKsVault is ReentrancyGuard {
 			tx.gasprice
 		)));
 
+		// CACHE MIN TOKENS (avoid repeated external call)
+		uint256 minTokens = getMinEligibilityTokens();
+
+		// CACHE BALANCES (avoid external calls in loops)
+		uint256[] memory balances = new uint256[](validEntries.length);
+		for (uint256 i = 0; i < validEntries.length; i++) {
+			balances[i] = TOKEN.balanceOf(validEntries[i].buyer);
+		}
+
 		// TRY TO FIND ELIGIBLE WINNER (bounded retries)
 		address recipient;
 		bool found = false;
@@ -456,17 +465,17 @@ contract JACKsVault is ReentrancyGuard {
 			uint256 selectedIndex = attemptSeed % validEntries.length;
 			address candidate = validEntries[selectedIndex].buyer;
 			
-			// Check if eligible
-			if (TOKEN.balanceOf(candidate) >= getMinEligibilityTokens()) {
+			// Check if eligible (using cached balance)
+			if (balances[selectedIndex] >= minTokens) {
 				recipient = candidate;
 				found = true;
 			}
 		}
 
-		// FALLBACK: Linear scan for first eligible (if random failed)
+		// FALLBACK: Linear scan for first eligible (using cached balances)
 		if (!found) {
 			for (uint256 i = 0; i < validEntries.length; i++) {
-				if (TOKEN.balanceOf(validEntries[i].buyer) >= getMinEligibilityTokens()) {
+				if (balances[i] >= minTokens) {
 					recipient = validEntries[i].buyer;
 					found = true;
 					break;

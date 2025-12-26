@@ -1,0 +1,811 @@
+'forge clean' running (wd: /home/marco/jackspools)
+'forge config --json' running
+'forge build --build-info --skip */test/** */script/** --force' running (wd: /home/marco/jackspools)
+INFO:Detectors:
+JACKsPools._processTaxes() (src/JACKsPools.sol#450-553) sends eth to arbitrary user
+	Dangerous calls:
+	- VAULT.onTaxReceived{value: ethForReward}() (src/JACKsPools.sol#523)
+	- LP_VAULT.onLpTaxReceived{value: ethForLpReward}() (src/JACKsPools.sol#528)
+JACKsPools._processTaxesWithReward(address) (src/JACKsPools.sol#755-770) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = caller.call{value: reward}() (src/JACKsPools.sol#766)
+JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#906-933) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = recipient.call{value: expiredAmount}() (src/JACKsVault.sol#929)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+JACKsVault.finalizeRound() (src/JACKsVault.sol#387-528) uses a weak PRNG: "selectedIndex = attemptSeed % validEntries.length (src/JACKsVault.sol#465)" 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#weak-PRNG
+INFO:Detectors:
+JACKsPools._processTaxes() (src/JACKsPools.sol#450-553) performs a multiplication on the result of a division:
+	- swapReward = (localReward * tokensToProcess) / totalTokens (src/JACKsPools.sol#479)
+	- ethForReward = (ethReceived * swapReward) / tokensToSwap (src/JACKsPools.sol#514)
+JACKsPools._processTaxes() (src/JACKsPools.sol#450-553) performs a multiplication on the result of a division:
+	- swapLpReward = (localLpReward * tokensToProcess) / totalTokens (src/JACKsPools.sol#480)
+	- ethForLpReward = (ethReceived * swapLpReward) / tokensToSwap (src/JACKsPools.sol#515)
+JACKsPools._processTaxes() (src/JACKsPools.sol#450-553) performs a multiplication on the result of a division:
+	- adjustmentRatio = (contractBalance * BPS) / tokensToProcess (src/JACKsPools.sol#465)
+	- localReward = (localReward * adjustmentRatio) / BPS (src/JACKsPools.sol#466)
+JACKsPools._processTaxes() (src/JACKsPools.sol#450-553) performs a multiplication on the result of a division:
+	- adjustmentRatio = (contractBalance * BPS) / tokensToProcess (src/JACKsPools.sol#465)
+	- localLp = (localLp * adjustmentRatio) / BPS (src/JACKsPools.sol#467)
+JACKsPools._processTaxes() (src/JACKsPools.sol#450-553) performs a multiplication on the result of a division:
+	- adjustmentRatio = (contractBalance * BPS) / tokensToProcess (src/JACKsPools.sol#465)
+	- localLpReward = (localLpReward * adjustmentRatio) / BPS (src/JACKsPools.sol#468)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+INFO:Detectors:
+JACKsVault.finalizeRound().recipient (src/JACKsVault.sol#458) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+INFO:Detectors:
+JACKsLPManager.addLiquidityAndRegister(uint256,uint256,uint256,uint256) (src/JACKsLPManager.sol#76-143) ignores return value by TOKEN.approve(address(ROUTER),0) (src/JACKsLPManager.sol#96)
+JACKsPools.getLpValue() (src/JACKsPools.sol#572-593) ignores return value by (reserve0,reserve1) = IUniswapV2Pair(PAIR).getReserves() (src/JACKsPools.sol#573-592)
+JACKsPools._isPair(address) (src/JACKsPools.sol#665-673) ignores return value by IUniswapV2Pair(account).token0() (src/JACKsPools.sol#668-672)
+JACKsPools.addInitialLiquidity() (src/JACKsPools.sol#676-693) ignores return value by ROUTER.addLiquidityETH{value: msg.value}(address(this),tokenAmount,0,0,DEAD,block.timestamp) (src/JACKsPools.sol#685-692)
+JACKsVault.constructor(address) (src/JACKsVault.sol#147-162) ignores return value by IJACKsPools(_token).getLpValue() (src/JACKsVault.sol#151-155)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+JACKsVault.finalizeRound() (src/JACKsVault.sol#387-528) has external calls inside a loop: balances[i] = TOKEN.balanceOf(validEntries[i].buyer) (src/JACKsVault.sol#454)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation/#calls-inside-a-loop
+INFO:Detectors:
+Reentrancy in JACKsPools._processTaxes() (src/JACKsPools.sol#450-553):
+	External calls:
+	- ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap,minOutput,path,address(this),block.timestamp) (src/JACKsPools.sol#503-551)
+	- VAULT.onTaxReceived{value: ethForReward}() (src/JACKsPools.sol#523)
+	- LP_VAULT.onLpTaxReceived{value: ethForLpReward}() (src/JACKsPools.sol#528)
+	- (tokenUsed,ethUsed,liquidity) = ROUTER.addLiquidityETH{value: ethForLp}(address(this),lpHalf,0,0,DEAD,block.timestamp) (src/JACKsPools.sol#533-542)
+	External calls sending eth:
+	- VAULT.onTaxReceived{value: ethForReward}() (src/JACKsPools.sol#523)
+	- LP_VAULT.onLpTaxReceived{value: ethForLpReward}() (src/JACKsPools.sol#528)
+	- (tokenUsed,ethUsed,liquidity) = ROUTER.addLiquidityETH{value: ethForLp}(address(this),lpHalf,0,0,DEAD,block.timestamp) (src/JACKsPools.sol#533-542)
+	Event emitted after the call(s):
+	- AutoLiquify(tokenUsed,ethUsed,liquidity) (src/JACKsPools.sol#541)
+	- TaxProcessed(ethForReward + ethForLpReward,ethForLp,0) (src/JACKsPools.sol#545)
+Reentrancy in JACKsPools._processTaxes() (src/JACKsPools.sol#450-553):
+	External calls:
+	- ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap,minOutput,path,address(this),block.timestamp) (src/JACKsPools.sol#503-551)
+	Event emitted after the call(s):
+	- TaxProcessingFailed(localReward,localLp,localLpReward,Swap failed) (src/JACKsPools.sol#550)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+JACKsLPVault.recordLpContribution(address,uint256) (src/JACKsLPVault.sol#169-242) uses timestamp for comparisons
+	Dangerous comparisons:
+	- snapshotTaken && block.timestamp > snapshotTimestamp + 1209600 (src/JACKsLPVault.sol#226)
+JACKsLPVault.finalizeRound() (src/JACKsLPVault.sol#277-353) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(! rounds[snapshotRound].finalized,Round already finalized) (src/JACKsLPVault.sol#279)
+	- isTimedOut = block.timestamp >= snapshotTimestamp + 604800 (src/JACKsLPVault.sol#286)
+	- require(bool,string)(isParticipant || isTimedOut,Only participants or wait 7 days) (src/JACKsLPVault.sol#288-291)
+JACKsLPVault.claimReward(uint256) (src/JACKsLPVault.sol#470-487) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(rounds[roundId].finalized,Round not finalized) (src/JACKsLPVault.sol#471)
+	- require(bool,string)(block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE,Claim deadline passed) (src/JACKsLPVault.sol#474-477)
+JACKsLPVault.claimMultipleRewards(uint256[]) (src/JACKsLPVault.sol#492-517) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[roundId].finalized && ! hasClaimed[roundId][msg.sender] && roundRewards[roundId][msg.sender] > 0 && block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#499-502)
+JACKsLPVault.getUserStats(address) (src/JACKsLPVault.sol#645-710) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp <= rounds[i_scope_2].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#703)
+JACKsLPVault.getClaimableRounds(address) (src/JACKsLPVault.sol#715-750) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].finalized && ! hasClaimed[i][user] && roundRewards[i][user] > 0 && block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#723-726)
+	- rounds[i_scope_0].finalized && ! hasClaimed[i_scope_0][user] && roundRewards[i_scope_0][user] > 0 && block.timestamp <= rounds[i_scope_0].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#738-741)
+JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[]) (src/JACKsLPVault.sol#759-791) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp <= info.timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#769)
+JACKsLPVault.getExpiredRounds() (src/JACKsLPVault.sol#819-842) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].finalized && block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#824-825)
+	- rounds[i_scope_0].finalized && block.timestamp > rounds[i_scope_0].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#834-835)
+JACKsPools._transfer(address,address,uint256,bool) (src/JACKsPools.sol#301-448) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= sellUnlock[from],Sell locked 2h) (src/JACKsPools.sol#332)
+	- require(bool,string)(block.timestamp >= lastBuyTime[to] + BUY_COOLDOWN,Wait 30s between buys) (src/JACKsPools.sol#355-358)
+JACKsVault.addEligibleBuyer(address,uint256) (src/JACKsVault.sol#224-281) uses timestamp for comparisons
+	Dangerous comparisons:
+	- snapshotTaken && block.timestamp > snapshotTimestamp + 604800 (src/JACKsVault.sol#271)
+JACKsVault._getValidSnapshotEntries() (src/JACKsVault.sol#316-359) uses timestamp for comparisons
+	Dangerous comparisons:
+	- snapshotBuffer.entries[pos].timestamp >= cutoffTime (src/JACKsVault.sol#336)
+	- snapshotBuffer.entries[pos_scope_1].timestamp >= cutoffTime (src/JACKsVault.sol#352)
+	- snapshotTimestamp > ENTRY_EXPIRY (src/JACKsVault.sol#322-324)
+JACKsVault.finalizeRound() (src/JACKsVault.sol#387-528) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= lastFinalizeTime + FINALIZE_COOLDOWN,Cooldown active) (src/JACKsVault.sol#402-405)
+JACKsVault.getUserRewards(address) (src/JACKsVault.sol#574-611) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].recipient == user && rounds[i].amount > 0 (src/JACKsVault.sol#582)
+	- rounds[i_scope_0].recipient == user && rounds[i_scope_0].amount > 0 (src/JACKsVault.sol#603)
+JACKsVault.getUnclaimedRewards() (src/JACKsVault.sol#616-664) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! rounds[i].claimed && rounds[i].amount > 0 (src/JACKsVault.sol#625)
+	- ! rounds[i_scope_0].claimed && rounds[i_scope_0].amount > 0 (src/JACKsVault.sol#648)
+	- block.timestamp < deadline (src/JACKsVault.sol#655)
+JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#906-933) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].recipient == recipient && ! rounds[i].claimed && block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#915-917)
+JACKsVault.cleanupExpiredClaimsForRound(uint256) (src/JACKsVault.sol#940-966) uses timestamp for comparisons
+	Dangerous comparisons:
+	- info.claimed || block.timestamp <= info.timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#946)
+JACKsVault.getExpiredRounds() (src/JACKsVault.sol#1009-1033) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! rounds[i].claimed && rounds[i].amount > 0 && block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#1013-1015)
+	- ! rounds[i_scope_0].claimed && rounds[i_scope_0].amount > 0 && block.timestamp > rounds[i_scope_0].timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#1024-1026)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+2 different versions of Solidity are used:
+	- Version constraint ^0.8.20 is used by:
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)
+	- Version constraint ^0.8.26 is used by:
+		-^0.8.26 (src/JACKsLPManager.sol#2)
+		-^0.8.26 (src/JACKsLPVault.sol#2)
+		-^0.8.26 (src/JACKsPools.sol#2)
+		-^0.8.26 (src/JACKsVault.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+JACKsLPVault.claimMultipleRewards(uint256[]) (src/JACKsLPVault.sol#492-517) has costly operations inside a loop:
+	- totalClaimed += reward (src/JACKsLPVault.sol#507)
+JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[]) (src/JACKsLPVault.sol#759-791) has costly operations inside a loop:
+	- totalClaimed += amount (src/JACKsLPVault.sol#785)
+JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[]) (src/JACKsLPVault.sol#759-791) has costly operations inside a loop:
+	- totalClaimed += amount (src/JACKsLPVault.sol#785)
+	Calls stack containing the loop:
+		JACKsLPVault.cleanupExpiredClaimsBatch(uint256[],address[][])
+JACKsVault.cleanupExpiredClaimsForRound(uint256) (src/JACKsVault.sol#940-966) has costly operations inside a loop:
+	- totalClaimed += amountToRecover (src/JACKsVault.sol#961)
+	Calls stack containing the loop:
+		JACKsVault.cleanupExpiredClaimsBatch(uint256,uint256)
+JACKsVault.cleanupExpiredClaimsForRound(uint256) (src/JACKsVault.sol#940-966) has costly operations inside a loop:
+	- totalClaimed += amountToRecover (src/JACKsVault.sol#961)
+	Calls stack containing the loop:
+		JACKsVault.cleanupExpiredClaims()
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#costly-operations-inside-a-loop
+INFO:Detectors:
+JACKsLPVault.getUserStats(address) (src/JACKsLPVault.sol#645-710) has a high cyclomatic complexity (15).
+JACKsPools._transfer(address,address,uint256,bool) (src/JACKsPools.sol#301-448) has a high cyclomatic complexity (20).
+JACKsPools._processTaxes() (src/JACKsPools.sol#450-553) has a high cyclomatic complexity (18).
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cyclomatic-complexity
+INFO:Detectors:
+Low level call in JACKsLPManager.addLiquidityAndRegister(uint256,uint256,uint256,uint256) (src/JACKsLPManager.sol#76-143):
+	- (success,None) = address(msg.sender).call{value: excessEth}() (src/JACKsLPManager.sol#130)
+Low level call in JACKsLPVault.claimReward(uint256) (src/JACKsLPVault.sol#470-487):
+	- (success,None) = address(msg.sender).call{value: reward}() (src/JACKsLPVault.sol#483)
+Low level call in JACKsLPVault.claimMultipleRewards(uint256[]) (src/JACKsLPVault.sol#492-517):
+	- (success,None) = address(msg.sender).call{value: totalReward}() (src/JACKsLPVault.sol#515)
+Low level call in JACKsPools.recoverEth() (src/JACKsPools.sol#713-718):
+	- (success,None) = owner.call{value: balance}() (src/JACKsPools.sol#716)
+Low level call in JACKsPools._processTaxesWithReward(address) (src/JACKsPools.sol#755-770):
+	- (success,None) = caller.call{value: reward}() (src/JACKsPools.sol#766)
+Low level call in JACKsVault.claim() (src/JACKsVault.sol#822-835):
+	- (success,None) = msg.sender.call{value: amount}() (src/JACKsVault.sol#831)
+Low level call in JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#906-933):
+	- (success,None) = recipient.call{value: expiredAmount}() (src/JACKsVault.sol#929)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+JACKsLPVault (src/JACKsLPVault.sol#20-951) should inherit from IJACKsLPVault (src/JACKsPools.sol#72-75)
+JACKsPools (src/JACKsPools.sol#77-782) should inherit from IJACKsPools (src/JACKsVault.sol#14-17)
+JACKsVault (src/JACKsVault.sol#19-1041) should inherit from IJACKsVault (src/JACKsPools.sol#67-70)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+INFO:Detectors:
+Variable JACKsLPManager.TOKEN (src/JACKsLPManager.sol#43) is not in mixedCase
+Variable JACKsLPManager.LP_VAULT (src/JACKsLPManager.sol#44) is not in mixedCase
+Variable JACKsLPManager.ROUTER (src/JACKsLPManager.sol#45) is not in mixedCase
+Parameter JACKsLPVault.setLpManager(address)._lpManager (src/JACKsLPVault.sol#118) is not in mixedCase
+Variable JACKsLPVault.TOKEN (src/JACKsLPVault.sol#21) is not in mixedCase
+Variable JACKsLPVault.LP_MANAGER (src/JACKsLPVault.sol#22) is not in mixedCase
+Function IUniswapV2Router02.WETH() (src/JACKsPools.sol#31) is not in mixedCase
+Parameter JACKsPools.setVault(address)._vault (src/JACKsPools.sol#204) is not in mixedCase
+Parameter JACKsPools.setLpVault(address)._lpVault (src/JACKsPools.sol#219) is not in mixedCase
+Parameter JACKsPools.setLpManager(address)._lpManager (src/JACKsPools.sol#231) is not in mixedCase
+Parameter JACKsPools.updateMinSwapTokens(uint256)._minSwapTokens (src/JACKsPools.sol#249) is not in mixedCase
+Variable JACKsPools.ROUTER (src/JACKsPools.sol#104) is not in mixedCase
+Variable JACKsPools.PAIR (src/JACKsPools.sol#105) is not in mixedCase
+Variable JACKsPools.WETH (src/JACKsPools.sol#106) is not in mixedCase
+Variable JACKsPools.VAULT (src/JACKsPools.sol#107) is not in mixedCase
+Variable JACKsPools.LP_VAULT (src/JACKsPools.sol#108) is not in mixedCase
+Variable JACKsPools.LP_MANAGER (src/JACKsPools.sol#109) is not in mixedCase
+Parameter JACKsVault.setEmergencyPause(bool)._pause (src/JACKsVault.sol#889) is not in mixedCase
+Variable JACKsVault.TOKEN (src/JACKsVault.sol#20) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+**THIS CHECKLIST IS NOT COMPLETE**. Use `--show-ignored-findings` to show all the results.
+Summary
+ - [arbitrary-send-eth](#arbitrary-send-eth) (3 results) (High)
+ - [weak-prng](#weak-prng) (1 results) (High)
+ - [divide-before-multiply](#divide-before-multiply) (5 results) (Medium)
+ - [uninitialized-local](#uninitialized-local) (1 results) (Medium)
+ - [unused-return](#unused-return) (5 results) (Medium)
+ - [calls-loop](#calls-loop) (1 results) (Low)
+ - [reentrancy-events](#reentrancy-events) (2 results) (Low)
+ - [timestamp](#timestamp) (17 results) (Low)
+ - [pragma](#pragma) (1 results) (Informational)
+ - [costly-loop](#costly-loop) (5 results) (Informational)
+ - [cyclomatic-complexity](#cyclomatic-complexity) (3 results) (Informational)
+ - [low-level-calls](#low-level-calls) (7 results) (Informational)
+ - [missing-inheritance](#missing-inheritance) (3 results) (Informational)
+ - [naming-convention](#naming-convention) (19 results) (Informational)
+## arbitrary-send-eth
+Impact: High
+Confidence: Medium
+ - [ ] ID-0
+[JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553) sends eth to arbitrary user
+	Dangerous calls:
+	- [VAULT.onTaxReceived{value: ethForReward}()](src/JACKsPools.sol#L523)
+	- [LP_VAULT.onLpTaxReceived{value: ethForLpReward}()](src/JACKsPools.sol#L528)
+
+src/JACKsPools.sol#L450-L553
+
+
+ - [ ] ID-1
+[JACKsVault.emergencyClaim(address)](src/JACKsVault.sol#L906-L933) sends eth to arbitrary user
+	Dangerous calls:
+	- [(success,None) = recipient.call{value: expiredAmount}()](src/JACKsVault.sol#L929)
+
+src/JACKsVault.sol#L906-L933
+
+
+ - [ ] ID-2
+[JACKsPools._processTaxesWithReward(address)](src/JACKsPools.sol#L755-L770) sends eth to arbitrary user
+	Dangerous calls:
+	- [(success,None) = caller.call{value: reward}()](src/JACKsPools.sol#L766)
+
+src/JACKsPools.sol#L755-L770
+
+
+## weak-prng
+Impact: High
+Confidence: Medium
+ - [ ] ID-3
+[JACKsVault.finalizeRound()](src/JACKsVault.sol#L387-L528) uses a weak PRNG: "[selectedIndex = attemptSeed % validEntries.length](src/JACKsVault.sol#L465)" 
+
+src/JACKsVault.sol#L387-L528
+
+
+## divide-before-multiply
+Impact: Medium
+Confidence: Medium
+ - [ ] ID-4
+[JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553) performs a multiplication on the result of a division:
+	- [swapReward = (localReward * tokensToProcess) / totalTokens](src/JACKsPools.sol#L479)
+	- [ethForReward = (ethReceived * swapReward) / tokensToSwap](src/JACKsPools.sol#L514)
+
+src/JACKsPools.sol#L450-L553
+
+
+ - [ ] ID-5
+[JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553) performs a multiplication on the result of a division:
+	- [swapLpReward = (localLpReward * tokensToProcess) / totalTokens](src/JACKsPools.sol#L480)
+	- [ethForLpReward = (ethReceived * swapLpReward) / tokensToSwap](src/JACKsPools.sol#L515)
+
+src/JACKsPools.sol#L450-L553
+
+
+ - [ ] ID-6
+[JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553) performs a multiplication on the result of a division:
+	- [adjustmentRatio = (contractBalance * BPS) / tokensToProcess](src/JACKsPools.sol#L465)
+	- [localLp = (localLp * adjustmentRatio) / BPS](src/JACKsPools.sol#L467)
+
+src/JACKsPools.sol#L450-L553
+
+
+ - [ ] ID-7
+[JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553) performs a multiplication on the result of a division:
+	- [adjustmentRatio = (contractBalance * BPS) / tokensToProcess](src/JACKsPools.sol#L465)
+	- [localLpReward = (localLpReward * adjustmentRatio) / BPS](src/JACKsPools.sol#L468)
+
+src/JACKsPools.sol#L450-L553
+
+
+ - [ ] ID-8
+[JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553) performs a multiplication on the result of a division:
+	- [adjustmentRatio = (contractBalance * BPS) / tokensToProcess](src/JACKsPools.sol#L465)
+	- [localReward = (localReward * adjustmentRatio) / BPS](src/JACKsPools.sol#L466)
+
+src/JACKsPools.sol#L450-L553
+
+
+## uninitialized-local
+Impact: Medium
+Confidence: Medium
+ - [ ] ID-9
+[JACKsVault.finalizeRound().recipient](src/JACKsVault.sol#L458) is a local variable never initialized
+
+src/JACKsVault.sol#L458
+
+
+## unused-return
+Impact: Medium
+Confidence: Medium
+ - [ ] ID-10
+[JACKsPools.getLpValue()](src/JACKsPools.sol#L572-L593) ignores return value by [(reserve0,reserve1) = IUniswapV2Pair(PAIR).getReserves()](src/JACKsPools.sol#L573-L592)
+
+src/JACKsPools.sol#L572-L593
+
+
+ - [ ] ID-11
+[JACKsVault.constructor(address)](src/JACKsVault.sol#L147-L162) ignores return value by [IJACKsPools(_token).getLpValue()](src/JACKsVault.sol#L151-L155)
+
+src/JACKsVault.sol#L147-L162
+
+
+ - [ ] ID-12
+[JACKsPools.addInitialLiquidity()](src/JACKsPools.sol#L676-L693) ignores return value by [ROUTER.addLiquidityETH{value: msg.value}(address(this),tokenAmount,0,0,DEAD,block.timestamp)](src/JACKsPools.sol#L685-L692)
+
+src/JACKsPools.sol#L676-L693
+
+
+ - [ ] ID-13
+[JACKsPools._isPair(address)](src/JACKsPools.sol#L665-L673) ignores return value by [IUniswapV2Pair(account).token0()](src/JACKsPools.sol#L668-L672)
+
+src/JACKsPools.sol#L665-L673
+
+
+ - [ ] ID-14
+[JACKsLPManager.addLiquidityAndRegister(uint256,uint256,uint256,uint256)](src/JACKsLPManager.sol#L76-L143) ignores return value by [TOKEN.approve(address(ROUTER),0)](src/JACKsLPManager.sol#L96)
+
+src/JACKsLPManager.sol#L76-L143
+
+
+## calls-loop
+Impact: Low
+Confidence: Medium
+ - [ ] ID-15
+[JACKsVault.finalizeRound()](src/JACKsVault.sol#L387-L528) has external calls inside a loop: [balances[i] = TOKEN.balanceOf(validEntries[i].buyer)](src/JACKsVault.sol#L454)
+
+src/JACKsVault.sol#L387-L528
+
+
+## reentrancy-events
+Impact: Low
+Confidence: Medium
+ - [ ] ID-16
+Reentrancy in [JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553):
+	External calls:
+	- [ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap,minOutput,path,address(this),block.timestamp)](src/JACKsPools.sol#L503-L551)
+	Event emitted after the call(s):
+	- [TaxProcessingFailed(localReward,localLp,localLpReward,Swap failed)](src/JACKsPools.sol#L550)
+
+src/JACKsPools.sol#L450-L553
+
+
+ - [ ] ID-17
+Reentrancy in [JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553):
+	External calls:
+	- [ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap,minOutput,path,address(this),block.timestamp)](src/JACKsPools.sol#L503-L551)
+	- [VAULT.onTaxReceived{value: ethForReward}()](src/JACKsPools.sol#L523)
+	- [LP_VAULT.onLpTaxReceived{value: ethForLpReward}()](src/JACKsPools.sol#L528)
+	- [(tokenUsed,ethUsed,liquidity) = ROUTER.addLiquidityETH{value: ethForLp}(address(this),lpHalf,0,0,DEAD,block.timestamp)](src/JACKsPools.sol#L533-L542)
+	External calls sending eth:
+	- [VAULT.onTaxReceived{value: ethForReward}()](src/JACKsPools.sol#L523)
+	- [LP_VAULT.onLpTaxReceived{value: ethForLpReward}()](src/JACKsPools.sol#L528)
+	- [(tokenUsed,ethUsed,liquidity) = ROUTER.addLiquidityETH{value: ethForLp}(address(this),lpHalf,0,0,DEAD,block.timestamp)](src/JACKsPools.sol#L533-L542)
+	Event emitted after the call(s):
+	- [AutoLiquify(tokenUsed,ethUsed,liquidity)](src/JACKsPools.sol#L541)
+	- [TaxProcessed(ethForReward + ethForLpReward,ethForLp,0)](src/JACKsPools.sol#L545)
+
+src/JACKsPools.sol#L450-L553
+
+
+## timestamp
+Impact: Low
+Confidence: Medium
+ - [ ] ID-18
+[JACKsVault.getUnclaimedRewards()](src/JACKsVault.sol#L616-L664) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [! rounds[i].claimed && rounds[i].amount > 0](src/JACKsVault.sol#L625)
+	- [! rounds[i_scope_0].claimed && rounds[i_scope_0].amount > 0](src/JACKsVault.sol#L648)
+	- [block.timestamp < deadline](src/JACKsVault.sol#L655)
+
+src/JACKsVault.sol#L616-L664
+
+
+ - [ ] ID-19
+[JACKsLPVault.getUserStats(address)](src/JACKsLPVault.sol#L645-L710) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [block.timestamp <= rounds[i_scope_2].timestamp + CLAIM_DEADLINE](src/JACKsLPVault.sol#L703)
+
+src/JACKsLPVault.sol#L645-L710
+
+
+ - [ ] ID-20
+[JACKsVault.emergencyClaim(address)](src/JACKsVault.sol#L906-L933) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [rounds[i].recipient == recipient && ! rounds[i].claimed && block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY](src/JACKsVault.sol#L915-L917)
+
+src/JACKsVault.sol#L906-L933
+
+
+ - [ ] ID-21
+[JACKsVault.addEligibleBuyer(address,uint256)](src/JACKsVault.sol#L224-L281) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [snapshotTaken && block.timestamp > snapshotTimestamp + 604800](src/JACKsVault.sol#L271)
+
+src/JACKsVault.sol#L224-L281
+
+
+ - [ ] ID-22
+[JACKsVault._getValidSnapshotEntries()](src/JACKsVault.sol#L316-L359) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [snapshotBuffer.entries[pos].timestamp >= cutoffTime](src/JACKsVault.sol#L336)
+	- [snapshotBuffer.entries[pos_scope_1].timestamp >= cutoffTime](src/JACKsVault.sol#L352)
+	- [snapshotTimestamp > ENTRY_EXPIRY](src/JACKsVault.sol#L322-L324)
+
+src/JACKsVault.sol#L316-L359
+
+
+ - [ ] ID-23
+[JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[])](src/JACKsLPVault.sol#L759-L791) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [block.timestamp <= info.timestamp + CLAIM_DEADLINE](src/JACKsLPVault.sol#L769)
+
+src/JACKsLPVault.sol#L759-L791
+
+
+ - [ ] ID-24
+[JACKsLPVault.claimMultipleRewards(uint256[])](src/JACKsLPVault.sol#L492-L517) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [rounds[roundId].finalized && ! hasClaimed[roundId][msg.sender] && roundRewards[roundId][msg.sender] > 0 && block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE](src/JACKsLPVault.sol#L499-L502)
+
+src/JACKsLPVault.sol#L492-L517
+
+
+ - [ ] ID-25
+[JACKsLPVault.recordLpContribution(address,uint256)](src/JACKsLPVault.sol#L169-L242) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [snapshotTaken && block.timestamp > snapshotTimestamp + 1209600](src/JACKsLPVault.sol#L226)
+
+src/JACKsLPVault.sol#L169-L242
+
+
+ - [ ] ID-26
+[JACKsVault.getUserRewards(address)](src/JACKsVault.sol#L574-L611) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [rounds[i].recipient == user && rounds[i].amount > 0](src/JACKsVault.sol#L582)
+	- [rounds[i_scope_0].recipient == user && rounds[i_scope_0].amount > 0](src/JACKsVault.sol#L603)
+
+src/JACKsVault.sol#L574-L611
+
+
+ - [ ] ID-27
+[JACKsPools._transfer(address,address,uint256,bool)](src/JACKsPools.sol#L301-L448) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [require(bool,string)(block.timestamp >= sellUnlock[from],Sell locked 2h)](src/JACKsPools.sol#L332)
+	- [require(bool,string)(block.timestamp >= lastBuyTime[to] + BUY_COOLDOWN,Wait 30s between buys)](src/JACKsPools.sol#L355-L358)
+
+src/JACKsPools.sol#L301-L448
+
+
+ - [ ] ID-28
+[JACKsVault.getExpiredRounds()](src/JACKsVault.sol#L1009-L1033) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [! rounds[i].claimed && rounds[i].amount > 0 && block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY](src/JACKsVault.sol#L1013-L1015)
+	- [! rounds[i_scope_0].claimed && rounds[i_scope_0].amount > 0 && block.timestamp > rounds[i_scope_0].timestamp + MAX_CLAIM_DELAY](src/JACKsVault.sol#L1024-L1026)
+
+src/JACKsVault.sol#L1009-L1033
+
+
+ - [ ] ID-29
+[JACKsVault.finalizeRound()](src/JACKsVault.sol#L387-L528) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [require(bool,string)(block.timestamp >= lastFinalizeTime + FINALIZE_COOLDOWN,Cooldown active)](src/JACKsVault.sol#L402-L405)
+
+src/JACKsVault.sol#L387-L528
+
+
+ - [ ] ID-30
+[JACKsLPVault.finalizeRound()](src/JACKsLPVault.sol#L277-L353) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [require(bool,string)(! rounds[snapshotRound].finalized,Round already finalized)](src/JACKsLPVault.sol#L279)
+	- [isTimedOut = block.timestamp >= snapshotTimestamp + 604800](src/JACKsLPVault.sol#L286)
+	- [require(bool,string)(isParticipant || isTimedOut,Only participants or wait 7 days)](src/JACKsLPVault.sol#L288-L291)
+
+src/JACKsLPVault.sol#L277-L353
+
+
+ - [ ] ID-31
+[JACKsLPVault.claimReward(uint256)](src/JACKsLPVault.sol#L470-L487) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [require(bool,string)(rounds[roundId].finalized,Round not finalized)](src/JACKsLPVault.sol#L471)
+	- [require(bool,string)(block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE,Claim deadline passed)](src/JACKsLPVault.sol#L474-L477)
+
+src/JACKsLPVault.sol#L470-L487
+
+
+ - [ ] ID-32
+[JACKsVault.cleanupExpiredClaimsForRound(uint256)](src/JACKsVault.sol#L940-L966) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [info.claimed || block.timestamp <= info.timestamp + MAX_CLAIM_DELAY](src/JACKsVault.sol#L946)
+
+src/JACKsVault.sol#L940-L966
+
+
+ - [ ] ID-33
+[JACKsLPVault.getClaimableRounds(address)](src/JACKsLPVault.sol#L715-L750) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [rounds[i].finalized && ! hasClaimed[i][user] && roundRewards[i][user] > 0 && block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE](src/JACKsLPVault.sol#L723-L726)
+	- [rounds[i_scope_0].finalized && ! hasClaimed[i_scope_0][user] && roundRewards[i_scope_0][user] > 0 && block.timestamp <= rounds[i_scope_0].timestamp + CLAIM_DEADLINE](src/JACKsLPVault.sol#L738-L741)
+
+src/JACKsLPVault.sol#L715-L750
+
+
+ - [ ] ID-34
+[JACKsLPVault.getExpiredRounds()](src/JACKsLPVault.sol#L819-L842) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [rounds[i].finalized && block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE](src/JACKsLPVault.sol#L824-L825)
+	- [rounds[i_scope_0].finalized && block.timestamp > rounds[i_scope_0].timestamp + CLAIM_DEADLINE](src/JACKsLPVault.sol#L834-L835)
+
+src/JACKsLPVault.sol#L819-L842
+
+
+## pragma
+Impact: Informational
+Confidence: High
+ - [ ] ID-35
+2 different versions of Solidity are used:
+	- Version constraint ^0.8.20 is used by:
+		-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#L4)
+		-[^0.8.20](lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#L5)
+	- Version constraint ^0.8.26 is used by:
+		-[^0.8.26](src/JACKsLPManager.sol#L2)
+		-[^0.8.26](src/JACKsLPVault.sol#L2)
+		-[^0.8.26](src/JACKsPools.sol#L2)
+		-[^0.8.26](src/JACKsVault.sol#L2)
+
+lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#L4
+
+
+## costly-loop
+Impact: Informational
+Confidence: Medium
+ - [ ] ID-36
+[JACKsVault.cleanupExpiredClaimsForRound(uint256)](src/JACKsVault.sol#L940-L966) has costly operations inside a loop:
+	- [totalClaimed += amountToRecover](src/JACKsVault.sol#L961)
+	Calls stack containing the loop:
+		JACKsVault.cleanupExpiredClaims()
+
+src/JACKsVault.sol#L940-L966
+
+
+ - [ ] ID-37
+[JACKsVault.cleanupExpiredClaimsForRound(uint256)](src/JACKsVault.sol#L940-L966) has costly operations inside a loop:
+	- [totalClaimed += amountToRecover](src/JACKsVault.sol#L961)
+	Calls stack containing the loop:
+		JACKsVault.cleanupExpiredClaimsBatch(uint256,uint256)
+
+src/JACKsVault.sol#L940-L966
+
+
+ - [ ] ID-38
+[JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[])](src/JACKsLPVault.sol#L759-L791) has costly operations inside a loop:
+	- [totalClaimed += amount](src/JACKsLPVault.sol#L785)
+
+src/JACKsLPVault.sol#L759-L791
+
+
+ - [ ] ID-39
+[JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[])](src/JACKsLPVault.sol#L759-L791) has costly operations inside a loop:
+	- [totalClaimed += amount](src/JACKsLPVault.sol#L785)
+	Calls stack containing the loop:
+		JACKsLPVault.cleanupExpiredClaimsBatch(uint256[],address[][])
+
+src/JACKsLPVault.sol#L759-L791
+
+
+ - [ ] ID-40
+[JACKsLPVault.claimMultipleRewards(uint256[])](src/JACKsLPVault.sol#L492-L517) has costly operations inside a loop:
+	- [totalClaimed += reward](src/JACKsLPVault.sol#L507)
+
+src/JACKsLPVault.sol#L492-L517
+
+
+## cyclomatic-complexity
+Impact: Informational
+Confidence: High
+ - [ ] ID-41
+[JACKsLPVault.getUserStats(address)](src/JACKsLPVault.sol#L645-L710) has a high cyclomatic complexity (15).
+
+src/JACKsLPVault.sol#L645-L710
+
+
+ - [ ] ID-42
+[JACKsPools._processTaxes()](src/JACKsPools.sol#L450-L553) has a high cyclomatic complexity (18).
+
+src/JACKsPools.sol#L450-L553
+
+
+ - [ ] ID-43
+[JACKsPools._transfer(address,address,uint256,bool)](src/JACKsPools.sol#L301-L448) has a high cyclomatic complexity (20).
+
+src/JACKsPools.sol#L301-L448
+
+
+## low-level-calls
+Impact: Informational
+Confidence: High
+ - [ ] ID-44
+Low level call in [JACKsPools.recoverEth()](src/JACKsPools.sol#L713-L718):
+	- [(success,None) = owner.call{value: balance}()](src/JACKsPools.sol#L716)
+
+src/JACKsPools.sol#L713-L718
+
+
+ - [ ] ID-45
+Low level call in [JACKsLPVault.claimMultipleRewards(uint256[])](src/JACKsLPVault.sol#L492-L517):
+	- [(success,None) = address(msg.sender).call{value: totalReward}()](src/JACKsLPVault.sol#L515)
+
+src/JACKsLPVault.sol#L492-L517
+
+
+ - [ ] ID-46
+Low level call in [JACKsVault.claim()](src/JACKsVault.sol#L822-L835):
+	- [(success,None) = msg.sender.call{value: amount}()](src/JACKsVault.sol#L831)
+
+src/JACKsVault.sol#L822-L835
+
+
+ - [ ] ID-47
+Low level call in [JACKsLPManager.addLiquidityAndRegister(uint256,uint256,uint256,uint256)](src/JACKsLPManager.sol#L76-L143):
+	- [(success,None) = address(msg.sender).call{value: excessEth}()](src/JACKsLPManager.sol#L130)
+
+src/JACKsLPManager.sol#L76-L143
+
+
+ - [ ] ID-48
+Low level call in [JACKsLPVault.claimReward(uint256)](src/JACKsLPVault.sol#L470-L487):
+	- [(success,None) = address(msg.sender).call{value: reward}()](src/JACKsLPVault.sol#L483)
+
+src/JACKsLPVault.sol#L470-L487
+
+
+ - [ ] ID-49
+Low level call in [JACKsVault.emergencyClaim(address)](src/JACKsVault.sol#L906-L933):
+	- [(success,None) = recipient.call{value: expiredAmount}()](src/JACKsVault.sol#L929)
+
+src/JACKsVault.sol#L906-L933
+
+
+ - [ ] ID-50
+Low level call in [JACKsPools._processTaxesWithReward(address)](src/JACKsPools.sol#L755-L770):
+	- [(success,None) = caller.call{value: reward}()](src/JACKsPools.sol#L766)
+
+src/JACKsPools.sol#L755-L770
+
+
+## missing-inheritance
+Impact: Informational
+Confidence: High
+ - [ ] ID-51
+[JACKsVault](src/JACKsVault.sol#L19-L1041) should inherit from [IJACKsVault](src/JACKsPools.sol#L67-L70)
+
+src/JACKsVault.sol#L19-L1041
+
+
+ - [ ] ID-52
+[JACKsPools](src/JACKsPools.sol#L77-L782) should inherit from [IJACKsPools](src/JACKsVault.sol#L14-L17)
+
+src/JACKsPools.sol#L77-L782
+
+
+ - [ ] ID-53
+[JACKsLPVault](src/JACKsLPVault.sol#L20-L951) should inherit from [IJACKsLPVault](src/JACKsPools.sol#L72-L75)
+
+src/JACKsLPVault.sol#L20-L951
+
+
+## naming-convention
+Impact: Informational
+Confidence: High
+ - [ ] ID-54
+Parameter [JACKsLPVault.setLpManager(address)._lpManager](src/JACKsLPVault.sol#L118) is not in mixedCase
+
+src/JACKsLPVault.sol#L118
+
+
+ - [ ] ID-55
+Variable [JACKsVault.TOKEN](src/JACKsVault.sol#L20) is not in mixedCase
+
+src/JACKsVault.sol#L20
+
+
+ - [ ] ID-56
+Variable [JACKsPools.LP_MANAGER](src/JACKsPools.sol#L109) is not in mixedCase
+
+src/JACKsPools.sol#L109
+
+
+ - [ ] ID-57
+Variable [JACKsPools.PAIR](src/JACKsPools.sol#L105) is not in mixedCase
+
+src/JACKsPools.sol#L105
+
+
+ - [ ] ID-58
+Variable [JACKsPools.LP_VAULT](src/JACKsPools.sol#L108) is not in mixedCase
+
+src/JACKsPools.sol#L108
+
+
+ - [ ] ID-59
+Variable [JACKsPools.WETH](src/JACKsPools.sol#L106) is not in mixedCase
+
+src/JACKsPools.sol#L106
+
+
+ - [ ] ID-60
+Parameter [JACKsPools.setVault(address)._vault](src/JACKsPools.sol#L204) is not in mixedCase
+
+src/JACKsPools.sol#L204
+
+
+ - [ ] ID-61
+Parameter [JACKsPools.setLpManager(address)._lpManager](src/JACKsPools.sol#L231) is not in mixedCase
+
+src/JACKsPools.sol#L231
+
+
+ - [ ] ID-62
+Function [IUniswapV2Router02.WETH()](src/JACKsPools.sol#L31) is not in mixedCase
+
+src/JACKsPools.sol#L31
+
+
+ - [ ] ID-63
+Parameter [JACKsVault.setEmergencyPause(bool)._pause](src/JACKsVault.sol#L889) is not in mixedCase
+
+src/JACKsVault.sol#L889
+
+
+ - [ ] ID-64
+Variable [JACKsLPManager.ROUTER](src/JACKsLPManager.sol#L45) is not in mixedCase
+
+src/JACKsLPManager.sol#L45
+
+
+ - [ ] ID-65
+Parameter [JACKsPools.updateMinSwapTokens(uint256)._minSwapTokens](src/JACKsPools.sol#L249) is not in mixedCase
+
+src/JACKsPools.sol#L249
+
+
+ - [ ] ID-66
+Variable [JACKsLPVault.LP_MANAGER](src/JACKsLPVault.sol#L22) is not in mixedCase
+
+src/JACKsLPVault.sol#L22
+
+
+ - [ ] ID-67
+Parameter [JACKsPools.setLpVault(address)._lpVault](src/JACKsPools.sol#L219) is not in mixedCase
+
+src/JACKsPools.sol#L219
+
+
+ - [ ] ID-68
+Variable [JACKsLPManager.TOKEN](src/JACKsLPManager.sol#L43) is not in mixedCase
+
+src/JACKsLPManager.sol#L43
+
+
+ - [ ] ID-69
+Variable [JACKsLPManager.LP_VAULT](src/JACKsLPManager.sol#L44) is not in mixedCase
+
+src/JACKsLPManager.sol#L44
+
+
+ - [ ] ID-70
+Variable [JACKsPools.ROUTER](src/JACKsPools.sol#L104) is not in mixedCase
+
+src/JACKsPools.sol#L104
+
+
+ - [ ] ID-71
+Variable [JACKsLPVault.TOKEN](src/JACKsLPVault.sol#L21) is not in mixedCase
+
+src/JACKsLPVault.sol#L21
+
+
+ - [ ] ID-72
+Variable [JACKsPools.VAULT](src/JACKsPools.sol#L107) is not in mixedCase
+
+src/JACKsPools.sol#L107
+
+
+INFO:Slither:. analyzed (18 contracts with 100 detectors), 73 result(s) found
