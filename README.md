@@ -79,7 +79,9 @@ Fork, invariant, and static analysis outputs are included under `/docs/tests`:
 - End-to-end fork simulations
 - High-load LP scenarios (400 participants, eviction)
 - Invariant testing (accounting, lifecycle, idempotency)
-- Slither static analysis report
+- Slither static analysis report is included under `/docs/tests/SlitherReport.txt`.
+  Some findings are expected for this design (best-effort randomness, timestamp-gated rounds, ETH payouts via pull-payments).
+  See `/docs/tests/README.md` for a short explanation.
 
 ### `script/TestBaseCompleteFork.s.sol`
 
