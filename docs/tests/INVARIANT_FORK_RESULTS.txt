@@ -1,7 +1,7 @@
 No files changed, compilation skipped
 
 Ran 8 tests for test/InvariantCore.t.sol:CoreInvariantTest
-[PASS] test_Invariant_Accounting() (gas: 67695728)
+[PASS] test_Invariant_Accounting() (gas: 58322230)
 Logs:
   
 === TEST 1: ACCOUNTING INVARIANTS ===
@@ -36,7 +36,7 @@ Logs:
   
 === RESULT: ACCOUNTING INVARIANTS PASS ===
 
-[PASS] test_Invariant_AccountingConservation() (gas: 31552138)
+[PASS] test_Invariant_AccountingConservation() (gas: 27910638)
 Logs:
   
 === TEST 1A: ACCOUNTING CONSERVATION (DELTA-BASED) ===
@@ -51,7 +51,10 @@ Logs:
   Buyer pool: 0 -> 29218943696502602
   
 --- Verify Conservation (Delta-Based) ---
-  PASS: Supply conservation (1100000000000000000000000000)
+  PASS: Supply conservation (burns allowed)
+    Initial: 1100000000000000000000000000
+    Final: 1097656041226623759293782568
+    Burned: 2343958773376240706217432
   PASS: Delta conservation verified
     Delta Distributed: 29218943696502602
     Delta Claimed: 0
@@ -63,7 +66,7 @@ Logs:
   
 === RESULT: ACCOUNTING CONSERVATION PASS ===
 
-[PASS] test_Invariant_CompleteClaimLifecycle() (gas: 31750455)
+[PASS] test_Invariant_CompleteClaimLifecycle() (gas: 28111240)
 Logs:
   
 === TEST 3A: COMPLETE CLAIM LIFECYCLE (NEW) ===
@@ -95,7 +98,7 @@ Logs:
   
 === RESULT: COMPLETE CLAIM LIFECYCLE PASS ===
 
-[PASS] test_Invariant_Idempotency() (gas: 67872755)
+[PASS] test_Invariant_Idempotency() (gas: 58503233)
 Logs:
   
 === TEST 2: IDEMPOTENCY INVARIANTS ===
@@ -127,7 +130,7 @@ Logs:
   
 === RESULT: IDEMPOTENCY INVARIANTS PASS ===
 
-[PASS] test_Invariant_LPEligibilityMonotonic() (gas: 2542867)
+[PASS] test_Invariant_LPEligibilityMonotonic() (gas: 2546819)
 Logs:
   
 === TEST 4: LP ELIGIBILITY MONOTONIC ===
@@ -147,7 +150,7 @@ Logs:
   
 === RESULT: LP ELIGIBILITY INVARIANTS PASS ===
 
-[PASS] test_Invariant_LPEviction() (gas: 43086996)
+[PASS] test_Invariant_LPEviction() (gas: 43163107)
 Logs:
   
 === TEST 4A: LP EVICTION (NEW) ===
@@ -172,7 +175,7 @@ Logs:
   
 === RESULT: LP EVICTION INVARIANT PASS ===
 
-[PASS] test_Invariant_Lifecycle() (gas: 67868404)
+[PASS] test_Invariant_Lifecycle() (gas: 58498828)
 Logs:
   
 === TEST 3: LIFECYCLE INVARIANTS ===
@@ -207,7 +210,7 @@ Logs:
   
 === RESULT: LIFECYCLE INVARIANTS PASS ===
 
-[PASS] test_Invariant_NoPrivilegedPaths() (gas: 62395360)
+[PASS] test_Invariant_NoPrivilegedPaths() (gas: 54530804)
 Logs:
   
 === TEST 5: NO PRIVILEGED PATHS ===
@@ -255,6 +258,6 @@ Logs:
   
 === RESULT: NO PRIVILEGED PATHS INVARIANTS PASS ===
 
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 30.38s (137.07s CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 41.57s (143.81s CPU time)
 
-Ran 1 test suite in 33.35s (30.38s CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+Ran 1 test suite in 41.75s (41.57s CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
