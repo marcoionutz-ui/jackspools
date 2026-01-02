@@ -123,7 +123,18 @@ The protocol has been deployed and fully exercised on Base Sepolia:
 
 A minimal frontend is available for interacting with the protocol on Base Sepolia:
 
-https://jack-spools-website.vercel.app/  
+https://jack-spools-website.vercel.app/
+
+ **Note on testnet configuration**
+
+> The Base Sepolia deployment uses **reduced thresholds and shorter timings**
+> compared to the intended mainnet configuration.
+>
+> This is done strictly to allow faster iteration, multiple full reward cycles,
+> and easier on-chain validation under testnet conditions.
+>
+> Core logic, security assumptions, and lifecycle behavior are identical
+> between testnet and the mainnet candidate.
 
 ### `script/TestBaseCompleteFork.s.sol`
 
