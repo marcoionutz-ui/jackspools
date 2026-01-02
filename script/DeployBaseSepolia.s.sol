@@ -117,7 +117,7 @@ contract DeployBaseSepolia is Script {
 		require(success, "addInitialLiquidity failed"); 
 		console.log("   Liquidity added: 0.02 ETH + 1B tokens");
         console.log("   LP Value: 0.04 ETH");
-		console.log("   Stage: 5 (MATURE)");
+		console.log("   Stage: 1 ");
         
         // 7. Enable Trading
         console.log("");

@@ -21,13 +21,23 @@ interface IJACKsPools {
     function approve(address spender, uint256 amount) external returns (bool);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
     function balanceOf(address account) external view returns (uint256);
+	function PAIR() external view returns (address);
 }
 
 interface IJACKsLPVault {
     function recordLpContribution(address user, uint256 ethAmount) external;
 }
 
+interface IUniswapV2Pair {
+    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
+    function token0() external view returns (address);
+    function token1() external view returns (address);
+}
+
 interface IUniswapV2Router02 {
+	function factory() external pure returns (address);
+	function WETH() external pure returns (address);
+
     function addLiquidityETH(
         address token,
         uint amountTokenDesired,
@@ -43,6 +53,8 @@ contract JACKsLPManager is ReentrancyGuard {
 	IJACKsPools public immutable TOKEN;
 	IJACKsLPVault public immutable LP_VAULT;
     IUniswapV2Router02 public immutable ROUTER;
+	address public immutable WETH;
+    IUniswapV2Pair public immutable PAIR;
     
     event LPAdded(
 		address indexed user,
@@ -63,17 +75,53 @@ contract JACKsLPManager is ReentrancyGuard {
 		TOKEN = IJACKsPools(_token);
 		LP_VAULT = IJACKsLPVault(_lpVault);
 		ROUTER = IUniswapV2Router02(_router);
+		
+		// Store WETH and PAIR
+		WETH = ROUTER.WETH();
+		PAIR = IUniswapV2Pair(TOKEN.PAIR());
+		require(address(PAIR) != address(0), "Pair not created");
 	}
     
+	/**
+	 * @notice Calculate exact ETH needed for token amount
+	 */
+	function quoteEthForTokens(uint256 tokenAmount) public view returns (uint256 ethNeeded) {
+		(uint112 r0, uint112 r1,) = PAIR.getReserves();
+		
+		(uint256 reserveToken, uint256 reserveWeth) = 
+			(PAIR.token0() == address(TOKEN)) 
+				? (uint256(r0), uint256(r1)) 
+				: (uint256(r1), uint256(r0));
+		
+		require(reserveToken > 0 && reserveWeth > 0, "No reserves");
+		ethNeeded = (tokenAmount * reserveWeth) / reserveToken;
+	}
+
+	/**
+	 * @notice Calculate exact tokens needed for ETH amount
+	 */
+	function quoteTokensForEth(uint256 ethAmount) public view returns (uint256 tokenNeeded) {
+		(uint112 r0, uint112 r1,) = PAIR.getReserves();
+		
+		(uint256 reserveToken, uint256 reserveWeth) = 
+			(PAIR.token0() == address(TOKEN)) 
+				? (uint256(r0), uint256(r1)) 
+				: (uint256(r1), uint256(r0));
+		
+		require(reserveToken > 0 && reserveWeth > 0, "No reserves");
+		tokenNeeded = (ethAmount * reserveToken) / reserveWeth;
+	}
+	
     /**
 	 * @notice Add liquidity and register for LP Reward Rounds
 	 * @dev User must approve tokens to this contract first
+	 * @dev User must send EXACT ETH amount (use quoteEthForTokens helper)
 	 * @param tokenAmount Amount of tokens to add
 	 * @param tokenMin Minimum tokens (slippage protection)
 	 * @param ethMin Minimum ETH (slippage protection)
 	 * @param deadline Transaction deadline
 	 */
-    function addLiquidityAndRegister(
+	function addLiquidityAndRegister(
 		uint256 tokenAmount,
 		uint256 tokenMin,
 		uint256 ethMin,
@@ -85,21 +133,21 @@ contract JACKsLPManager is ReentrancyGuard {
 	) {
 		require(msg.value > 0, "No ETH sent");
 		require(tokenAmount > 0, "No tokens specified");
-        
-        // Transfer tokens from user to this contract
-        require(
-            TOKEN.transferFrom(msg.sender, address(this), tokenAmount),
-            "Token transfer failed"
-        );
-        
-        // Approve router to spend tokens
-        TOKEN.approve(address(ROUTER), 0);
+		
+		// Transfer tokens from user to this contract
+		require(
+			TOKEN.transferFrom(msg.sender, address(this), tokenAmount),
+			"Token transfer failed"
+		);
+		
+		// Approve router to spend tokens
+		TOKEN.approve(address(ROUTER), 0);
 		require(
 			TOKEN.approve(address(ROUTER), tokenAmount),
 			"Approval failed"
 		);
-        
-        // Add liquidity (LP tokens are sent to DEAD)
+		
+		// Add liquidity (LP tokens are sent to DEAD)
 		(addedTokens, addedEth, liquidity) = ROUTER.addLiquidityETH{value: msg.value}(
 			address(TOKEN),
 			tokenAmount,
@@ -109,38 +157,31 @@ contract JACKsLPManager is ReentrancyGuard {
 			deadline
 		);
 		
+		// CRITICAL: Force exact ETH usage (no refund = no griefing)
+		require(addedEth == msg.value, "Requote ETH");
+		
 		// Reset router allowance to 0 (security hardening)
-        uint256 remainingAllowance = IERC20(address(TOKEN)).allowance(address(this), address(ROUTER));
-        if (remainingAllowance > 0) {
-            require(TOKEN.approve(address(ROUTER), 0), "Allowance reset failed");
-        }
-        
-        // Refund excess tokens if any
-        uint256 excessTokens = tokenAmount - addedTokens;
-        if (excessTokens > 0) {
-            require(
-                IERC20(address(TOKEN)).transfer(msg.sender, excessTokens),
-                "Refund failed"
-            );
-        }
-        
-        // Refund excess ETH if any
-		uint256 excessEth = msg.value - addedEth;
-		if (excessEth > 0) {
-			(bool success, ) = payable(msg.sender).call{value: excessEth}("");
-			require(success, "ETH refund failed");
+		uint256 remainingAllowance = IERC20(address(TOKEN)).allowance(address(this), address(ROUTER));
+		if (remainingAllowance > 0) {
+			require(TOKEN.approve(address(ROUTER), 0), "Allowance reset failed");
 		}
-        
-        // Record contribution in LP Vault (if meets minimum)
-		// No try-catch - transparency over silent fails
-		// Users must meet minimum requirements to participate in LP Reward Rounds
-		// Alternative: Add LP directly via DEX (no reward round participation)
+		
+		// Refund excess tokens if any
+		uint256 excessTokens = tokenAmount - addedTokens;
+		if (excessTokens > 0) {
+			require(
+				IERC20(address(TOKEN)).transfer(msg.sender, excessTokens),
+				"Refund failed"
+			);
+		}
+		
+		// Record contribution in LP Vault (if meets minimum)
 		LP_VAULT.recordLpContribution(msg.sender, addedEth);
 		
 		emit LPAdded(msg.sender, addedTokens, addedEth, liquidity);
 
 		return (addedTokens, addedEth, liquidity);
-		}
+	}
         
     receive() external payable {
 		// Accept ETH refund from Router during LP addition

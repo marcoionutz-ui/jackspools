@@ -60,6 +60,7 @@ contract JACKsVault is ReentrancyGuard {
     // Configuration
 	uint256 public constant MAX_CLAIM_DELAY = 30 days; // Safety: auto-release after 30 days
 	uint256 public constant FINALIZE_COOLDOWN = 3 minutes;
+	uint256 public constant REVEAL_DELAY_BLOCKS = 25;
 	
 	// Stage LP thresholds
 	uint256 private constant STAGE_2_LP_THRESHOLD = 2 ether;
@@ -100,6 +101,7 @@ contract JACKsVault is ReentrancyGuard {
     mapping(address => uint256) public claimable;
     mapping(address => uint256) public recipientHistory;
     mapping(uint256 => RoundInfo) public rounds;
+	mapping(address => address payable) public payoutAddress; // Payout address redirection (for contract wallets)
 	
 	// Winner tracking (for statistics)
 	address[] private uniqueRecipients;
@@ -124,7 +126,9 @@ contract JACKsVault is ReentrancyGuard {
 	event BufferSwapped(uint256 newActiveBufferNum, uint256 round);
     event RoundReady(uint256 poolBalance, uint256 eligibleBuyers, uint256 round);
     event RewardDistributed(address indexed recipient, uint256 amount, uint256 round);
-    event Claimed(address indexed recipient, uint256 amount);
+    event Claimed(address indexed claimant, address indexed recipient, uint256 amount);
+	event PayoutAddressSet(address indexed user, address indexed payoutAddress);
+	event EmergencyClaimFailed(address indexed recipient, uint256 amount); 
 	event SnapshotReset(uint256 indexed round, string reason);
     event EmergencyPauseSet(bool paused);
     event OwnershipRenounced();
@@ -287,8 +291,8 @@ contract JACKsVault is ReentrancyGuard {
 		snapshotTaken = true;
 		snapshotTimestamp = block.timestamp;
 		snapshotRound = currentRound;
-		snapshotBlockNumber = block.number;           // NEW: Save snapshot block
-		snapshotRevealBlock = block.number + 5;       // NEW: +5 blocks (~15s delay)
+		snapshotBlockNumber = block.number; // Save snapshot block
+		snapshotRevealBlock = block.number + REVEAL_DELAY_BLOCKS; // delayed reveal for extra entropy
 		
 		// Mark current buffer as snapshot
 		snapshotBufferNum = activeBufferNum;
@@ -817,22 +821,28 @@ contract JACKsVault is ReentrancyGuard {
     }
 	
     /**
-     * @notice Claim reward winnings
-     */
-    function claim() external nonReentrant {
-        uint256 amount = claimable[msg.sender];
-        require(amount > 0, "Nothing to claim");
-        
-        // Reset first (prevent reentrancy)
-        claimable[msg.sender] = 0;
-        totalClaimed += amount;
-                
-        // Transfer prize
-        (bool success,) = msg.sender.call{value: amount}("");
-        require(success, "Transfer failed");
-        
-        emit Claimed(msg.sender, amount);
-    }
+	 * @notice Claim reward winnings
+	 */
+	function claim() external nonReentrant {
+		uint256 amount = claimable[msg.sender];
+		require(amount > 0, "Nothing to claim");
+		
+		// Determine recipient (use payout address if set)
+		address payable recipient = payoutAddress[msg.sender] != address(0)
+			? payoutAddress[msg.sender]
+			: payable(msg.sender);
+		
+		// Reset first (prevent reentrancy)
+		claimable[msg.sender] = 0;
+		totalClaimed += amount;
+		
+		// Transfer prize
+		(bool success,) = recipient.call{value: amount}("");
+		require(success, "Transfer failed");
+		
+		// Enhanced event (claimant + recipient)
+		emit Claimed(msg.sender, recipient, amount);
+	}
     
     /**
      * @notice Get total pending claims
@@ -881,6 +891,24 @@ contract JACKsVault is ReentrancyGuard {
         return (info.recipient, info.amount, info.timestamp, info.claimed);
     }
     
+	/**
+	 * @notice Set custom payout address (for contract wallets)
+	 * @param _payoutAddress Address to receive claim payouts
+	 */
+	function setPayoutAddress(address payable _payoutAddress) external {
+		require(_payoutAddress != address(0), "Zero address");
+		payoutAddress[msg.sender] = _payoutAddress;
+		emit PayoutAddressSet(msg.sender, _payoutAddress);
+	}
+
+	/**
+	 * @notice Clear payout address (revert to msg.sender)
+	 */
+	function clearPayoutAddress() external {
+		delete payoutAddress[msg.sender];
+		emit PayoutAddressSet(msg.sender, address(0));
+	}
+	
     // Owner functions
     
     /**
@@ -902,34 +930,52 @@ contract JACKsVault is ReentrancyGuard {
 	/**
 	 * @notice Emergency claim for stuck funds after 30 days (safety mechanism)
 	 * @dev Gas-limited: only checks last 100 rounds to prevent out-of-gas
+	 * @dev Uses 2-pass loop: calculate → transfer → mark claimed
 	 */
 	function emergencyClaim(address recipient) external nonReentrant {
-		require(claimable[recipient] > 0, "No claim");
-		
 		// Limit to last 100 rounds to prevent gas issues
 		uint256 startRound = round > 100 ? round - 100 : 0;
 		
-		// Calculate and mark expired unclaimed rounds for this recipient
+		// Calculate expired amount (NO state changes)
 		uint256 expiredAmount = 0;
 		for (uint256 i = startRound; i < round; i++) {
-			if (rounds[i].recipient == recipient && 
-				!rounds[i].claimed && 
+			if (rounds[i].recipient == recipient &&
+				!rounds[i].claimed &&
 				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
 				expiredAmount += rounds[i].amount;
-				rounds[i].claimed = true;
 			}
 		}
 		
 		require(expiredAmount > 0, "No emergency claim");
 		
-		// Only pay expired amount, not entire claimable
+		// Try transfer BEFORE any state changes
+		(bool success,) = recipient.call{value: expiredAmount}("");
+		
+		if (!success) {
+			// Transfer failed - EXIT without state changes
+			// Emit event for observability
+			emit EmergencyClaimFailed(recipient, expiredAmount);
+			// Funds remain claimable, can retry
+			return;
+		}
+		
+		// Transfer succeeded - NOW mark as claimed
+		// Repeat exact same condition to ensure consistency
+		for (uint256 i = startRound; i < round; i++) {
+			if (rounds[i].recipient == recipient &&
+				!rounds[i].claimed &&
+				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
+				rounds[i].claimed = true;
+			}
+		}
+		
+		// Update accounting
+		require(claimable[recipient] >= expiredAmount, "Claimable underflow");
 		claimable[recipient] -= expiredAmount;
 		totalClaimed += expiredAmount;
 		
-		(bool success,) = recipient.call{value: expiredAmount}("");
-		require(success, "Transfer failed");
-		
-		emit Claimed(recipient, expiredAmount);
+		// WHO triggered (msg.sender) + WHERE money went (recipient)
+		emit Claimed(msg.sender, recipient, expiredAmount);
 	}
 	
 	/**

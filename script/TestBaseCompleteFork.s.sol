@@ -37,6 +37,7 @@ interface IJACKsPools {
     function transfer(address, uint256) external returns (bool);
     function tradingEnabled() external view returns (bool);
     function PAIR() external view returns (address);
+	function totalSupply() external view returns (uint256);
 }
 
 interface IJACKsVault {
@@ -87,6 +88,7 @@ interface IJACKsLPManager {
         uint256 ethMin,
         uint256 deadline
     ) external payable returns (uint256, uint256, uint256);
+	function quoteEthForTokens(uint256) external view returns (uint256);
 }
 
 interface IRouter {
@@ -134,7 +136,7 @@ contract TestBaseCompleteFork is Script, Test {
     // Timing constants
     uint256 constant BUY_COOLDOWN = 31 seconds;
     uint256 constant SELL_LOCK_DURATION = 2 hours;
-    uint256 constant REVEAL_BLOCKS = 5;
+    uint256 constant REVEAL_BLOCKS = 25;
     uint256 constant CLAIM_EXPIRY = 31 days;
     uint256 constant FINALIZE_TIMEOUT = 7 days;
     
@@ -247,6 +249,18 @@ contract TestBaseCompleteFork is Script, Test {
     function _getUniqueAddr(string memory seed) internal pure returns (address) {
         return vm.addr(uint256(keccak256(abi.encodePacked(seed))));
     }
+	
+	function _addLPExact(address user, uint256 tokenAmount) internal returns (uint256, uint256, uint256) {
+		vm.startBroadcast(user);
+		token.approve(address(lpManager), tokenAmount);
+		uint256 exactEth = lpManager.quoteEthForTokens(tokenAmount);
+		(uint256 tokens, uint256 eth, uint256 liquidity) = 
+			lpManager.addLiquidityAndRegister{value: exactEth}(
+				tokenAmount, 0, 0, block.timestamp
+			);
+		vm.stopBroadcast();
+		return (tokens, eth, liquidity);
+	}
     
     // ============================================
     // MAIN TEST EXECUTION
@@ -292,7 +306,7 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("                        PHASE 1: DEPLOYMENT & SETUP");
         console.log("=============================================================================\n");
         
-        deployer = makeAddr("deployer");
+        deployer = msg.sender;
         vm.deal(deployer, 1000 ether);
         
         for (uint i = 0; i < 20; i++) {
@@ -494,18 +508,10 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("  Test user token balance:", userBalance);
         
         console.log("\nTest 1: First LP addition (below threshold)");
-        
-        // Use only 40% of tokens for first LP
-        vm.startBroadcast(testUser);
-        uint256 tokenAmount1 = userBalance * 40 / 100;
-        token.approve(address(lpManager), tokenAmount1);
-        (uint256 tokens1, uint256 eth1,) = lpManager.addLiquidityAndRegister{value: STANDARD_LP}(
-            tokenAmount1,
-            0,
-            0,
-            block.timestamp
-        );
-        vm.stopBroadcast();
+
+		// Use only 40% of tokens for first LP
+		uint256 tokenAmount1 = userBalance * 40 / 100;
+		(uint256 tokens1, uint256 eth1,) = _addLPExact(testUser, tokenAmount1);
         
         uint256 lifetime1 = lpVault.lifetimeContributions(testUser);
         bool eligible1 = lpVault.isUserEligible(testUser);
@@ -518,24 +524,17 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("  PASS: First LP added\n");
         
         console.log("Test 2: Other LP providers adding liquidity");
-        for (uint i = 1; i < lpProviders.length; i++) {
-            _addLP(lpProviders[i], STANDARD_LP);
-        }
-        console.log("  All LPs added liquidity\n");
+		for (uint i = 1; i < lpProviders.length; i++) {
+			uint256 balance = token.balanceOf(lpProviders[i]);
+			_addLPExact(lpProviders[i], balance);
+		}
+		console.log("  All LPs added liquidity\n");
         
         console.log("Test 3: First user adds second LP");
-        
-        // Use 50% of remaining tokens for second LP
-        vm.startBroadcast(testUser);
-        uint256 tokenAmount2 = token.balanceOf(testUser) * 50 / 100;
-        token.approve(address(lpManager), tokenAmount2);
-        (uint256 tokens2, uint256 eth2,) = lpManager.addLiquidityAndRegister{value: 0.03 ether}(
-            tokenAmount2,
-            0,
-            0,
-            block.timestamp
-        );
-        vm.stopBroadcast();
+
+		// Use 50% of remaining tokens for second LP
+		uint256 tokenAmount2 = token.balanceOf(testUser) * 50 / 100;
+		(uint256 tokens2, uint256 eth2,) = _addLPExact(testUser, tokenAmount2);
         
         uint256 lifetime2 = lpVault.lifetimeContributions(testUser);
         bool eligible2 = lpVault.isUserEligible(testUser);
@@ -822,26 +821,27 @@ contract TestBaseCompleteFork is Script, Test {
         
         console.log("Testing 0.25% buy tax burn mechanism...\n");
         
-        uint256 deadBefore = token.balanceOf(DEAD);
-        console.log("DEAD balance before:", deadBefore);
-        
-        console.log("\nExecuting 10 buys (", MEDIUM_BUY / 1e15, "finney each)...");
-        
-        for (uint i = 0; i < 10; i++) {
-            address buyer = _getUniqueAddr(string(abi.encodePacked("phase10_burn_", vm.toString(i))));
-            vm.deal(buyer, 1 ether);
-            
-            _buy(buyer, MEDIUM_BUY);
-            _skipCooldown();
-        }
-        
-        uint256 deadAfter = token.balanceOf(DEAD);
-        console.log("\nDEAD balance after:", deadAfter);
-        console.log("Burned tokens:", deadAfter - deadBefore);
-        
-        assertGt(deadAfter, deadBefore, "Burn should increase DEAD balance");
-        console.log("\nPASS: Burn mechanism VERIFIED!");
-        console.log("Phase 9 complete!\n");
+        uint256 supplyBefore = token.totalSupply();
+		console.log("Total supply before:", supplyBefore / 10**18, "tokens");
+
+		console.log("\nExecuting 10 buys (", MEDIUM_BUY / 1e15, "finney each)...");
+
+		for (uint i = 0; i < 10; i++) {
+			address buyer = _getUniqueAddr(string(abi.encodePacked("phase9_burn_", vm.toString(i))));
+			vm.deal(buyer, 1 ether);
+			
+			_buy(buyer, MEDIUM_BUY);
+			_skipCooldown();
+		}
+
+		uint256 supplyAfter = token.totalSupply();
+		console.log("\nTotal supply after:", supplyAfter / 10**18, "tokens");
+		console.log("Burned tokens:", (supplyBefore - supplyAfter) / 10**18, "tokens");
+
+		assertLt(supplyAfter, supplyBefore, "Total supply should decrease");
+		console.log("\nPASS: Burn mechanism VERIFIED!");
+		console.log("Phase 9 complete!\n");
+       
     }
     
     // ============================================
@@ -1301,13 +1301,8 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("  Adding LP multiple times to exceed threshold...");
         
         // LP #1 - use 30% of tokens
-        vm.startBroadcast(lpPowerUser);
-        uint256 tokens1 = token.balanceOf(lpPowerUser) * 30 / 100;
-        token.approve(address(lpManager), tokens1);
-        (, uint256 eth1,) = lpManager.addLiquidityAndRegister{value: 0.05 ether}(
-            tokens1, 0, 0, block.timestamp
-        );
-        vm.stopBroadcast();
+		uint256 tokens1 = token.balanceOf(lpPowerUser) * 30 / 100;
+		(, uint256 eth1,) = _addLPExact(lpPowerUser, tokens1);
         
         uint256 lifetime1 = lpVault.lifetimeContributions(lpPowerUser);
         bool eligible1 = lpVault.isUserEligible(lpPowerUser);
@@ -1319,13 +1314,8 @@ contract TestBaseCompleteFork is Script, Test {
         vm.warp(block.timestamp + 1);
         
         // LP #2 - use 30% of remaining tokens
-        vm.startBroadcast(lpPowerUser);
-        uint256 tokens2 = token.balanceOf(lpPowerUser) * 30 / 100;
-        token.approve(address(lpManager), tokens2);
-        (, uint256 eth2,) = lpManager.addLiquidityAndRegister{value: 0.05 ether}(
-            tokens2, 0, 0, block.timestamp
-        );
-        vm.stopBroadcast();
+		uint256 tokens2 = token.balanceOf(lpPowerUser) * 30 / 100;
+		(, uint256 eth2,) = _addLPExact(lpPowerUser, tokens2);
         
         uint256 lifetime2 = lpVault.lifetimeContributions(lpPowerUser);
         bool eligible2 = lpVault.isUserEligible(lpPowerUser);
@@ -1337,13 +1327,8 @@ contract TestBaseCompleteFork is Script, Test {
         vm.warp(block.timestamp + 1);
         
         // LP #3 - use 30% of remaining tokens
-        vm.startBroadcast(lpPowerUser);
-        uint256 tokens3 = token.balanceOf(lpPowerUser) * 30 / 100;
-        token.approve(address(lpManager), tokens3);
-        (, uint256 eth3,) = lpManager.addLiquidityAndRegister{value: 0.05 ether}(
-            tokens3, 0, 0, block.timestamp
-        );
-        vm.stopBroadcast();
+		uint256 tokens3 = token.balanceOf(lpPowerUser) * 30 / 100;
+		(, uint256 eth3,) = _addLPExact(lpPowerUser, tokens3);
         
         uint256 lifetime3 = lpVault.lifetimeContributions(lpPowerUser);
         bool eligible3 = lpVault.isUserEligible(lpPowerUser);

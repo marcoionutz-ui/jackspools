@@ -66,6 +66,7 @@ interface IJACKsLPManager {
         uint256 ethMin,
         uint256 deadline
     ) external payable returns (uint256, uint256, uint256);
+	function quoteEthForTokens(uint256 tokenAmount) external view returns (uint256);
 }
 
 interface IRouter {
@@ -116,6 +117,26 @@ contract TestBaseAdvanced is Script {
         return vm.addr(uint256(keccak256(abi.encodePacked(seed))));
     }
     
+	function _addLPExact(address user, uint256 tokenAmount) internal returns (uint256, uint256, uint256) {
+        vm.startBroadcast(user);
+        
+        // Approve tokens
+        token.approve(address(lpManager), tokenAmount);
+        
+        // Calculate EXACT ETH needed
+        uint256 exactEth = lpManager.quoteEthForTokens(tokenAmount);
+        
+        // Add LP with exact amount
+        (uint256 tokens, uint256 eth, uint256 liquidity) = 
+            lpManager.addLiquidityAndRegister{value: exactEth}(
+                tokenAmount, 0, 0, block.timestamp
+            );
+        
+        vm.stopBroadcast();
+        
+        return (tokens, eth, liquidity);
+    }
+	
     function run() external {
         console.log("\n===============================================================================");
         console.log("         JACKS POOLS - ADVANCED TESTS (PHASE 17-19)");
@@ -332,7 +353,7 @@ contract TestBaseAdvanced is Script {
         require(vault.isRoundReady(), "Snapshot not triggered");
         
         // Finalize
-        vm.roll(block.number + 5);
+        vm.roll(block.number + 25);
         vm.startBroadcast(deployer);
         uint256 gasStartBuyerFinalize = gasleft();
 		vault.finalizeRound();
@@ -375,16 +396,13 @@ contract TestBaseAdvanced is Script {
 
 			vm.warp(block.timestamp + 2 hours + 1);
 
-			// Add LP (0.5 ETH each -> all equal contributions)
-			vm.startBroadcast(lpUser);
+			 // Add LP with EXACT ETH (use helper)
 			uint256 lpBalance = token.balanceOf(lpUser);
-			token.approve(address(lpManager), lpBalance);
+			
 			uint256 gasStartLP = gasleft();
-			lpManager.addLiquidityAndRegister{value: 0.5 ether}(
-				lpBalance, 0, 0, block.timestamp
-			);
+			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
 			uint256 gasUsedLP = gasStartLP - gasleft();
-			vm.stopBroadcast();
+			
 			if (i == 0) console.log("    [GAS] Add LP:", gasUsedLP);
             
             if ((i + 1) % 100 == 0) {
@@ -419,16 +437,13 @@ contract TestBaseAdvanced is Script {
         vm.warp(block.timestamp + 2 hours + 1);
         
         // Try to add LP with SMALL amount
-        vm.startBroadcast(smallLP);
-		uint256 balance = token.balanceOf(smallLP);
-		token.approve(address(lpManager), balance);
+        uint256 balance = token.balanceOf(smallLP);
+
 		uint256 gasStartSmallLP = gasleft();
-		lpManager.addLiquidityAndRegister{value: 0.2 ether}(
-			balance, 0, 0, block.timestamp
-		);
+		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(smallLP, balance);
 		uint256 gasUsedSmallLP = gasStartSmallLP - gasleft();
-		vm.stopBroadcast();
-		console.log("  [GAS] Small LP attempt:", gasUsedSmallLP);
+
+		console.log("  [GAS] Small LP add:", gasUsedSmallLP);
 		        
         // Check if small LP was added
         (,uint256 participantsAfterSmall,,,,,) = lpVault.getCurrentRoundStatus();
@@ -457,15 +472,12 @@ contract TestBaseAdvanced is Script {
         // Add LP with LARGE amount
         uint256 participantsBefore = participantsAfterSmall;
         
-        vm.startBroadcast(largeLP);
         balance = token.balanceOf(largeLP);
-		token.approve(address(lpManager), balance);
+
 		uint256 gasStartLargeLP = gasleft();
-		lpManager.addLiquidityAndRegister{value: 2.0 ether}(
-			balance, 0, 0, block.timestamp
-		);
+		(addedTokens, addedEth, liquidity) = _addLPExact(largeLP, balance);
 		uint256 gasUsedLargeLP = gasStartLargeLP - gasleft();
-		vm.stopBroadcast();
+
 		console.log("  [GAS] Large LP (eviction):", gasUsedLargeLP);
         
         // Check buffer after large LP
@@ -560,11 +572,13 @@ contract TestBaseAdvanced is Script {
         console.log("Testing LP reward with many participants...\n");
         
         console.log("Funding strategy:");
-        console.log("  Top 10 (users 0-9): 15 ETH each (for 10 ETH LP)");
-        console.log("  Ranks 11-50 (users 10-49): 10 ETH each (for 5 ETH LP)");
-        console.log("  Ranks 51-100 (users 50-99): 5 ETH each (for 2 ETH LP)");
-        console.log("  Ranks 101-400 (users 100-399): 2 ETH each (for 0.5 ETH LP)\n");
+        console.log("  Top 10 (users 0-9): 15 ETH buy -> LARGE token balance -> LARGE LP");
+		console.log("  Ranks 11-50 (users 10-49): 10 ETH buy -> MEDIUM token balance -> MEDIUM LP");
+		console.log("  Ranks 51-100 (users 50-99): 5 ETH buy -> SMALL token balance -> SMALL LP");
+		console.log("  Ranks 101-400 (users 100-399): 2 ETH buy -> TINY token balance -> TINY LP");
+		console.log("  (LP ETH amounts calculated automatically via quoteEthForTokens)\n");
         
+		console.log("Step 1: 400 users buy tokens (VARIED AMOUNTS)");
         IRouter routerContract = IRouter(ROUTER);
         address[] memory path = new address[](2);
         path[0] = WETH;
@@ -605,46 +619,37 @@ contract TestBaseAdvanced is Script {
         vm.warp(block.timestamp + 2 hours + 1);
         
         // Step 2: Users add LP via LPManager (DIFFERENT AMOUNTS!)
-        console.log("Step 2: 400 users add liquidity (VARIED AMOUNTS)");
-        console.log("  Top 10 (users 0-9): 10 ETH each (LARGEST contributions)");
-        console.log("  Ranks 11-50 (users 10-49): 5 ETH each (MEDIUM contributions)");
-        console.log("  Ranks 51-100 (users 50-99): 2 ETH each (SMALL contributions)");
-        console.log("  Ranks 101-400 (users 100-399): 0.5 ETH each (SMALLEST contributions)\n");
+        console.log("Step 2: 400 users add liquidity (EXACT AMOUNTS)");
+		console.log("  Top 10 (users 0-9): 90% of token balance -> LARGEST LP");
+		console.log("  Ranks 11-50 (users 10-49): 70% of token balance -> MEDIUM LP");
+		console.log("  Ranks 51-100 (users 50-99): 50% of token balance -> SMALL LP");
+		console.log("  Ranks 101-400 (users 100-399): 30% of token balance -> SMALLEST LP");
+		console.log("  (ETH calculated automatically via quoteEthForTokens)\n");
         
         for (uint i = 0; i < 400; i++) {
-            address user = _getUniqueAddr(string(abi.encodePacked("phase19_", vm.toString(i))));
-            
-            // Determine ETH amount based on user index (future ranking)
-            uint256 ethAmount;
-            if (i < 10) {
-                ethAmount = 10 ether;  // Top 10: LARGEST (will get 75% of pot)
-            } else if (i < 50) {
-                ethAmount = 5 ether;   // Ranks 11-50: MEDIUM (will get 25% of pot)
-            } else if (i < 100) {
-                ethAmount = 2 ether;   // Ranks 51-100: SMALL (no reward)
-            } else {
-                ethAmount = 0.5 ether; // Rest: SMALLEST (no reward)
-            }
-            
-            vm.startBroadcast(user);
-            
-            uint256 balance = token.balanceOf(user);
-            token.approve(address(lpManager), balance);
-            
-            // Use LPManager to register for LP reward
-            lpManager.addLiquidityAndRegister{value: ethAmount}(
-                balance,
-                0,
-                0,
-                block.timestamp
-            );
-            
-            vm.stopBroadcast();
-            
-            if ((i + 1) % 50 == 0) {
-                console.log("  ", i + 1, "LPs added");
-            }
-        }
+		address user = _getUniqueAddr(string(abi.encodePacked("phase19_", vm.toString(i))));
+		
+		// Determine LP percentage based on ranking (creates variety)
+		uint256 lpPercentage;
+		if (i < 10) {
+			lpPercentage = 90;  // Top 10: add 90% of tokens (LARGEST LP)
+		} else if (i < 50) {
+			lpPercentage = 70;  // Ranks 11-50: add 70% (MEDIUM LP)
+		} else if (i < 100) {
+			lpPercentage = 50;  // Ranks 51-100: add 50% (SMALL LP)
+		} else {
+			lpPercentage = 30;  // Ranks 101-400: add 30% (SMALLEST LP)
+		}
+		
+		uint256 balance = token.balanceOf(user);
+		uint256 lpTokens = (balance * lpPercentage) / 100;
+		
+		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(user, lpTokens);
+		
+		if ((i + 1) % 50 == 0) {
+			console.log("  ", i + 1, "LPs added");
+		}
+	}
         console.log("  All 400 LPs added\n");
         
         // Step 3: Execute sells to fund LP pot

@@ -31,6 +31,9 @@ contract JACKsLPVault is ReentrancyGuard {
 	// Accounting for multi-round solvency
 	uint256 public totalDistributed;
 	uint256 public totalClaimed;
+	
+	// Payout address redirection (for contract wallets)
+	mapping(address => address payable) public payoutAddress; 
     
     // Buffer system (2 buffers alternating)
     uint256 public activeBuffer; // 0 or 1
@@ -92,9 +95,10 @@ contract JACKsLPVault is ReentrancyGuard {
 	event SnapshotTaken(uint256 indexed round, uint256 participants, uint256 totalContributed);
     event SnapshotReset(uint256 indexed round, string reason);
 	event RoundFinalized(uint256 indexed round, uint256 totalDistributed, uint256 winnersCount, address[] winners);
-    event RewardClaimed(address indexed user, uint256 indexed round, uint256 amount);
+    event RewardClaimed(address indexed claimant, address indexed recipient, uint256 indexed round, uint256 amount);
     event Funded(address indexed from, uint256 amount, uint256 poolAfter);
 	event BufferCleared(uint256 indexed bufferIndex, uint256 round);
+	event PayoutAddressSet(address indexed user, address indexed payoutAddress);
     
     modifier onlyToken() {
         require(msg.sender == address(TOKEN), "Only token can call");
@@ -465,56 +469,68 @@ contract JACKsLPVault is ReentrancyGuard {
     // ============================================
     
     /**
-     * @notice Claim reward from a specific round
-     */
-    function claimReward(uint256 roundId) external nonReentrant {
-        require(rounds[roundId].finalized, "Round not finalized");
-        require(!hasClaimed[roundId][msg.sender], "Already claimed");
-        require(roundRewards[roundId][msg.sender] > 0, "No reward");
-        require(
-            block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE,
-            "Claim deadline passed"
-        );
-        
-        uint256 reward = roundRewards[roundId][msg.sender];
-        hasClaimed[roundId][msg.sender] = true;
+	 * @notice Claim reward from a specific round
+	 */
+	function claimReward(uint256 roundId) external nonReentrant {
+		require(rounds[roundId].finalized, "Round not finalized");
+		require(!hasClaimed[roundId][msg.sender], "Already claimed");
+		require(roundRewards[roundId][msg.sender] > 0, "No reward");
+		require(
+			block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE,
+			"Claim deadline passed"
+		);
+		
+		uint256 reward = roundRewards[roundId][msg.sender];
+		
+		// Determine recipient (use payout address if set)
+		address payable recipient = payoutAddress[msg.sender] != address(0)
+			? payoutAddress[msg.sender]
+			: payable(msg.sender);
+		
+		hasClaimed[roundId][msg.sender] = true;
 		totalClaimed += reward;
-        
-        (bool success, ) = payable(msg.sender).call{value: reward}("");
-        require(success, "Transfer failed");
-        
-        emit RewardClaimed(msg.sender, roundId, reward);
-    }
+		
+		(bool success, ) = recipient.call{value: reward}("");
+		require(success, "Transfer failed");
+				
+		emit RewardClaimed(msg.sender, recipient, roundId, reward);
+	}
     
     /**
-     * @notice Claim rewards from multiple rounds
-     */
-    function claimMultipleRewards(uint256[] calldata roundIds) external nonReentrant {
-        uint256 totalReward = 0;
-        
-        for (uint256 i = 0; i < roundIds.length; i++) {
-            uint256 roundId = roundIds[i];
-            
-            if (
-                rounds[roundId].finalized &&
-                !hasClaimed[roundId][msg.sender] &&
-                roundRewards[roundId][msg.sender] > 0 &&
-                block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE
-            ) {
-                uint256 reward = roundRewards[roundId][msg.sender];
-                hasClaimed[roundId][msg.sender] = true;
-                totalReward += reward;
+	 * @notice Claim rewards from multiple rounds
+	 */
+	function claimMultipleRewards(uint256[] calldata roundIds) external nonReentrant {
+		uint256 totalReward = 0;
+		
+		// Determine recipient once (gas savings)
+		address payable recipient = payoutAddress[msg.sender] != address(0)
+			? payoutAddress[msg.sender]
+			: payable(msg.sender);
+		
+		for (uint256 i = 0; i < roundIds.length; i++) {
+			uint256 roundId = roundIds[i];
+			
+			if (
+				rounds[roundId].finalized &&
+				!hasClaimed[roundId][msg.sender] &&
+				roundRewards[roundId][msg.sender] > 0 &&
+				block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE
+			) {
+				uint256 reward = roundRewards[roundId][msg.sender];
+				hasClaimed[roundId][msg.sender] = true;
+				totalReward += reward;
 				totalClaimed += reward;
-                
-                emit RewardClaimed(msg.sender, roundId, reward);
-            }
-        }
-        
-        require(totalReward > 0, "No rewards to claim");
-        
-        (bool success, ) = payable(msg.sender).call{value: totalReward}("");
-        require(success, "Transfer failed");
-    }
+				
+				// Enhanced event for each round
+				emit RewardClaimed(msg.sender, recipient, roundId, reward);
+			}
+		}
+		
+		require(totalReward > 0, "No rewards to claim");
+		
+		(bool success, ) = recipient.call{value: totalReward}("");
+		require(success, "Transfer failed");
+	}
     
     // ============================================
     // FUNDING
@@ -930,6 +946,24 @@ contract JACKsLPVault is ReentrancyGuard {
 	 */
 	function getFinalizingRound() external view returns (uint256) {
 		return snapshotTaken ? snapshotRound : 0;
+	}
+	
+		/**
+	 * @notice Set custom payout address (for contract wallets)
+	 * @param _payoutAddress Address to receive claim payouts
+	 */
+	function setPayoutAddress(address payable _payoutAddress) external {
+		require(_payoutAddress != address(0), "Zero address");
+		payoutAddress[msg.sender] = _payoutAddress;
+		emit PayoutAddressSet(msg.sender, _payoutAddress);
+	}
+
+	/**
+	 * @notice Clear payout address (revert to msg.sender)
+	 */
+	function clearPayoutAddress() external {
+		delete payoutAddress[msg.sender];
+		emit PayoutAddressSet(msg.sender, address(0));
 	}
 	
     // ============================================

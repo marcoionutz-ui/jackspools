@@ -86,7 +86,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     string public constant NAME = "JACKs Pools";
     string public constant SYMBOL = "JACK";
     uint8 public constant DECIMALS = 18;
-    uint256 public constant totalSupply = 1_100_000_000 * 10**18; // 1.1B
+    uint256 public totalSupply;
     
     // Tax configuration (immutable)
 	uint256 public constant BUY_TAX_REWARD_BPS = 775;  // 7.75%
@@ -109,12 +109,11 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 	address public LP_MANAGER; // Contract that handles LP additions
     
     // Swap configuration
-    uint256 public minSwapTokens = 1000 * 10**18; // 1000 tokens minimum (for low LP launches)
+    uint256 public minSwapTokens = 100 * 10**18; // 100 tokens minimum (for low LP launches)
     uint256 private _rewardTokens;
 	uint256 private _lpTokens;
 	uint256 private _lpRewardTokens;
-	uint256 public lastProcessBlock;
-    
+	    
     // State
     bool private _swapping;
 	bool public vaultLocked;
@@ -177,6 +176,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
         require(_router != address(0), "Zero router");
         
         owner = msg.sender;
+		totalSupply = 1_100_000_000 * 10**18; // Initialize total supply
 		ROUTER = IUniswapV2Router02(_router);
 		WETH = ROUTER.WETH();
 
@@ -365,10 +365,10 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			uint256 lpTokens = (amount * BUY_TAX_LP_BPS) / BPS;
 			uint256 burnTokens = (amount * BUY_TAX_BURN_BPS) / BPS;
 			
-			// Burn immediately
+			// BURN - decrease total supply
 			if (burnTokens > 0) {
-				_balances[DEAD] += burnTokens;
-				emit Transfer(from, DEAD, burnTokens);
+				totalSupply -= burnTokens;
+				emit Transfer(from, address(0), burnTokens);
 			}
 			
 			// Contract gets only reward + lp (NOT burn!)
@@ -422,24 +422,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
                 );
             }
         }
-		
-        // INTERACTIONS - EXTERNAL CALLS (AFTER ALL STATE UPDATES!)
-        
-        // Process accumulated taxes (AUTO + MANUAL)
-        // Simple condition: just check if we have enough tokens
-        if (
-            !_swapping &&
-            isBuy &&
-            !isLpAddition &&
-            _balances[address(this)] >= minSwapTokens &&
-            vaultLocked &&
-			block.number > lastProcessBlock
-        ) {
-			// Try to process (fails silent if issues)
-            lastProcessBlock = block.number;
-			try this.processTaxesInternal() {} catch {}
-        }
-        
+		        
         // Add buyer to eligible pool (after balance is confirmed updated)
 		if (isBuy && vaultLocked && address(VAULT) != address(0)) {
 			uint256 ethValue = _getEthValue(amount - taxAmount);
@@ -448,108 +431,96 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     }
     
     function _processTaxes() private lockSwap {
-
-		// Save to locals first
 		uint256 localReward = _rewardTokens;
 		uint256 localLp = _lpTokens;
 		uint256 localLpReward = _lpRewardTokens;
-		
+
 		uint256 tokensToProcess = localReward + localLp + localLpReward;
 		if (tokensToProcess == 0) return;
-		
-		// Use available contract balance
-		uint256 contractBalance = _balances[address(this)];
 
-		// Adjust locals proportionally if insufficient balance
+		uint256 contractBalance = _balances[address(this)];
+		if (contractBalance == 0) return;
+
+		// Scale locals down if we can't cover them (process subset)
 		if (tokensToProcess > contractBalance) {
 			uint256 adjustmentRatio = (contractBalance * BPS) / tokensToProcess;
 			localReward = (localReward * adjustmentRatio) / BPS;
 			localLp = (localLp * adjustmentRatio) / BPS;
 			localLpReward = (localLpReward * adjustmentRatio) / BPS;
-			tokensToProcess = contractBalance;
+
+			// IMPORTANT: recompute actual processable amount after rounding
+			tokensToProcess = localReward + localLp + localLpReward;
+			if (tokensToProcess == 0) return;
 		}
 		
-		if (tokensToProcess == 0) return;
-		
-		// EXPLICIT swap composition
-		uint256 totalTokens = localReward + localLp + localLpReward;
-		uint256 lpHalf = (localLp * tokensToProcess) / totalTokens / 2;
-		
-		// What actually gets swapped to ETH
-		uint256 swapReward = (localReward * tokensToProcess) / totalTokens;
-		uint256 swapLpReward = (localLpReward * tokensToProcess) / totalTokens;
-		uint256 swapLpPart = ((localLp * tokensToProcess) / totalTokens) - lpHalf;
+		// Keep half of LP tokens for addLiquidity, swap the other half
+		uint256 lpHalf = localLp / 2;
+
+		uint256 swapReward = localReward;
+		uint256 swapLpReward = localLpReward;
+		uint256 swapLpPart = localLp - lpHalf;
+
 		uint256 tokensToSwap = swapReward + swapLpReward + swapLpPart;
-				
-		if (tokensToSwap > 0) {
-			uint256 initialBalance = address(this).balance;
-			
-			// Calculate minimum output with slippage protection (CAN REVERT)
-			uint256 minOutput = _calculateMinOutput(tokensToSwap);
-			
-			address[] memory path = new address[](2);
-			path[0] = address(this);
-			path[1] = WETH;
-			
-			// Approve router for swap + LP in one call (CAN REVERT, CEI pattern)
-			uint256 approveAmount = lpHalf > 0 ? tokensToSwap + lpHalf : tokensToSwap;
-			_approve(address(this), address(ROUTER), approveAmount);
-			
-			// Reset Storage
-			_rewardTokens = 0;
-			_lpTokens = 0;
-			_lpRewardTokens = 0;
-			
-			try ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(
-				tokensToSwap,
-				minOutput,
-				path,
-				address(this),
-				block.timestamp
-			) {
-				uint256 ethReceived = address(this).balance - initialBalance;
+		if (tokensToSwap == 0) return;
 
-				if (ethReceived > 0) {
-					// Calculate proportional split (safe from underflow)
-					uint256 ethForReward = (ethReceived * swapReward) / tokensToSwap;
-					uint256 ethForLpReward = (ethReceived * swapLpReward) / tokensToSwap;
-					
-					// Use REMAINDER for ethForLp (prevents underflow from rounding)
-					uint256 allocated = ethForReward + ethForLpReward;
-					uint256 ethForLp = ethReceived > allocated ? ethReceived - allocated : 0;
+		uint256 initialBalance = address(this).balance;
 
-					// Send to buyer reward round
-					if (ethForReward > 0 && address(VAULT) != address(0)) {
-						try VAULT.onTaxReceived{value: ethForReward}() {} catch {}
-					}
+		uint256 minOutput = _calculateMinOutput(tokensToSwap);
 
-					// Send to LP reward round
-					if (ethForLpReward > 0 && address(LP_VAULT) != address(0)) {
-						try LP_VAULT.onLpTaxReceived{value: ethForLpReward}() {} catch {}
-					}
+		address[] memory path = new address[](2);
+		path[0] = address(this);
+		path[1] = WETH;
 
-					// Add liquidity
-					if (ethForLp > 0 && lpHalf > 0) {
-						try ROUTER.addLiquidityETH{value: ethForLp}(
-							address(this),
-							lpHalf,
-							0,
-							0,
-							DEAD,
-							block.timestamp
-						) returns (uint256 tokenUsed, uint256 ethUsed, uint256 liquidity) {
-							emit AutoLiquify(tokenUsed, ethUsed, liquidity);
-						} catch {}
-					}
+		uint256 approveAmount = tokensToSwap + lpHalf;
+		_approve(address(this), address(ROUTER), approveAmount);
+		
+		try ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(
+			tokensToSwap,
+			minOutput,
+			path,
+			address(this),
+			block.timestamp
+		) {
+			// EFFECTS: subtract exactly what we processed
+			_rewardTokens -= localReward;
+			_lpTokens -= localLp;
+			_lpRewardTokens -= localLpReward;
 
-					emit TaxProcessed(ethForReward + ethForLpReward, ethForLp, 0);
-				}
-			} catch {
-								
-				// Emit for monitoring/debugging
-				emit TaxProcessingFailed(localReward, localLp, localLpReward, "Swap failed");
+			uint256 ethReceived = address(this).balance - initialBalance;
+			if (ethReceived == 0) return;
+
+			uint256 ethForReward = (ethReceived * swapReward) / tokensToSwap;
+			uint256 ethForLpReward = (ethReceived * swapLpReward) / tokensToSwap;
+
+			uint256 allocated = ethForReward + ethForLpReward;
+			uint256 ethForLp = ethReceived > allocated ? ethReceived - allocated : 0;
+
+			if (ethForReward > 0 && address(VAULT) != address(0)) {
+				try VAULT.onTaxReceived{value: ethForReward}() {} catch {}
 			}
-		}       
+
+			if (ethForLpReward > 0 && address(LP_VAULT) != address(0)) {
+				try LP_VAULT.onLpTaxReceived{value: ethForLpReward}() {} catch {}
+			}
+
+			if (ethForLp > 0 && lpHalf > 0) {
+				try ROUTER.addLiquidityETH{value: ethForLp}(
+					address(this),
+					lpHalf,
+					0,
+					0,
+					DEAD,
+					block.timestamp
+				) returns (uint256 tokenUsed, uint256 ethUsed, uint256 liquidity) {
+					emit AutoLiquify(tokenUsed, ethUsed, liquidity);
+				} catch {}
+			}
+
+			emit TaxProcessed(ethForReward + ethForLpReward, ethForLp, 0);
+		} catch {
+			// FAILED: storage unchanged -> retry possible next time
+			emit TaxProcessingFailed(localReward, localLp, localLpReward, "Swap failed");
+		}
 	}
     
     function _calculateMinOutput(uint256 tokenAmount) private view returns (uint256) {
@@ -741,14 +712,20 @@ contract JACKsPools is IERC20, ReentrancyGuard {
         _processTaxesWithReward(msg.sender);
     }
     
-    /**
-     * @notice Internal processing (auto-triggered from _transfer)
-     */
-    function processTaxesInternal() external {
-        require(msg.sender == address(this), "Only self");
-        _processTaxes();
-    }
-    
+	/**
+	 * @notice Get pending taxes awaiting processing
+	 * @return rewardTokens Tokens for buyer vault
+	 * @return lpTokens Tokens for auto-LP
+	 * @return lpRewardTokens Tokens for LP vault
+	 */
+	function getPendingTaxes() external view returns (
+		uint256 rewardTokens,
+		uint256 lpTokens,
+		uint256 lpRewardTokens
+	) {
+		return (_rewardTokens, _lpTokens, _lpRewardTokens);
+	}
+	
     /**
      * @notice Process taxes with optional caller reward
      */
@@ -764,7 +741,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
             
             if (reward > 0) {
                 (bool success,) = caller.call{value: reward}("");
-                require(success, "Reward failed");
+                // Intentionally ignore success - silent failure for griefing resistance
+				// Tax processing continues regardless of reward payment status
             }
         }
     }

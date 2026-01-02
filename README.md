@@ -11,6 +11,33 @@ The system is fully non-custodial and non-ruggable:
 - All rewards are claim-based (pull payments)  
 - All logic is deterministic, self-contained, and onchain  
 
+## Mainnet Candidate Status
+
+JACKs Pools has completed full end-to-end on-chain validation on Base Sepolia
+and is currently considered a mainnet candidate.
+
+All critical flows have been executed on-chain using real transactions,
+multiple wallets, and no privileged access.
+
+## Final Design Decisions (Post-Validation)
+
+Following full on-chain validation on Base Sepolia, several final protocol
+decisions were made based on real gas usage, user behavior, and griefing analysis:
+
+- Auto tax processing was removed to avoid forcing additional gas costs on users.
+  Tax processing is now manual, permissionless, and incentivized with a caller reward.
+
+- True burn was implemented.
+  Burned tokens are permanently removed from total supply and are not routed
+  to any externally owned or contract address.
+
+- The snapshot reveal delay was increased to +25 blocks to further separate
+  snapshot state from randomness revelation.
+
+- Additional anti-griefing protections were added:
+  reward distribution paths are hardened to safely handle contract wallets
+  without a payable `receive()` function, preventing reward blocking or denial-of-service.
+
 ---
 
 ## Architecture Overview
@@ -20,7 +47,7 @@ The system is fully non-custodial and non-ruggable:
 - Buy/sell incentives routed into:
   - Buyer Reward Vault (ETH rewards for buyers)
   - LP Reward Vault (ETH rewards for liquidity providers)
-  - Burn address (supply reduction)
+  - True burn (permanent supply reduction)
 - Auto-liquidity engine on Base
 - Dynamic stages based on total LP value:
   - min buy
@@ -82,6 +109,21 @@ Fork, invariant, and static analysis outputs are included under `/docs/tests`:
 - Slither static analysis report is included under `/docs/tests/SlitherReport.txt`.
   Some findings are expected for this design (best-effort randomness, timestamp-gated rounds, ETH payouts via pull-payments).
   See `/docs/tests/README.md` for a short explanation.
+  
+## Base Sepolia Deployments
+
+The protocol has been deployed and fully exercised on Base Sepolia:
+
+- JACKsPools (ERC20): `0xe7De2E9f12e9BE6230f5d836D4525EEB5A2625f2`
+- JACKsVault (Buyer Rewards): `0x441e76329ec37d81d99B06342B97368460F31810`
+- JACKsLPVault (LP Rewards): `0x7766145e659AD21C28c36E720FAC8E33C6260Be2`
+- JACKsLPManager: `0xFa712A34a8415c46c25D5E09046f0a15FFF3acAB`
+
+## Mini Dapp (Testnet)
+
+A minimal frontend is available for interacting with the protocol on Base Sepolia:
+
+https://jack-spools-website.vercel.app/  
 
 ### `script/TestBaseCompleteFork.s.sol`
 
@@ -128,3 +170,7 @@ BASE_RPC_SEPOLIA – Base Sepolia RPC endpoint (used for testnet deployments)
 PRIVATE_KEY – Deployer private key (testnet only)
 
 An example configuration is provided in ".env.example".
+
+---
+
+This repository represents the final mainnet candidate state of the JACKs Pools protocol.
