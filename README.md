@@ -1,5 +1,8 @@
 # JACKs Pools – Autonomous Reward Distribution Protocol on Base
 
+## Documentation
+ **Whitepaper:** [WHITEPAPER.md](./WHITEPAPER.md)
+
 JACKs Pools is an autonomous onchain reward distribution system designed for Base.
 The protocol features **permanent, ever-growing liquidity**, a **buyer reward cycle** with a
 4,096-entry circular buffer system, an **LP reward cycle** for top contributors, and a regenerative
