@@ -122,6 +122,9 @@ The protocol has been deployed and fully exercised on Base Sepolia:
 - JACKsLPVault (LP Rewards): `0x7766145e659AD21C28c36E720FAC8E33C6260Be2`
 - JACKsLPManager: `0xFa712A34a8415c46c25D5E09046f0a15FFF3acAB`
 
+### Verification
+- [LP Buffer Stress Test (Base Sepolia)](docs/verification/LP_BUFFER_STRESS_TEST.md)
+
 ## Mini Dapp (Testnet)
 
 A minimal frontend is available for interacting with the protocol on Base Sepolia:
