@@ -1,13 +1,17 @@
 # JACKs Pools – Autonomous Reward Distribution Protocol on Base
 
 ## Documentation
- **Whitepaper:** [WHITEPAPER.md](./WHITEPAPER.md)
+ **Whitepaper:** /whitepaper/WHITEPAPER.md
+ **Architecture:** /docs/ARCHITECTURE.md
 
 JACKs Pools is an autonomous on-chain reward protocol designed for Base that turns
 trading and liquidity activity into recurring reward rounds for participants.
-The protocol features **permanent, ever-growing liquidity**, a **buyer reward cycle** with a
-4,096-entry circular buffer system, an **LP reward cycle** for top contributors, and a regenerative
-economic model where every interaction (buy, sell, LP add) strengthens the protocol.
+The protocol combines a buyer reward engine with a competitive liquidity leaderboard,
+creating two autonomous engagement loops for traders and liquidity providers.
+It features permanent, ever-growing liquidity, a buyer reward cycle with a
+4,096-entry circular buffer system, an LP reward cycle for top contributors,
+and a regenerative economic model where every interaction (buy, sell, LP add)
+strengthens the protocol.
 
 JACKs Pools is designed as a consumer-facing economic game where trading
 and liquidity participation continuously fund protocol reward rounds.
@@ -147,7 +151,7 @@ The protocol has been deployed and fully exercised on Base Sepolia:
 - JACKsLPVault (LP Rewards): `0x84458eA7d67CF920D002D96a10F4ECb778AF3119`
 - JACKsLPManager: `0x5839Bf682CeB945B03C573AAa5E3ba7a82028ACC`
 
-### Sepolia Validation Transactions
+### On-chain Validation Transactions (Base Sepolia)
 
 The following transactions demonstrate the protocol lifecycle executed on Base Sepolia:
 
@@ -218,7 +222,7 @@ https://jackspoolswebsite.vercel.app/
 
 High-LP environment simulation:
 
-- 25 ETH initial LP (Stage 5)
+- High initial LP setup
 - Multiple consecutive buyer reward cycles
 - LP buffer saturation and eviction
 - Full LP reward distribution cycle

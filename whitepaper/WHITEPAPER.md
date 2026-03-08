@@ -5,6 +5,7 @@
 JACK is an autonomous on‑chain reward protocol built on Base that redistributes value generated from market activity directly back to its participants through transparent, rule‑based smart contracts. The system combines permanent liquidity, dynamic market protections, and two independent reward mechanisms — Buyer Rewards and Liquidity Provider (LP) Rewards — without relying on administrators, oracles, or discretionary control.
 
 JACK is not a promise of yield, profit, or appreciation. It is a deterministic system where outcomes emerge solely from on‑chain activity and immutable rules.
+All core mechanisms operate entirely on-chain and rely only on deterministic smart contract logic without external dependencies or off-chain services.
 
 ---
 
@@ -19,7 +20,7 @@ At its core, JACK is:
 * A buyer participation system that periodically redistributes collected value to eligible buyers
 * A liquidity provider reward system that distributes rewards proportionally to contributors
 
-All mechanisms operate without post‑deployment control. Once ownership is renounced, JACK continues to function solely according to its encoded logic.
+All mechanisms operate without discretionary post-deployment control once ownership is renounced. Once ownership is renounced, JACK continues to function solely according to its encoded logic.
 
 ---
 
@@ -146,7 +147,7 @@ This design:
 * Prevents forced gas spikes on buys/sells
 * Encourages decentralized maintenance via open incentives
 
-Failed tax processing does not corrupt state. All operations are failure-tolerant and retryable.
+If tax processing fails, internal accounting state is preserved and processing remains retryable.
 
 ---
 
@@ -156,7 +157,7 @@ JACK includes protocol-level protections enforced at the token layer:
 
 * **Buy cooldown:** Fixed delay between buys per address (**30 seconds**)
 * **Sell lock:** Fixed sell restriction applied after each buy (**2 hours**)
-* **Dynamic max wallet:** Scales by LP stage and becomes **unlimited once LP ≥ 20 ETH (Stage 5)**
+* **Dynamic max wallet:** Scales by LP stage and becomes **unlimited once LP ≥ 500 ETH (Stage 5)**
 * **Slippage bounds:** Fixed maximum slippage enforced during protocol swaps (**10% max slippage**)
 
 Only the **max wallet** rule changes with liquidity depth. Buy cooldowns, sell locks, and slippage bounds are constant parameters.
@@ -175,19 +176,19 @@ No external funding, manual deposits, or admin intervention exist.
 
 ---
 
-### Stage-Based Pot Thresholds (Buyer Vault)
+### Stage-Based Reward Pool Thresholds (Buyer Vault)
 
-The Buyer Vault takes a snapshot when the **available pot** reaches the current stage threshold.
+The Buyer Vault takes a snapshot when the **available reward pool** reaches the current stage threshold.
 
-* **Available pot = vault ETH balance − total pending (unclaimed) rewards**
+* **Available reward pool = vault ETH balance − total pending (unclaimed) rewards**
 
-| Liquidity Stage | Total LP Value | Buyer Pot Threshold (ETH) |
+| Liquidity Stage | Total LP Value | Buyer Reward Pool Threshold (ETH) |
 | --------------- | -------------- | ------------------------- |
-| Stage 1         | < 2 ETH        | 0.014 ETH                 |
-| Stage 2         | 2 – 5 ETH      | 0.057 ETH                 |
-| Stage 3         | 5 – 10 ETH     | 0.143 ETH                 |
-| Stage 4         | 10 – 20 ETH    | 0.286 ETH                 |
-| Stage 5         | ≥ 20 ETH       | 0.714 ETH                 |
+| Stage 1         | < 10 ETH        | 0.15 ETH                 |
+| Stage 2         | 10 – 50 ETH      | 0.30 ETH                 |
+| Stage 3         | 50 – 150 ETH     | 0.75 ETH                 |
+| Stage 4         | 150 – 500 ETH    | 1 ETH                 |
+| Stage 5         | ≥ 500 ETH       | 2 ETH                 |
 
 These values are enforced by `getCurrentThreshold()` in the Buyer Vault.
 
@@ -226,11 +227,11 @@ Entries (tickets) expire after **2 hours** (`ENTRY_EXPIRY`). At finalize time, t
 
 ### Snapshot & Round Creation
 
-A Buyer Reward round is driven by the vault’s **available pot**:
+A Buyer Reward round is driven by the vault’s **available reward pool**:
 
-* **Pot = vault ETH balance − total pending (unclaimed) rewards**
+* **Reward pool = vault ETH balance − total pending (unclaimed) rewards**
 
-When the pot reaches the current stage threshold and a snapshot is not already taken, the vault automatically:
+When the reward pool reaches the current stage threshold and a snapshot is not already taken, the vault automatically:
 
 * Takes a snapshot of the current active buffer
 * Freezes that buffer for selection
@@ -253,7 +254,7 @@ Winner selection uses best-effort, multi-source entropy:
 * Past block hashes around snapshot time
 * A future block hash at the reveal block (**snapshot + 25 blocks**)
 * Current block data (`prevrandao`, timestamp, block number)
-* Round data (snapshot round, snapshot timestamp, pot)
+* Round data (snapshot round, snapshot timestamp, reward pool size)
 * Community entropy mixed from buyer activity (`roundEntropy`)
 * Transaction context (caller, gas price)
 
@@ -267,7 +268,7 @@ This model is not VRF-based by design. JACK prioritizes autonomy and censorship 
 * The vault requires the reveal block to be reached before finalization
 * The vault filters out expired snapshot entries and exits safely if none remain
 * The winner must still satisfy the **minimum token balance** for the current stage at finalize time (balance is re-checked)
-* The round assigns **100% of the available pot** to a single winner (pull-based claim)
+* The round assigns **100% of the available reward pool** to a single winner (pull-based claim)
 
 ---
 
@@ -277,14 +278,14 @@ Buyer Rewards use a pull-based claim model:
 
 * When a round is finalized, the winner receives a **claimable allocation** recorded in vault state.
 * Claiming is initiated by the winner (or their configured payout address) and transfers the allocated ETH.
-* Unclaimed allocations remain counted as **pending rewards** and reduce the vault’s **available pot** until claimed or cleared.
+* Unclaimed allocations remain counted as **pending rewards** and reduce the vault’s **available reward pool** until claimed or cleared.
 
 **Claim window:** Unclaimed Buyer Rewards can be cleared after **30 days** (`MAX_CLAIM_DELAY`).
 
 Cleanup behavior:
 
 * Cleanup is permissionless and exists to prevent permanent vault lockup.
-* Clearing an expired allocation releases it back into the vault’s **available pot** for future rounds.
+* Clearing an expired allocation releases it back into the vault’s **available reward pool** for future rounds.
 * Cleanup does not alter past round history; it only removes expired, unclaimed allocations.
 
 Unclaimed Buyer Rewards can be reclaimed after **30 days** (`MAX_CLAIM_DELAY`) via safety cleanup logic.
@@ -325,11 +326,11 @@ The LP vault uses **two alternating buffers** (0/1). When a snapshot is taken, t
 
 ### Snapshot & Finalization
 
-LP rounds are driven by the vault’s **available pot**:
+LP rounds are driven by the vault’s **available reward pool**:
 
-* **Available pot = vault ETH balance − total pending (unclaimed) rewards**
+* **Available reward pool = vault ETH balance − total pending (unclaimed) rewards**
 
-When the available pot reaches the stage threshold (`getPotThreshold()`) and the active buffer contains participants, the vault takes a snapshot.
+When the available reward pool reaches the stage threshold (`getPoolThreshold()`) and the active buffer contains participants, the vault takes a snapshot.
 
 Finalization rules:
 
@@ -342,8 +343,8 @@ Finalization rules:
 
 At finalization, the vault selects the **top contributors** in the snapshot buffer and assigns rewards:
 
-* **60%** of the pot → ranks **1–10** (proportional)
-* **40%** of the pot → ranks **11–60** (proportional)
+* **60%** of the reward pool → ranks **1–10** (proportional)
+* **40%** of the reward pool → ranks **11–60** (proportional)
 
 Rewards are stored per round and claimed via pull-based withdrawals.
 
@@ -355,34 +356,34 @@ LP Rewards are also pull-based:
 
 * At finalization, each eligible address receives a per-round reward allocation recorded in vault state.
 * Each address claims independently, transferring its allocated ETH.
-* Unclaimed LP allocations remain counted as **pending rewards** and reduce the vault’s **available pot** until claimed or cleared.
+* Unclaimed LP allocations remain counted as **pending rewards** and reduce the vault’s **available reward pool** until claimed or cleared.
 
 **Claim window:** Unclaimed LP Rewards can be cleared after **30 days** (`CLAIM_DEADLINE`).
 
 Cleanup behavior:
 
-* Cleanup is permissionless and exists to prevent stale rounds from permanently reducing the available pot.
-* Clearing expired allocations releases them back into the vault’s **available pot** for future rounds.
+* Cleanup is permissionless and exists to prevent stale rounds from permanently reducing the available reward pool.
+* Clearing expired allocations releases them back into the vault’s **available reward pool** for future rounds.
 
 Unclaimed rewards expire after **30 days** (`CLAIM_DEADLINE`) and can be cleared safely.
 
 ---
 
-### Stage-Based Pot Thresholds (LP Vault)
+### Stage-Based Reward Pool Thresholds (LP Vault)
 
-The LP Vault takes a snapshot when the **available pot** reaches the current stage threshold.
+The LP Vault takes a snapshot when the **available reward pool** reaches the current stage threshold.
 
-* **Available pot = vault ETH balance − total pending (unclaimed) rewards**
+* **Available reward pool = vault ETH balance − total pending (unclaimed) rewards**
 
-| Liquidity Stage | Total LP Value | LP Pot Threshold (ETH) |
+| Liquidity Stage | Total LP Value | LP Reward Pool Threshold (ETH) |
 | --------------- | -------------- | ---------------------- |
-| Stage 1         | < 2 ETH        | 0.086 ETH              |
-| Stage 2         | 2 – 5 ETH      | 0.257 ETH              |
-| Stage 3         | 5 – 10 ETH     | 0.514 ETH              |
-| Stage 4         | 10 – 20 ETH    | 1.03 ETH               |
-| Stage 5         | ≥ 20 ETH       | 1.71 ETH               |
+| Stage 1         | < 10 ETH        | 0.2 ETH              |
+| Stage 2         | 10 – 50 ETH      | 0.75 ETH              |
+| Stage 3         | 50 – 150 ETH     | 8 ETH              |
+| Stage 4         | 150 – 500 ETH    | 15 ETH               |
+| Stage 5         | ≥ 500 ETH       | 35 ETH               |
 
-These values are enforced by `getPotThreshold()` in the LP Vault.
+These values are enforced by `getPoolThreshold()` in the LP Vault.
 
 ---
 
@@ -450,11 +451,11 @@ JACK adapts a defined subset of parameters dynamically based on total liquidity 
 
 Stages are derived exclusively from total LP value (ETH):
 
-* **Stage 1:** LP < 2 ETH
-* **Stage 2:** LP 2–5 ETH
-* **Stage 3:** LP 5–10 ETH
-* **Stage 4:** LP 10–20 ETH
-* **Stage 5:** LP ≥ 20 ETH
+* **Stage 1:** LP < 10 ETH
+* **Stage 2:** LP 10–50 ETH
+* **Stage 3:** LP 50–150 ETH
+* **Stage 4:** LP 150–500 ETH
+* **Stage 5:** LP ≥ 500 ETH
 
 No manual configuration or governance input exists.
 
@@ -503,8 +504,9 @@ JACK prioritizes safety through architectural constraints rather than governance
 ### Key Security Properties
 
 * No upgradeability or proxy patterns
-* No post-deployment parameter changes
-* Ownership renouncement enforced
+* Core tax rates and reward mechanics are immutable
+* Limited setup functions exist prior to ownership renouncement
+* After renouncement the protocol operates without administrative control
 * Reentrancy protection on all sensitive functions
 * Pull-based reward claiming
 * Strict separation between accounting and transfers
@@ -556,7 +558,7 @@ This section documents non-obvious behaviors that are enforced by the contracts 
 #### Tax Processing
 
 * **Permissionless processing:** any address may call `processTaxes()` when thresholds are met.
-* **Failure isolation:** if tax processing fails (e.g., swap/liquidity step fails), the call reverts and state is not corrupted; processing remains retryable.
+* **Failure isolation:** if tax processing fails (for example during swap execution), internal accounting is preserved and processing remains retryable on a later call.
 * **Caller incentive:** successful processing pays **0.3%** of generated ETH to the caller.
 
 ---
@@ -608,11 +610,11 @@ Below are the **explicit on-chain thresholds** used by the protocol.
 
 | Liquidity Stage | Total LP Value | Minimum Buy (ETH) | Minimum JACK Balance |
 | --------------- | -------------- | ----------------- | -------------------- |
-| Stage 1         | < 2 ETH        | 0.00043 ETH       | 500,000 JACK         |
-| Stage 2         | 2 – 5 ETH      | 0.00057 ETH       | 250,000 JACK         |
-| Stage 3         | 5 – 10 ETH     | 0.00071 ETH       | 100,000 JACK         |
-| Stage 4         | 10 – 20 ETH    | 0.00086 ETH       | 50,000 JACK          |
-| Stage 5         | ≥ 20 ETH       | 0.001 ETH         | 1 JACK               |
+| Stage 1         | < 10 ETH        | 0.00043 ETH       | 500,000 JACK         |
+| Stage 2         | 10 – 50 ETH      | 0.00057 ETH       | 250,000 JACK         |
+| Stage 3         | 50 – 150 ETH     | 0.00071 ETH       | 100,000 JACK         |
+| Stage 4         | 150 – 500 ETH    | 0.00086 ETH       | 50,000 JACK          |
+| Stage 5         | ≥ 500 ETH       | 0.001 ETH         | 1 JACK               |
 
 **All conditions below must be met:**
 
@@ -634,11 +636,11 @@ To ever participate in LP Reward rounds, a wallet must reach a **minimum lifetim
 
 | Liquidity Stage | Total LP Value | Minimum Lifetime LP (ETH) |
 | --------------- | -------------- | ------------------------- |
-| Stage 1         | < 2 ETH        | 0.0086 ETH                |
-| Stage 2         | 2 – 5 ETH      | 0.01 ETH                  |
-| Stage 3         | 5 – 10 ETH     | 0.011 ETH                 |
-| Stage 4         | 10 – 20 ETH    | 0.013 ETH                 |
-| Stage 5         | ≥ 20 ETH       | 0.014 ETH                 |
+| Stage 1         | < 10 ETH        | 0.0086 ETH                |
+| Stage 2         | 10 – 50 ETH      | 0.01 ETH                  |
+| Stage 3         | 50 – 150 ETH     | 0.011 ETH                 |
+| Stage 4         | 150 – 500 ETH    | 0.013 ETH                 |
+| Stage 5         | ≥ 500 ETH       | 0.014 ETH                 |
 
 Once this threshold is reached:
 
@@ -666,7 +668,7 @@ The following scenarios illustrate how the protocol behaves in practice. All val
 
 **Context:**
 
-* Liquidity Stage: **Stage 1** (LP ≈ 1 ETH)
+* Liquidity Stage: **Stage 1** (LP < 10 ETH)
 * Minimum Buy: **0.00043 ETH**
 * Minimum Balance: **500,000 JACK**
 
@@ -682,7 +684,7 @@ Alice buys **0.001 ETH** worth of JACK.
 * Alice cannot sell for **2 hours**
 * **Note:** During the sell lock, Alice may still add liquidity via the **LP Manager**, as adding LP does not involve selling tokens
 
-If the Buyer Reward pot reaches the current threshold, the protocol takes a snapshot and freezes the current buyer buffer for that round. Alice will be included in the selection **only if her ticket is still valid at snapshot time** (i.e., not expired and not overwritten by buffer rotation).
+If the buyer reward pool reaches the current threshold, the protocol takes a snapshot and freezes the current buyer buffer for that round. Alice will be included in the selection **only if her ticket is still valid at snapshot time** (i.e., not expired and not overwritten by buffer rotation).
 
 ---
 
@@ -706,7 +708,7 @@ Bob performs two buys:
 
 **Context:**
 
-* Liquidity Stage: **Stage 3** (LP ≈ 7 ETH)
+* Liquidity Stage: **Stage 3** (LP between 50 ETH and 150 ETH)
 * Lifetime LP threshold: **0.011 ETH**
 
 **Action:**
@@ -759,7 +761,7 @@ A: The dApp displays your current stage, thresholds, buyer ticket status, and LP
 **Q: What if nobody finalizes a round?**
 A: Rounds do not distribute automatically. Any address may call the finalize function when conditions are met.
 
-* **Buyer Rewards:** `finalizeRound()` is permissionless and can be called by anyone once a snapshot exists and the pot meets the threshold (**3-minute finalize cooldown**).
+* **Buyer Rewards:** `finalizeRound()` is permissionless and can be called by anyone once a snapshot exists, the reward pool meets the threshold, the reveal block has been reached, and the finalize cooldown has passed.
 * **LP Rewards:** participants may finalize immediately; after a timeout, anyone can finalize to prevent deadlock.
 
 **Q: Can I lose my LP eligibility?**
@@ -793,3 +795,17 @@ JACK is experimental software provided "as is".
 Participation involves risk. Users are responsible for understanding the protocol, reviewing the smart contracts, and complying with applicable laws and regulations.
 
 Nothing in this document constitutes financial advice, investment solicitation, or a guarantee of outcomes.
+
+---
+
+## Why Base
+
+JACK is designed for a high-activity on-chain environment where market participation can occur frequently and cheaply.
+
+Base provides:
+
+• low transaction costs  
+• fast transaction finality  
+• a rapidly growing DeFi ecosystem  
+
+These properties allow JACK’s on-chain reward mechanisms to operate efficiently without relying on off-chain coordination or external services.
