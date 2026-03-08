@@ -67,9 +67,13 @@ https://sepolia.basescan.org/tx/0x7f33e507f04cf659430bdc3aacd77df50ad487296694e5
 ## Summary
 
 The LP buffer behaves as designed under full capacity:
+
 - No unintended evictions
 - Deterministic replacement rules
 - Stable ordering and ranking
 - Explicit eviction events emitted on-chain
+
+This confirms that the LP reward system behaves deterministically even
+when the contributor buffer reaches maximum capacity.
 
 These tests were performed using real EOAs and real liquidity interactions.
