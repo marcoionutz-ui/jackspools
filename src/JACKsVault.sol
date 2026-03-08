@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.33;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title JACKs Reward Vault - Buyer Round Distribution
- * @notice Core vault of the JACKs Pots ecosystem, holding and distributing
+ * @notice Core vault of the JACKs Pools ecosystem, holding and distributing
  *         round-based rewards using a secure pull-payment system.
  * @dev Features adaptive thresholds based on total LP value and ensures
  *      full payout to the selected recipient without external control or intervention.
@@ -63,38 +63,38 @@ contract JACKsVault is ReentrancyGuard {
 	uint256 public constant REVEAL_DELAY_BLOCKS = 25;
 	
 	// Stage LP thresholds
-	uint256 private constant STAGE_2_LP_THRESHOLD = 2 ether;
-	uint256 private constant STAGE_3_LP_THRESHOLD = 5 ether;
-	uint256 private constant STAGE_4_LP_THRESHOLD = 10 ether;
-	uint256 private constant STAGE_5_LP_THRESHOLD = 20 ether;
+	uint256 private constant STAGE_2_LP_THRESHOLD = 10 ether;
+	uint256 private constant STAGE_3_LP_THRESHOLD = 50 ether;
+	uint256 private constant STAGE_4_LP_THRESHOLD = 150 ether;
+	uint256 private constant STAGE_5_LP_THRESHOLD = 500 ether;
 
-	// Stage 1: Pot thresholds (LP < 2 ETH)
-	uint256 private constant STAGE_1_POT_THRESHOLD = 0.014 ether;   // $50 @ $3500/ETH
+	// Stage 1: Pool thresholds (LP < 10 ETH)
+	uint256 private constant STAGE_1_POOL_THRESHOLD = 0.15 ether;
 	uint256 private constant STAGE_1_MIN_BUY = 0.00043 ether;       // $1.50 @ $3500/ETH
 	uint256 private constant STAGE_1_MIN_TOKENS = 500_000 * 10**18; // 500k tokens
 
-	// Stage 2: Pot thresholds (LP 2-5 ETH)
-	uint256 private constant STAGE_2_POT_THRESHOLD = 0.057 ether;   // $200 @ $3500/ETH
+	// Stage 2: Pool thresholds (LP 10-50 ETH)
+	uint256 private constant STAGE_2_POOL_THRESHOLD = 0.3 ether; 
 	uint256 private constant STAGE_2_MIN_BUY = 0.00057 ether;       // $2 @ $3500/ETH
 	uint256 private constant STAGE_2_MIN_TOKENS = 250_000 * 10**18; // 250k tokens
 
-	// Stage 3: Pot thresholds (LP 5-10 ETH)
-	uint256 private constant STAGE_3_POT_THRESHOLD = 0.143 ether;   // $500 @ $3500/ETH
+	// Stage 3: Pool thresholds (LP 50-150 ETH)
+	uint256 private constant STAGE_3_POOL_THRESHOLD = 0.75 ether;
 	uint256 private constant STAGE_3_MIN_BUY = 0.00071 ether;       // $2.50 @ $3500/ETH
 	uint256 private constant STAGE_3_MIN_TOKENS = 100_000 * 10**18; // 100k tokens
 
-	// Stage 4: Pot thresholds (LP 10-20 ETH)
-	uint256 private constant STAGE_4_POT_THRESHOLD = 0.286 ether;   // $1,000 @ $3500/ETH
+	// Stage 4: Pool thresholds (LP 150-500 ETH)
+	uint256 private constant STAGE_4_POOL_THRESHOLD = 1 ether;
 	uint256 private constant STAGE_4_MIN_BUY = 0.00086 ether;       // $3 @ $3500/ETH
 	uint256 private constant STAGE_4_MIN_TOKENS = 50_000 * 10**18;  // 50k tokens
 
-	// Stage 5: Pot thresholds (LP > 20 ETH)
-	uint256 private constant STAGE_5_POT_THRESHOLD = 0.714 ether;   // $2,500 @ $3500/ETH
+	// Stage 5: Pool thresholds (LP > 500 ETH)
+	uint256 private constant STAGE_5_POOL_THRESHOLD = 2 ether;
 	uint256 private constant STAGE_5_MIN_BUY = 0.001 ether;         // $3.50 @ $3500/ETH
 	uint256 private constant STAGE_5_MIN_TOKENS = 1 * 10**18;       // 1 token
     
     // State
-    uint256 public round;
+    uint256 public payoutRound;
     uint256 public totalDistributed;
     uint256 public totalClaimed;
 	uint256 public lastFinalizeTime;
@@ -120,7 +120,7 @@ contract JACKsVault is ReentrancyGuard {
     bool public emergencyPause;
     
     // Events
-    event Funded(address indexed from, uint256 amount, uint256 potAfter);
+    event Funded(address indexed from, uint256 amount, uint256 poolAfter);
 	event BuyerAdded(address indexed buyer, uint256 amount, uint256 round);
 	event SnapshotTaken(uint256 timestamp, uint256 entries, uint256 round);
 	event BufferSwapped(uint256 newActiveBufferNum, uint256 round);
@@ -172,15 +172,15 @@ contract JACKsVault is ReentrancyGuard {
 		uint256 lpValue = TOKEN.getLpValue();
 		
 		if (lpValue < STAGE_2_LP_THRESHOLD) {
-			return STAGE_1_POT_THRESHOLD;
+			return STAGE_1_POOL_THRESHOLD;
 		} else if (lpValue < STAGE_3_LP_THRESHOLD) {
-			return STAGE_2_POT_THRESHOLD;
+			return STAGE_2_POOL_THRESHOLD;
 		} else if (lpValue < STAGE_4_LP_THRESHOLD) {
-			return STAGE_3_POT_THRESHOLD;
+			return STAGE_3_POOL_THRESHOLD;
 		} else if (lpValue < STAGE_5_LP_THRESHOLD) {
-			return STAGE_4_POT_THRESHOLD;
+			return STAGE_4_POOL_THRESHOLD;
 		} else {
-			return STAGE_5_POT_THRESHOLD;
+			return STAGE_5_POOL_THRESHOLD;
 		}
 	}
     
@@ -278,8 +278,8 @@ contract JACKsVault is ReentrancyGuard {
 		}
 		
 		// Check if snapshot needed (auto-snapshot when threshold reached)
-		uint256 pot = address(this).balance - _getTotalPendingClaims();
-		if (pot >= getCurrentThreshold() && !snapshotTaken) {
+		uint256 pool = address(this).balance - _getTotalPendingClaims();
+		if (pool >= getCurrentThreshold() && !snapshotTaken) {
 			_takeSnapshot();
 		}
 	}
@@ -368,16 +368,14 @@ contract JACKsVault is ReentrancyGuard {
 	function onTaxReceived() external payable onlyToken notPaused {
 		require(msg.value > 0, "No value");
 		
-		uint256 potAfter = address(this).balance;
-		emit Funded(msg.sender, msg.value, potAfter);
+		uint256 poolAfter = address(this).balance;
+		emit Funded(msg.sender, msg.value, poolAfter);
 		
 		// Check if reward threshold reached and we have eligible buyers
-		uint256 pot = potAfter - _getTotalPendingClaims();
+		uint256 pool = poolAfter - _getTotalPendingClaims();
 		uint256 activeSize = buffers[activeBufferNum].size;
 		
-		if (pot >= getCurrentThreshold() && activeSize > 0) {
-			emit RoundReady(pot, activeSize, currentRound);
-		
+		if (pool >= getCurrentThreshold() && activeSize > 0) {
 			// Auto-snapshot if not already taken
 			if (!snapshotTaken) {
 				_takeSnapshot();
@@ -391,8 +389,8 @@ contract JACKsVault is ReentrancyGuard {
 	function finalizeRound() external nonReentrant notPaused {
 		require(snapshotTaken, "No snapshot taken");
 		
-		uint256 pot = address(this).balance - _getTotalPendingClaims();
-		require(pot >= getCurrentThreshold(), "Threshold not met");
+		uint256 pool = address(this).balance - _getTotalPendingClaims();
+		require(pool >= getCurrentThreshold(), "Threshold not met");
 		
 		// Prevent stale blockhash (blockhash only works for last 256 blocks)
 		if (block.number > snapshotBlockNumber + 256) {
@@ -439,7 +437,7 @@ contract JACKsVault is ReentrancyGuard {
 			// Round data
 			snapshotRound,
 			snapshotTimestamp,
-			pot,
+			pool,
 			
 			// Community entropy (user contributions)
 			roundEntropy[snapshotRound],
@@ -497,10 +495,10 @@ contract JACKsVault is ReentrancyGuard {
 		// NOW safe to reset snapshot (after guaranteed valid recipient)
 		snapshotTaken = false;
 
-		uint256 rewardAmount = pot; // 100% to winner
+		uint256 rewardAmount = pool; // 100% to winner
 		
 		// Record round info
-		rounds[round] = RoundInfo({
+		rounds[payoutRound] = RoundInfo({
 			recipient: recipient,
 			amount: rewardAmount,
 			timestamp: block.timestamp,
@@ -525,8 +523,8 @@ contract JACKsVault is ReentrancyGuard {
 		
 		// Reset for next round
 		lastFinalizeTime = block.timestamp;
-		uint256 currentRoundCompleted = round;
-		round++;
+		uint256 currentRoundCompleted = payoutRound;
+		payoutRound++;
 		
 		emit RewardDistributed(recipient, rewardAmount, currentRoundCompleted);
 	}
@@ -541,7 +539,7 @@ contract JACKsVault is ReentrancyGuard {
         uint256[] memory timestamps,
         bool[] memory claimedStatus
     ) {
-        uint256 totalRounds = round;
+        uint256 totalRounds = payoutRound;
         if (totalRounds == 0) {
             return (
                 new uint256[](0),
@@ -582,7 +580,7 @@ contract JACKsVault is ReentrancyGuard {
         bool[] memory claimedStatus
     ) {
         uint256 count = 0;
-        for (uint256 i = 0; i < round; i++) {
+        for (uint256 i = 0; i < payoutRound; i++) {
             if (rounds[i].recipient == user && rounds[i].amount > 0) {
                 count++;
             }
@@ -603,7 +601,7 @@ contract JACKsVault is ReentrancyGuard {
         claimedStatus = new bool[](count);
         
         uint256 idx = 0;
-        for (uint256 i = 0; i < round; i++) {
+        for (uint256 i = 0; i < payoutRound; i++) {
             if (rounds[i].recipient == user && rounds[i].amount > 0) {
                 roundIds[idx] = i;
                 amounts[idx] = rounds[i].amount;
@@ -622,10 +620,10 @@ contract JACKsVault is ReentrancyGuard {
         address[] memory recipients,
         uint256[] memory amounts,
         uint256[] memory timestamps,
-        uint256[] memory daysRemaining
+        uint256[] memory secondsRemaining
     ) {
         uint256 unclaimedCount = 0;
-        for (uint256 i = 0; i < round; i++) {
+        for (uint256 i = 0; i < payoutRound; i++) {
             if (!rounds[i].claimed && rounds[i].amount > 0) {
                 unclaimedCount++;
             }
@@ -645,10 +643,10 @@ contract JACKsVault is ReentrancyGuard {
         recipients = new address[](unclaimedCount);
         amounts = new uint256[](unclaimedCount);
         timestamps = new uint256[](unclaimedCount);
-        daysRemaining = new uint256[](unclaimedCount);
+        secondsRemaining = new uint256[](unclaimedCount);
         
         uint256 index = 0;
-        for (uint256 i = 0; i < round; i++) {
+        for (uint256 i = 0; i < payoutRound; i++) {
             if (!rounds[i].claimed && rounds[i].amount > 0) {
                 roundIds[index] = i;
                 recipients[index] = rounds[i].recipient;
@@ -656,10 +654,10 @@ contract JACKsVault is ReentrancyGuard {
                 timestamps[index] = rounds[i].timestamp;
                 
                 uint256 deadline = rounds[i].timestamp + MAX_CLAIM_DELAY;
-                if (block.timestamp < deadline) {
-                    daysRemaining[index] = (deadline - block.timestamp) / 1 days;
+				if (block.timestamp < deadline) {
+                    secondsRemaining[index] = deadline - block.timestamp;
                 } else {
-                    daysRemaining[index] = 0;
+                    secondsRemaining[index] = 0;
                 }
                 
                 index++;
@@ -680,7 +678,7 @@ contract JACKsVault is ReentrancyGuard {
 		uint256 currentThreshold,
 		bool roundReady
 	) {
-		totalRounds = round;
+		totalRounds = payoutRound;
 		totalDistributedAmount = totalDistributed;
 		totalClaimedAmount = totalClaimed;
 		uniqueRecipientCount = uniqueRecipients.length;
@@ -731,6 +729,10 @@ contract JACKsVault is ReentrancyGuard {
 		BufferSet storage activeBuffer = buffers[activeBufferNum];
 		uint256 activeSize = activeBuffer.size;
 		
+		// Validate start position
+		require(start < activeSize, "Start out of bounds");
+		
+		// Calculate end position (clamped to activeSize)
 		uint256 end = start + count;
 		if (end > activeSize) end = activeSize;
 		
@@ -739,8 +741,15 @@ contract JACKsVault is ReentrancyGuard {
 		amounts = new uint256[](resultCount);
 		timestamps = new uint256[](resultCount);
 		
+		// Calculate circular start position (oldest entry)
+		uint256 startPos = activeSize < BUFFER_CAPACITY 
+			? 0 
+			: (activeBuffer.index + BUFFER_CAPACITY - activeSize) % BUFFER_CAPACITY;
+		
+		// Read circularly
 		for (uint256 i = 0; i < resultCount; i++) {
-			BuyEntry memory entry = activeBuffer.entries[start + i];
+			uint256 pos = (startPos + start + i) % BUFFER_CAPACITY; // CIRCULAR!
+			BuyEntry memory entry = activeBuffer.entries[pos];
 			buyers[i] = entry.buyer;
 			amounts[i] = entry.amount;
 			timestamps[i] = entry.timestamp;
@@ -836,6 +845,14 @@ contract JACKsVault is ReentrancyGuard {
 		claimable[msg.sender] = 0;
 		totalClaimed += amount;
 		
+		// Mark all rounds for this claimant as claimed
+		uint256 startRound = payoutRound > 100 ? payoutRound - 100 : 0;
+		for (uint256 i = startRound; i < payoutRound; i++) {
+			if (rounds[i].recipient == msg.sender && !rounds[i].claimed) {
+				rounds[i].claimed = true;
+			}
+		}
+		
 		// Transfer prize
 		(bool success,) = recipient.call{value: amount}("");
 		require(success, "Transfer failed");
@@ -871,9 +888,9 @@ contract JACKsVault is ReentrancyGuard {
      * @notice Get potential round reward
      */
     function getRoundReward() external view returns (uint256) {
-        uint256 pot = address(this).balance - _getTotalPendingClaims();
-        if (pot >= getCurrentThreshold()) {
-            return pot;
+        uint256 pool = address(this).balance - _getTotalPendingClaims();
+        if (pool >= getCurrentThreshold()) {
+            return pool;
         }
         return 0;
     }
@@ -934,11 +951,11 @@ contract JACKsVault is ReentrancyGuard {
 	 */
 	function emergencyClaim(address recipient) external nonReentrant {
 		// Limit to last 100 rounds to prevent gas issues
-		uint256 startRound = round > 100 ? round - 100 : 0;
+		uint256 startRound = payoutRound > 100 ? payoutRound - 100 : 0;
 		
 		// Calculate expired amount (NO state changes)
 		uint256 expiredAmount = 0;
-		for (uint256 i = startRound; i < round; i++) {
+		for (uint256 i = startRound; i < payoutRound; i++) {
 			if (rounds[i].recipient == recipient &&
 				!rounds[i].claimed &&
 				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
@@ -961,7 +978,7 @@ contract JACKsVault is ReentrancyGuard {
 		
 		// Transfer succeeded - NOW mark as claimed
 		// Repeat exact same condition to ensure consistency
-		for (uint256 i = startRound; i < round; i++) {
+		for (uint256 i = startRound; i < payoutRound; i++) {
 			if (rounds[i].recipient == recipient &&
 				!rounds[i].claimed &&
 				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
@@ -984,7 +1001,7 @@ contract JACKsVault is ReentrancyGuard {
 	 * @return recovered Amount of ETH freed
 	 */
 	function cleanupExpiredClaimsForRound(uint256 roundId) public returns (uint256 recovered) {
-		require(roundId < round, "Invalid round");
+		require(roundId < payoutRound, "Invalid round");
 		
 		RoundInfo storage info = rounds[roundId];
 		
@@ -1019,7 +1036,7 @@ contract JACKsVault is ReentrancyGuard {
 	 */
 	function cleanupExpiredClaimsBatch(uint256 startRound, uint256 endRound) external returns (uint256 recovered) {
 		require(startRound <= endRound, "Invalid range");
-		require(endRound < round, "Invalid end round");
+		require(endRound < payoutRound, "Invalid end round");
 		
 		recovered = 0;
 		
@@ -1039,9 +1056,9 @@ contract JACKsVault is ReentrancyGuard {
 		recovered = 0;
 		
 		// Limit to prevent gas issues
-		uint256 startRound = round > 100 ? round - 100 : 0;
+		uint256 startRound = payoutRound > 100 ? payoutRound - 100 : 0;
 		
-		for (uint256 i = startRound; i < round; i++) {
+		for (uint256 i = startRound; i < payoutRound; i++) {
 			recovered += cleanupExpiredClaimsForRound(i);
 		}
 		
@@ -1055,7 +1072,7 @@ contract JACKsVault is ReentrancyGuard {
 	function getExpiredRounds() external view returns (uint256[] memory roundIds) {
 		uint256 count = 0;
 		
-		for (uint256 i = 0; i < round; i++) {
+		for (uint256 i = 0; i < payoutRound; i++) {
 			if (!rounds[i].claimed && 
 				rounds[i].amount > 0 &&
 				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
@@ -1066,7 +1083,7 @@ contract JACKsVault is ReentrancyGuard {
 		roundIds = new uint256[](count);
 		uint256 index = 0;
 		
-		for (uint256 i = 0; i < round; i++) {
+		for (uint256 i = 0; i < payoutRound; i++) {
 			if (!rounds[i].claimed && 
 				rounds[i].amount > 0 &&
 				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
@@ -1076,6 +1093,159 @@ contract JACKsVault is ReentrancyGuard {
 		}
 		
 		return roundIds;
+	}
+	
+	/**
+	 * @notice Get complete buyer round state in single call
+	 * @dev Batch info for dashboard/header display
+	 */
+	function getRoundState() external view returns (
+		uint256, // currentRoundNum
+		bool,    // isSnapshotTaken
+		uint256, // snapshotRoundNum
+		uint256, // activeBufferNum
+		uint256, // snapshotBufferNum
+		uint256, // snapshotTimestamp
+		uint256, // snapshotBlockNumber
+		uint256, // snapshotRevealBlock
+		uint256, // availablePool
+		uint256, // poolThreshold
+		uint256, // minBuyRequired
+		uint256, // minTokensRequired
+		uint256  // activeEntries
+	) {
+		uint256 pending = _getTotalPendingClaims();
+		uint256 bal = address(this).balance;
+		
+		return (
+			currentRound,
+			snapshotTaken,
+			snapshotRound,
+			activeBufferNum,
+			snapshotTaken ? snapshotBufferNum : activeBufferNum,
+			snapshotTimestamp,
+			snapshotBlockNumber,
+			snapshotRevealBlock,
+			bal > pending ? bal - pending : 0,
+			getCurrentThreshold(),
+			getMinBuyForEligibility(),
+			getMinEligibilityTokens(),
+			buffers[activeBufferNum].size
+		);
+	}
+
+	/**
+	 * @notice Get user's ticket status for current round
+	 */
+	function getUserTicketStatus(address user) external view returns (
+		bool hasTicketThisRound,
+		uint256 lastRoundTicketed,
+		bool isEligibleByTokens,
+		bool canEnterIfBuysMin,
+		uint256 userTokenBalance,
+		uint256 minBuyRequired,
+		uint256 minTokensRequired
+	) {
+		hasTicketThisRound = lastTicketRound[user] == currentRound;
+		lastRoundTicketed = lastTicketRound[user];
+		userTokenBalance = TOKEN.balanceOf(user);
+		minBuyRequired = getMinBuyForEligibility();
+		minTokensRequired = getMinEligibilityTokens();
+		isEligibleByTokens = userTokenBalance >= minTokensRequired;
+		canEnterIfBuysMin = isEligibleByTokens && !hasTicketThisRound;
+		
+		return (
+			hasTicketThisRound,
+			lastRoundTicketed,
+			isEligibleByTokens,
+			canEnterIfBuysMin,
+			userTokenBalance,
+			minBuyRequired,
+			minTokensRequired
+		);
+	}
+
+	/**
+	 * @notice Get finalization readiness and countdown timers
+	 */
+	function getFinalizeTimers() external view returns (
+		bool canFinalizeNow,
+		bool canFinalizeByBlock,
+		uint256 blocksUntilReveal,
+		bool canFinalizeByCooldown,
+		uint256 secondsUntilCooldown,
+		uint256 snapshotAge,
+		bool willAutoReset,
+		uint256 secondsUntilAutoReset,
+		bool blockhashUnavailable
+	) {
+		if (!snapshotTaken) {
+			return (false, false, 0, false, 0, 0, false, 0, false);
+		}
+		
+		uint256 pending = _getTotalPendingClaims();
+		uint256 bal = address(this).balance;
+		uint256 pool = bal > pending ? bal - pending : 0;
+		
+		blockhashUnavailable = block.number > snapshotBlockNumber + 256;
+		canFinalizeByBlock = block.number >= snapshotRevealBlock;
+		canFinalizeByCooldown = block.timestamp >= lastFinalizeTime + FINALIZE_COOLDOWN;
+		
+		canFinalizeNow = snapshotTaken 
+			&& pool >= getCurrentThreshold()
+			&& canFinalizeByBlock
+			&& canFinalizeByCooldown
+			&& !blockhashUnavailable;
+		
+		blocksUntilReveal = canFinalizeByBlock ? 0 : (snapshotRevealBlock - block.number);
+		secondsUntilCooldown = canFinalizeByCooldown ? 0 : (lastFinalizeTime + FINALIZE_COOLDOWN - block.timestamp);
+		
+		snapshotAge = block.timestamp > snapshotTimestamp ? block.timestamp - snapshotTimestamp : 0;
+		willAutoReset = snapshotAge > 7 days;
+		secondsUntilAutoReset = willAutoReset ? 0 : (7 days - snapshotAge);
+		
+		return (
+			canFinalizeNow,
+			canFinalizeByBlock,
+			blocksUntilReveal,
+			canFinalizeByCooldown,
+			secondsUntilCooldown,
+			snapshotAge,
+			willAutoReset,
+			secondsUntilAutoReset,
+			blockhashUnavailable
+		);
+	}
+
+	/**
+	 * @notice Count valid (non-expired) entries in snapshot buffer
+	 */
+	function getValidSnapshotEntriesCount() external view returns (uint256) {
+		if (!snapshotTaken) {
+			return 0;
+		}
+		
+		BufferSet storage buffer = buffers[snapshotBufferNum];
+		uint256 size = buffer.size;
+		
+		uint256 cutoffTime = snapshotTimestamp > ENTRY_EXPIRY 
+			? snapshotTimestamp - ENTRY_EXPIRY 
+			: 0;
+		
+		uint256 startPos = size < BUFFER_CAPACITY 
+			? 0 
+			: (buffer.index + BUFFER_CAPACITY - size) % BUFFER_CAPACITY;
+		
+		uint256 validCount = 0;
+		
+		for (uint256 i = 0; i < size; i++) {
+			uint256 pos = (startPos + i) % BUFFER_CAPACITY;
+			if (buffer.entries[pos].timestamp >= cutoffTime) {
+				validCount++;
+			}
+		}
+		
+		return validCount;
 	}
 	
     /**

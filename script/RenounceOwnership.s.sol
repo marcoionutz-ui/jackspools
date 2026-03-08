@@ -15,9 +15,9 @@ interface IJACKsPools {
 
 contract RenounceOwnership is Script {
     // Base Sepolia addresses
-    address constant TOKEN = 0xe7De2E9f12e9BE6230f5d836D4525EEB5A2625f2;
-    address constant VAULT = 0x441e76329ec37d81d99B06342B97368460F31810;
-    address constant LPVAULT = 0x7766145e659AD21C28c36E720FAC8E33C6260Be2;
+    address constant TOKEN = 0xfEA677CA47b1EDD9508D2D943aa716b39dD37D7b;
+    address constant VAULT = 0x39cb5b7086B824Afb907c10904c7c935e9E74e41;
+    address constant LPVAULT = 0x84458eA7d67CF920D002D96a10F4ECb778AF3119;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

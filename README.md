@@ -3,16 +3,22 @@
 ## Documentation
  **Whitepaper:** [WHITEPAPER.md](./WHITEPAPER.md)
 
-JACKs Pools is an autonomous onchain reward distribution system designed for Base.
+JACKs Pools is an autonomous on-chain reward protocol designed for Base that turns
+trading and liquidity activity into recurring reward rounds for participants.
 The protocol features **permanent, ever-growing liquidity**, a **buyer reward cycle** with a
 4,096-entry circular buffer system, an **LP reward cycle** for top contributors, and a regenerative
 economic model where every interaction (buy, sell, LP add) strengthens the protocol.
+
+JACKs Pools is designed as a consumer-facing economic game where trading
+and liquidity participation continuously fund protocol reward rounds.
 
 The system is fully non-custodial and non-ruggable:
 - Liquidity is permanent and can only increase  
 - No owner functions remain after initialization  
 - All rewards are claim-based (pull payments)  
-- All logic is deterministic, self-contained, and onchain  
+- All logic is deterministic, self-contained, and on-chain  
+
+---
 
 ## Mainnet Candidate Status
 
@@ -21,6 +27,16 @@ and is currently considered a mainnet candidate.
 
 All critical flows have been executed on-chain using real transactions,
 multiple wallets, and no privileged access.
+
+### Latest Patch
+
+A minor patch was applied to the reward claim path to correctly mark
+rounds as claimed within the internal accounting structures.
+
+This change ensures accurate UI/state reflection and does not alter
+reward logic, eligibility, or payout mechanics.
+
+The patch has been validated on Base Sepolia.
 
 ## Final Design Decisions (Post-Validation)
 
@@ -85,19 +101,28 @@ decisions were made based on real gas usage, user behavior, and griefing analysi
 
 - Helper contract for adding LP via the router
 - Registers LP contributions into the LP Reward Vault
-- Keeps LP flow standardized and onchain
+- Keeps LP flow standardized and on-chain
 
 ---
 
 ## Security assumptions
 
 - All reward finalization functions are permissionless and can be called by anyone.
-- Time-gated mechanisms are enforced onchain (round durations, finalize delays).
+- Time-gated mechanisms are enforced on-chain (round durations, finalize delays).
 - ETH rewards are distributed using pull-payment patterns only.
 - No external contracts are trusted for reward calculation.
 - No privileged owner functions exist after initialization.
-- Reward selection logic is deterministic given onchain state.
+- Reward selection logic is deterministic given on-chain state.
 - Liquidity is permanent and can only increase over time.
+
+## Protocol Properties
+
+- Fully autonomous operation after initialization
+- No privileged paths after owner renounce
+- Rewards funded entirely through protocol activity
+- Permanent liquidity growth mechanism
+- Competitive liquidity leaderboard for LP contributors
+- Deterministic reward logic based on on-chain state
 
 ## Integration Simulations (Foundry Scripts)
 
@@ -109,7 +134,7 @@ Fork, invariant, and static analysis outputs are included under `/docs/tests`:
 - End-to-end fork simulations
 - High-load LP scenarios (400 participants, eviction)
 - Invariant testing (accounting, lifecycle, idempotency)
-- Slither static analysis report is included under `/docs/tests/SlitherReport.txt`.
+- Slither static analysis report is included under `/docs/tests/SLITHER_REPORT.txt`.
   Some findings are expected for this design (best-effort randomness, timestamp-gated rounds, ETH payouts via pull-payments).
   See `/docs/tests/README.md` for a short explanation.
   

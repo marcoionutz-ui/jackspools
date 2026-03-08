@@ -4,9 +4,9 @@ pragma solidity ^0.8.26;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
-contract DeployBaseSepolia is Script {
+contract DeployBase is Script {
     
-    address constant ROUTER = 0x1689E7B1F10000AE47eBfE339a4f69dECd19F602;
+    address constant ROUTER = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
     
     address public token;
     address public vault;
@@ -21,7 +21,7 @@ contract DeployBaseSepolia is Script {
         vm.startBroadcast(deployerPrivateKey);
         
         console.log("=================================");
-        console.log("BASE SEPOLIA");
+        console.log("BASE MAINNET DEPLOYMENT");
         console.log("=================================");
         console.log("Deployer:", deployer);
         console.log("Router:", ROUTER);
@@ -112,11 +112,11 @@ contract DeployBaseSepolia is Script {
         
         // 6. Add Initial Liquidity
         console.log("");
-        console.log("6. Adding initial liquidity (0.02 ETH)...");
-		(success,) = token.call{value: 0.02 ether}(abi.encodeWithSignature("addInitialLiquidity()"));
+        console.log("6. Adding initial liquidity (0.5 ETH)...");
+		(success,) = token.call{value: 0.1 ether}(abi.encodeWithSignature("addInitialLiquidity()"));
 		require(success, "addInitialLiquidity failed"); 
-		console.log("   Liquidity added: 0.02 ETH + 1B tokens");
-        console.log("   LP Value: 0.04 ETH");
+		console.log("   Liquidity added: 0.1 ETH + 1B tokens");
+		console.log("   LP Value: 0.2 ETH");
 		console.log("   Stage: 1 ");
         
         // 7. Enable Trading

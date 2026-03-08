@@ -1,0 +1,307 @@
+'forge clean' running (wd: /home/marco/jackspools)
+'forge config --json' running
+'forge build --build-info --skip */test/** */script/** --force' running (wd: /home/marco/jackspools)
+INFO:Detectors:
+JACKsPools._processTaxes() (src/JACKsPools.sol#435-526) sends eth to arbitrary user
+	Dangerous calls:
+	- VAULT.onTaxReceived{value: ethForReward}() (src/JACKsPools.sol#501)
+	- LP_VAULT.onLpTaxReceived{value: ethForLpReward}() (src/JACKsPools.sol#505)
+JACKsPools._processTaxesWithReward(address) (src/JACKsPools.sol#734-750) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = caller.call{value: reward}() (src/JACKsPools.sol#745)
+JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#952-996) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = recipient.call{value: expiredAmount}() (src/JACKsVault.sol#969)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+JACKsVault.finalizeRound() (src/JACKsVault.sol#389-530) uses a weak PRNG: "selectedIndex = attemptSeed % validEntries.length (src/JACKsVault.sol#467)" 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#weak-PRNG
+INFO:Detectors:
+Reentrancy in JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#952-996):
+	External calls:
+	- (success,None) = recipient.call{value: expiredAmount}() (src/JACKsVault.sol#969)
+	State variables written after the call(s):
+	- rounds[i_scope_0].claimed = true (src/JACKsVault.sol#985)
+	JACKsVault.rounds (src/JACKsVault.sol#103) can be used in cross function reentrancies:
+	- JACKsVault.cleanupExpiredClaimsForRound(uint256) (src/JACKsVault.sol#1003-1029)
+	- JACKsVault.getExpiredRounds() (src/JACKsVault.sol#1072-1096)
+	- JACKsVault.getRecentRecipients(uint256) (src/JACKsVault.sol#535-571)
+	- JACKsVault.getRoundInfo(uint256) (src/JACKsVault.sol#901-909)
+	- JACKsVault.getUnclaimedRewards() (src/JACKsVault.sol#618-666)
+	- JACKsVault.getUserRewards(address) (src/JACKsVault.sol#576-613)
+	- JACKsVault.rounds (src/JACKsVault.sol#103)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities
+INFO:Detectors:
+JACKsPools._processTaxes() (src/JACKsPools.sol#435-526) performs a multiplication on the result of a division:
+	- adjustmentRatio = (contractBalance * BPS) / tokensToProcess (src/JACKsPools.sol#448)
+	- localReward = (localReward * adjustmentRatio) / BPS (src/JACKsPools.sol#449)
+JACKsPools._processTaxes() (src/JACKsPools.sol#435-526) performs a multiplication on the result of a division:
+	- adjustmentRatio = (contractBalance * BPS) / tokensToProcess (src/JACKsPools.sol#448)
+	- localLp = (localLp * adjustmentRatio) / BPS (src/JACKsPools.sol#450)
+JACKsPools._processTaxes() (src/JACKsPools.sol#435-526) performs a multiplication on the result of a division:
+	- adjustmentRatio = (contractBalance * BPS) / tokensToProcess (src/JACKsPools.sol#448)
+	- localLpReward = (localLpReward * adjustmentRatio) / BPS (src/JACKsPools.sol#451)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+INFO:Detectors:
+JACKsPools._processTaxes() (src/JACKsPools.sol#435-526) uses a dangerous strict equality:
+	- ethReceived == 0 (src/JACKsPools.sol#492)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Reentrancy in JACKsPools._processTaxes() (src/JACKsPools.sol#435-526):
+	External calls:
+	- ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap,minOutput,path,address(this),block.timestamp) (src/JACKsPools.sol#479-525)
+	State variables written after the call(s):
+	- _lpRewardTokens -= localLpReward (src/JACKsPools.sol#489)
+	JACKsPools._lpRewardTokens (src/JACKsPools.sol#115) can be used in cross function reentrancies:
+	- JACKsPools._processTaxes() (src/JACKsPools.sol#435-526)
+	- JACKsPools._transfer(address,address,uint256,bool) (src/JACKsPools.sol#302-433)
+	- JACKsPools.getPendingTaxes() (src/JACKsPools.sol#723-729)
+	- _lpTokens -= localLp (src/JACKsPools.sol#488)
+	JACKsPools._lpTokens (src/JACKsPools.sol#114) can be used in cross function reentrancies:
+	- JACKsPools._processTaxes() (src/JACKsPools.sol#435-526)
+	- JACKsPools._transfer(address,address,uint256,bool) (src/JACKsPools.sol#302-433)
+	- JACKsPools.emergencyProcessTaxes() (src/JACKsPools.sol#669-675)
+	- JACKsPools.getPendingTaxes() (src/JACKsPools.sol#723-729)
+	- _rewardTokens -= localReward (src/JACKsPools.sol#487)
+	JACKsPools._rewardTokens (src/JACKsPools.sol#113) can be used in cross function reentrancies:
+	- JACKsPools._processTaxes() (src/JACKsPools.sol#435-526)
+	- JACKsPools._transfer(address,address,uint256,bool) (src/JACKsPools.sol#302-433)
+	- JACKsPools.emergencyProcessTaxes() (src/JACKsPools.sol#669-675)
+	- JACKsPools.getPendingTaxes() (src/JACKsPools.sol#723-729)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+INFO:Detectors:
+JACKsVault.finalizeRound().recipient (src/JACKsVault.sol#460) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+INFO:Detectors:
+JACKsLPManager.quoteEthForTokens(uint256) (src/JACKsLPManager.sol#88-98) ignores return value by (r0,r1,None) = PAIR.getReserves() (src/JACKsLPManager.sol#89)
+JACKsLPManager.quoteTokensForEth(uint256) (src/JACKsLPManager.sol#103-113) ignores return value by (r0,r1,None) = PAIR.getReserves() (src/JACKsLPManager.sol#104)
+JACKsLPManager.addLiquidityAndRegister(uint256,uint256,uint256,uint256) (src/JACKsLPManager.sol#124-184) ignores return value by TOKEN.approve(address(ROUTER),0) (src/JACKsLPManager.sol#144)
+JACKsPools.getLpValue() (src/JACKsPools.sol#545-566) ignores return value by (reserve0,reserve1) = IUniswapV2Pair(PAIR).getReserves() (src/JACKsPools.sol#546-565)
+JACKsPools._isPair(address) (src/JACKsPools.sol#638-646) ignores return value by IUniswapV2Pair(account).token0() (src/JACKsPools.sol#641-645)
+JACKsPools.addInitialLiquidity() (src/JACKsPools.sol#649-666) ignores return value by ROUTER.addLiquidityETH{value: msg.value}(address(this),tokenAmount,0,0,DEAD,block.timestamp) (src/JACKsPools.sol#658-665)
+JACKsVault.constructor(address) (src/JACKsVault.sol#151-166) ignores return value by IJACKsPools(_token).getLpValue() (src/JACKsVault.sol#155-159)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+JACKsLPVault.claimReward(uint256).recipient (src/JACKsLPVault.sol#567-569) lacks a zero-check on :
+		- (success,None) = recipient.call{value: reward}() (src/JACKsLPVault.sol#574)
+JACKsLPVault.claimMultipleRewards(uint256[]).recipient (src/JACKsLPVault.sol#587-589) lacks a zero-check on :
+		- (success,None) = recipient.call{value: totalReward}() (src/JACKsLPVault.sol#612)
+JACKsVault.claim().recipient (src/JACKsVault.sol#840-842) lacks a zero-check on :
+		- (success,None) = recipient.call{value: amount}() (src/JACKsVault.sol#857)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+INFO:Detectors:
+JACKsVault.finalizeRound() (src/JACKsVault.sol#389-530) has external calls inside a loop: balances[i] = TOKEN.balanceOf(validEntries[i].buyer) (src/JACKsVault.sol#456)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation/#calls-inside-a-loop
+INFO:Detectors:
+Reentrancy in JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#952-996):
+	External calls:
+	- (success,None) = recipient.call{value: expiredAmount}() (src/JACKsVault.sol#969)
+	State variables written after the call(s):
+	- claimable[recipient] -= expiredAmount (src/JACKsVault.sol#991)
+	- totalClaimed += expiredAmount (src/JACKsVault.sol#992)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+INFO:Detectors:
+Reentrancy in JACKsPools._processTaxes() (src/JACKsPools.sol#435-526):
+	External calls:
+	- ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap,minOutput,path,address(this),block.timestamp) (src/JACKsPools.sol#479-525)
+	- VAULT.onTaxReceived{value: ethForReward}() (src/JACKsPools.sol#501)
+	- LP_VAULT.onLpTaxReceived{value: ethForLpReward}() (src/JACKsPools.sol#505)
+	- (tokenUsed,ethUsed,liquidity) = ROUTER.addLiquidityETH{value: ethForLp}(address(this),lpHalf,0,0,DEAD,block.timestamp) (src/JACKsPools.sol#509-518)
+	External calls sending eth:
+	- VAULT.onTaxReceived{value: ethForReward}() (src/JACKsPools.sol#501)
+	- LP_VAULT.onLpTaxReceived{value: ethForLpReward}() (src/JACKsPools.sol#505)
+	- (tokenUsed,ethUsed,liquidity) = ROUTER.addLiquidityETH{value: ethForLp}(address(this),lpHalf,0,0,DEAD,block.timestamp) (src/JACKsPools.sol#509-518)
+	Event emitted after the call(s):
+	- AutoLiquify(tokenUsed,ethUsed,liquidity) (src/JACKsPools.sol#517)
+	- TaxProcessed(ethForReward + ethForLpReward,ethForLp,0) (src/JACKsPools.sol#521)
+Reentrancy in JACKsPools._processTaxes() (src/JACKsPools.sol#435-526):
+	External calls:
+	- ROUTER.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap,minOutput,path,address(this),block.timestamp) (src/JACKsPools.sol#479-525)
+	Event emitted after the call(s):
+	- TaxProcessingFailed(localReward,localLp,localLpReward,Swap failed) (src/JACKsPools.sol#524)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+JACKsLPVault.recordLpContribution(address,uint256) (src/JACKsLPVault.sol#173-246) uses timestamp for comparisons
+	Dangerous comparisons:
+	- snapshotTaken && block.timestamp > snapshotTimestamp + 1209600 (src/JACKsLPVault.sol#230)
+JACKsLPVault.finalizeRound() (src/JACKsLPVault.sol#281-356) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(! rounds[snapshotRound].finalized,Round already finalized) (src/JACKsLPVault.sol#283)
+	- isTimedOut = block.timestamp >= snapshotTimestamp + 604800 (src/JACKsLPVault.sol#290)
+	- require(bool,string)(isParticipant || isTimedOut,Only participants or wait 7 days) (src/JACKsLPVault.sol#292-295)
+JACKsLPVault.claimReward(uint256) (src/JACKsLPVault.sol#555-578) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(rounds[roundId].finalized,Round not finalized) (src/JACKsLPVault.sol#556)
+	- require(bool,string)(block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE,Claim deadline passed) (src/JACKsLPVault.sol#559-562)
+JACKsLPVault.claimMultipleRewards(uint256[]) (src/JACKsLPVault.sol#583-614) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[roundId].finalized && ! hasClaimed[roundId][msg.sender] && roundRewards[roundId][msg.sender] > 0 && block.timestamp <= rounds[roundId].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#595-598)
+JACKsLPVault.getUserStats(address) (src/JACKsLPVault.sol#742-807) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp <= rounds[i_scope_2].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#800)
+JACKsLPVault.getClaimableRounds(address) (src/JACKsLPVault.sol#1090-1125) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].finalized && ! hasClaimed[i][user] && roundRewards[i][user] > 0 && block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#1098-1101)
+	- rounds[i_scope_0].finalized && ! hasClaimed[i_scope_0][user] && roundRewards[i_scope_0][user] > 0 && block.timestamp <= rounds[i_scope_0].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#1113-1116)
+JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[]) (src/JACKsLPVault.sol#1134-1166) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp <= info.timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#1144)
+JACKsLPVault.getExpiredRounds() (src/JACKsLPVault.sol#1194-1217) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].finalized && block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#1199-1200)
+	- rounds[i_scope_0].finalized && block.timestamp > rounds[i_scope_0].timestamp + CLAIM_DEADLINE (src/JACKsLPVault.sol#1209-1210)
+JACKsPools._transfer(address,address,uint256,bool) (src/JACKsPools.sol#302-433) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= sellUnlock[from],Sell locked 2h) (src/JACKsPools.sol#333)
+	- require(bool,string)(block.timestamp >= lastBuyTime[to] + BUY_COOLDOWN,Wait 30s between buys) (src/JACKsPools.sol#356-359)
+JACKsVault.addEligibleBuyer(address,uint256) (src/JACKsVault.sol#228-285) uses timestamp for comparisons
+	Dangerous comparisons:
+	- snapshotTaken && block.timestamp > snapshotTimestamp + 604800 (src/JACKsVault.sol#275)
+JACKsVault._getValidSnapshotEntries() (src/JACKsVault.sol#320-363) uses timestamp for comparisons
+	Dangerous comparisons:
+	- snapshotBuffer.entries[pos].timestamp >= cutoffTime (src/JACKsVault.sol#340)
+	- snapshotBuffer.entries[pos_scope_1].timestamp >= cutoffTime (src/JACKsVault.sol#356)
+	- snapshotTimestamp > ENTRY_EXPIRY (src/JACKsVault.sol#326-328)
+JACKsVault.finalizeRound() (src/JACKsVault.sol#389-530) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= lastFinalizeTime + FINALIZE_COOLDOWN,Cooldown active) (src/JACKsVault.sol#404-407)
+JACKsVault.getUserRewards(address) (src/JACKsVault.sol#576-613) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].recipient == user && rounds[i].amount > 0 (src/JACKsVault.sol#584)
+	- rounds[i_scope_0].recipient == user && rounds[i_scope_0].amount > 0 (src/JACKsVault.sol#605)
+JACKsVault.getUnclaimedRewards() (src/JACKsVault.sol#618-666) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! rounds[i].claimed && rounds[i].amount > 0 (src/JACKsVault.sol#627)
+	- ! rounds[i_scope_0].claimed && rounds[i_scope_0].amount > 0 (src/JACKsVault.sol#650)
+	- block.timestamp < deadline (src/JACKsVault.sol#657)
+JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#952-996) uses timestamp for comparisons
+	Dangerous comparisons:
+	- rounds[i].recipient == recipient && ! rounds[i].claimed && block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#959-961)
+	- rounds[i_scope_0].recipient == recipient && ! rounds[i_scope_0].claimed && block.timestamp > rounds[i_scope_0].timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#982-984)
+JACKsVault.cleanupExpiredClaimsForRound(uint256) (src/JACKsVault.sol#1003-1029) uses timestamp for comparisons
+	Dangerous comparisons:
+	- info.claimed || block.timestamp <= info.timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#1009)
+JACKsVault.getExpiredRounds() (src/JACKsVault.sol#1072-1096) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! rounds[i].claimed && rounds[i].amount > 0 && block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#1076-1078)
+	- ! rounds[i_scope_0].claimed && rounds[i_scope_0].amount > 0 && block.timestamp > rounds[i_scope_0].timestamp + MAX_CLAIM_DELAY (src/JACKsVault.sol#1087-1089)
+JACKsVault.getFinalizeTimers() (src/JACKsVault.sol#1171-1218) uses timestamp for comparisons
+	Dangerous comparisons:
+	- canFinalizeByCooldown = block.timestamp >= lastFinalizeTime + FINALIZE_COOLDOWN (src/JACKsVault.sol#1192)
+	- canFinalizeNow = snapshotTaken && pool >= getCurrentThreshold() && canFinalizeByBlock && canFinalizeByCooldown && ! blockhashUnavailable (src/JACKsVault.sol#1194-1198)
+	- willAutoReset = snapshotAge > 604800 (src/JACKsVault.sol#1204)
+	- block.timestamp > snapshotTimestamp (src/JACKsVault.sol#1203)
+JACKsVault.getValidSnapshotEntriesCount() (src/JACKsVault.sol#1223-1249) uses timestamp for comparisons
+	Dangerous comparisons:
+	- buffer.entries[pos].timestamp >= cutoffTime (src/JACKsVault.sol#1243)
+	- snapshotTimestamp > ENTRY_EXPIRY (src/JACKsVault.sol#1231-1233)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+StorageSlot.getAddressSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#66-70) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#67-69)
+StorageSlot.getBooleanSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#75-79) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#76-78)
+StorageSlot.getBytes32Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#84-88) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#85-87)
+StorageSlot.getUint256Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#93-97) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#94-96)
+StorageSlot.getInt256Slot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#102-106) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#103-105)
+StorageSlot.getStringSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#111-115) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#112-114)
+StorageSlot.getStringSlot(string) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#120-124) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#121-123)
+StorageSlot.getBytesSlot(bytes32) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#129-133) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#130-132)
+StorageSlot.getBytesSlot(bytes) (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#138-142) uses assembly
+	- INLINE ASM (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#139-141)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+INFO:Detectors:
+2 different versions of Solidity are used:
+	- Version constraint ^0.8.20 is used by:
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#4)
+		-^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)
+	- Version constraint ^0.8.33 is used by:
+		-^0.8.33 (src/JACKsLPManager.sol#2)
+		-^0.8.33 (src/JACKsLPVault.sol#2)
+		-^0.8.33 (src/JACKsPools.sol#2)
+		-^0.8.33 (src/JACKsVault.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+JACKsLPVault.claimMultipleRewards(uint256[]) (src/JACKsLPVault.sol#583-614) has costly operations inside a loop:
+	- totalClaimed += reward (src/JACKsLPVault.sol#603)
+JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[]) (src/JACKsLPVault.sol#1134-1166) has costly operations inside a loop:
+	- totalClaimed += amount (src/JACKsLPVault.sol#1160)
+JACKsLPVault.cleanupExpiredClaimsForRound(uint256,address[]) (src/JACKsLPVault.sol#1134-1166) has costly operations inside a loop:
+	- totalClaimed += amount (src/JACKsLPVault.sol#1160)
+	Calls stack containing the loop:
+		JACKsLPVault.cleanupExpiredClaimsBatch(uint256[],address[][])
+JACKsVault.cleanupExpiredClaimsForRound(uint256) (src/JACKsVault.sol#1003-1029) has costly operations inside a loop:
+	- totalClaimed += amountToRecover (src/JACKsVault.sol#1024)
+	Calls stack containing the loop:
+		JACKsVault.cleanupExpiredClaimsBatch(uint256,uint256)
+JACKsVault.cleanupExpiredClaimsForRound(uint256) (src/JACKsVault.sol#1003-1029) has costly operations inside a loop:
+	- totalClaimed += amountToRecover (src/JACKsVault.sol#1024)
+	Calls stack containing the loop:
+		JACKsVault.cleanupExpiredClaims()
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#costly-operations-inside-a-loop
+INFO:Detectors:
+JACKsLPVault.getUserStats(address) (src/JACKsLPVault.sol#742-807) has a high cyclomatic complexity (15).
+JACKsPools._transfer(address,address,uint256,bool) (src/JACKsPools.sol#302-433) has a high cyclomatic complexity (17).
+JACKsPools._processTaxes() (src/JACKsPools.sol#435-526) has a high cyclomatic complexity (12).
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cyclomatic-complexity
+INFO:Detectors:
+Version constraint ^0.8.20 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- VerbatimInvalidDeduplication
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess.
+It is used by:
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol#4)
+	- ^0.8.20 (lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol#5)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+INFO:Detectors:
+Low level call in JACKsLPVault.claimReward(uint256) (src/JACKsLPVault.sol#555-578):
+	- (success,None) = recipient.call{value: reward}() (src/JACKsLPVault.sol#574)
+Low level call in JACKsLPVault.claimMultipleRewards(uint256[]) (src/JACKsLPVault.sol#583-614):
+	- (success,None) = recipient.call{value: totalReward}() (src/JACKsLPVault.sol#612)
+Low level call in JACKsPools.recoverEth() (src/JACKsPools.sol#686-691):
+	- (success,None) = owner.call{value: balance}() (src/JACKsPools.sol#689)
+Low level call in JACKsPools._processTaxesWithReward(address) (src/JACKsPools.sol#734-750):
+	- (success,None) = caller.call{value: reward}() (src/JACKsPools.sol#745)
+Low level call in JACKsVault.claim() (src/JACKsVault.sol#835-862):
+	- (success,None) = recipient.call{value: amount}() (src/JACKsVault.sol#857)
+Low level call in JACKsVault.emergencyClaim(address) (src/JACKsVault.sol#952-996):
+	- (success,None) = recipient.call{value: expiredAmount}() (src/JACKsVault.sol#969)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+JACKsLPVault (src/JACKsLPVault.sol#20-1345) should inherit from IJACKsLPVault (src/JACKsPools.sol#72-75)
+JACKsPools (src/JACKsPools.sol#77-762) should inherit from IJACKsPools (src/JACKsVault.sol#14-17)
+JACKsVault (src/JACKsVault.sol#19-1257) should inherit from IJACKsVault (src/JACKsPools.sol#67-70)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+INFO:Detectors:
+Function IJACKsPools.PAIR() (src/JACKsLPManager.sol#24) is not in mixedCase
+Function IUniswapV2Router02.WETH() (src/JACKsLPManager.sol#39) is not in mixedCase
+Variable JACKsLPManager.TOKEN (src/JACKsLPManager.sol#53) is not in mixedCase
+Variable JACKsLPManager.LP_VAULT (src/JACKsLPManager.sol#54) is not in mixedCase
+Variable JACKsLPManager.ROUTER (src/JACKsLPManager.sol#55) is not in mixedCase
+Variable JACKsLPManager.WETH (src/JACKsLPManager.sol#56) is not in mixedCase
+Variable JACKsLPManager.PAIR (src/JACKsLPManager.sol#57) is not in mixedCase
+Parameter JACKsLPVault.setLpManager(address)._lpManager (src/JACKsLPVault.sol#122) is not in mixedCase
+Parameter JACKsLPVault.setPayoutAddress(address)._payoutAddress (src/JACKsLPVault.sol#1314) is not in mixedCase
+Variable JACKsLPVault.TOKEN (src/JACKsLPVault.sol#21) is not in mixedCase
+Variable JACKsLPVault.LP_MANAGER (src/JACKsLPVault.sol#22) is not in mixedCase
+Parameter JACKsPools.setVault(address)._vault (src/JACKsPools.sol#205) is not in mixedCase
+Parameter JACKsPools.setLpVault(address)._lpVault (src/JACKsPools.sol#220) is not in mixedCase
+Parameter JACKsPools.setLpManager(address)._lpManager (src/JACKsPools.sol#232) is not in mixedCase
+Parameter JACKsPools.updateMinSwapTokens(uint256)._minSwapTokens (src/JACKsPools.sol#250) is not in mixedCase
+Variable JACKsPools.ROUTER (src/JACKsPools.sol#104) is not in mixedCase
+Variable JACKsPools.PAIR (src/JACKsPools.sol#105) is not in mixedCase
+Variable JACKsPools.WETH (src/JACKsPools.sol#106) is not in mixedCase
+Variable JACKsPools.VAULT (src/JACKsPools.sol#107) is not in mixedCase
+Variable JACKsPools.LP_VAULT (src/JACKsPools.sol#108) is not in mixedCase
+Variable JACKsPools.LP_MANAGER (src/JACKsPools.sol#109) is not in mixedCase
+Parameter JACKsVault.setPayoutAddress(address)._payoutAddress (src/JACKsVault.sol#915) is not in mixedCase
+Parameter JACKsVault.setEmergencyPause(bool)._pause (src/JACKsVault.sol#934) is not in mixedCase
+Variable JACKsVault.TOKEN (src/JACKsVault.sol#20) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Slither:. analyzed (19 contracts with 100 detectors), 96 result(s) found

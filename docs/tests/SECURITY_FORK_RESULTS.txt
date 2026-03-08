@@ -26,13 +26,13 @@ Setup complete!
   Test 1.1: quoteEthForTokens() - Tokens to ETH
     Tokens: 1000000
     ETH needed: 25000000000000000
-    [GAS]: 3193
+    [GAS]: 3197
     PASS: quoteEthForTokens works!
 
   Test 1.2: quoteTokensForEth() - ETH -> Tokens
     ETH: 100000000000000000
     Tokens needed: 4000000
-    [GAS]: 2985
+    [GAS]: 2987
     PASS: quoteTokensForEth works!
 
   Test 1.3: Symmetry check (A -> B -> A ~ A)
@@ -78,7 +78,7 @@ Setup complete!
   Test 3.1: LP provider sets payout address
     LP Provider: 0x9B6E219B8B1a64c3362a73BCd340167c484ECb72
     Payout EOA: 0x274e3aA6050a5454827F06ee492276ed2E357977
-    [GAS]: 24723
+    [GAS]: 24789
     PASS: LP payout address set!
 
   Test 3.2: Clear LP payout address
@@ -130,7 +130,7 @@ Setup complete!
 
   Test 5.3: Griefer calls processTaxes()
     (Reward payment will FAIL, but processing CONTINUES)
-    [GAS]: 226365
+    [GAS]: 226384
     Pool before: 500000000000000000
     Pool after: 504632252772019785
     Funded: 4632252772019785

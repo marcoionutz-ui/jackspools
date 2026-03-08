@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.33;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -98,7 +98,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 	uint256 public constant SELL_LOCK_DURATION = 2 hours;
 	uint256 public constant BUY_COOLDOWN = 30; // 30 seconds between buys
 	uint256 public constant MAX_SLIPPAGE_BPS = 1000; // 10% max slippage
-	uint256 public constant MAX_WALLET_LP_THRESHOLD = 50 ether; // 50 ETH LP value to remove limit
+	uint256 public constant MAX_WALLET_LP_THRESHOLD = 500 ether; // 500 ETH LP value to remove limit
     
     // Contracts
     IUniswapV2Router02 public immutable ROUTER;
@@ -125,28 +125,28 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 	address private constant BASE_WETH = 0x4200000000000000000000000000000000000006;
 	
 	// Stage thresholds for dynamic parameters
-	uint256 private constant STAGE_2_LP_THRESHOLD = 2 ether;
-	uint256 private constant STAGE_3_LP_THRESHOLD = 5 ether;
-	uint256 private constant STAGE_4_LP_THRESHOLD = 10 ether;
-	uint256 private constant STAGE_5_LP_THRESHOLD = 20 ether;
+	uint256 private constant STAGE_2_LP_THRESHOLD = 10 ether;
+	uint256 private constant STAGE_3_LP_THRESHOLD = 50 ether;
+	uint256 private constant STAGE_4_LP_THRESHOLD = 150 ether;
+	uint256 private constant STAGE_5_LP_THRESHOLD = 500 ether;
 
-	// Stage 1 parameters (LP < 2 ETH)
+	// Stage 1 parameters (LP < 10 ETH)
 	uint256 private constant STAGE_1_MIN_BUY = 0.00043 ether;
 	uint256 private constant STAGE_1_MAX_WALLET = 15_000_000 * 10**18;
 
-	// Stage 2 parameters (LP 2-5 ETH)
+	// Stage 2 parameters (LP 10-50 ETH)
 	uint256 private constant STAGE_2_MIN_BUY = 0.00057 ether;
 	uint256 private constant STAGE_2_MAX_WALLET = 30_000_000 * 10**18;
 
-	// Stage 3 parameters (LP 5-10 ETH)
+	// Stage 3 parameters (LP 50-150 ETH)
 	uint256 private constant STAGE_3_MIN_BUY = 0.00071 ether;
 	uint256 private constant STAGE_3_MAX_WALLET = 60_000_000 * 10**18;
 
-	// Stage 4 parameters (LP 10-20 ETH)
+	// Stage 4 parameters (LP 150-500 ETH)
 	uint256 private constant STAGE_4_MIN_BUY = 0.00086 ether;
 	uint256 private constant STAGE_4_MAX_WALLET = 90_000_000 * 10**18;
 
-	// Stage 5 parameters (LP > 20 ETH)
+	// Stage 5 parameters (LP > 500 ETH)
 	uint256 private constant STAGE_5_MIN_BUY = 0.001 ether;
     
     // Events
@@ -160,6 +160,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 	event SellLockSet(address indexed account, uint256 unlockTime);
     event AutoLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 liquidity);
     event MinSwapTokensUpdated(uint256 oldValue, uint256 newValue);
+	event TokensBurned(address indexed from, uint256 amount);
 	        
     modifier onlyOwner() {
         require(msg.sender == owner, "Not owner");
@@ -369,6 +370,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			if (burnTokens > 0) {
 				totalSupply -= burnTokens;
 				emit Transfer(from, address(0), burnTokens);
+				emit TokensBurned(from, burnTokens);
 			}
 			
 			// Contract gets only reward + lp (NOT burn!)
@@ -559,7 +561,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 		} catch {
 			// Return high value to DISABLE max wallet limit on error
 			// This is safer than returning 0 which activates strictest limit
-			return 100 ether; // Returns Stage 5 threshold → no max wallet limit
+			return 1000 ether; // force Stage 5 behavior on error
 		}
 	}
 	

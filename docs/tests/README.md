@@ -20,6 +20,12 @@ trade-offs rather than security vulnerabilities.
   Slither flags ETH transfers generically, even when not performed in loops or
   under admin control.
 
+- **Reentrancy in emergencyClaim**
+  The 2-pass implementation is intentional design: transfer executes before
+  state updates to prevent fund locks on failed transfers. Protected by
+  `require(claimable >= expiredAmount)` guard and the `nonReentrant` modifier
+  is not applicable here by design.
+
 ## Summary
 
 None of the reported findings indicate:
@@ -31,4 +37,4 @@ None of the reported findings indicate:
 The protocol is fully permissionless after initialization and relies on
 deterministic onchain state transitions.
 
-Full static analysis report: `SlitherReport.txt`.
+Full static analysis report: `SLITHER_REPORT.txt`.

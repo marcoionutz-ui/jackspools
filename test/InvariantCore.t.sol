@@ -516,9 +516,9 @@ contract CoreInvariantTest is Test {
         vm.roll(block.number + 30);
         
         // First finalize - should succeed
-        uint256 roundBefore = buyerVault.round();
+        uint256 roundBefore = buyerVault.payoutRound();
         buyerVault.finalizeRound();
-        uint256 roundAfter = buyerVault.round();
+        uint256 roundAfter = buyerVault.payoutRound();
         console.log("First finalize succeeded, round: %s -> %s", roundBefore, roundAfter);
         
         // CRITICAL: Second finalize - should revert (no snapshot)
@@ -527,11 +527,11 @@ contract CoreInvariantTest is Test {
         console.log("PASS: Second finalize reverted (no snapshot)");
         
         // Verify round unchanged
-        assertEq(buyerVault.round(), roundAfter, "VIOLATED: Round changed after revert");
+        assertEq(buyerVault.payoutRound(), roundAfter, "VIOLATED: Round changed after revert");
         console.log("PASS: Round unchanged after failed finalize");
         
         // FIX #2: Use dynamic round tracking (not hardcoded 0)
-        uint256 buyerRoundId = buyerVault.round() - 1;
+        uint256 buyerRoundId = buyerVault.payoutRound() - 1;
         
         // Find winner in buyers array (not wallets)
         address winner = address(0);
@@ -651,9 +651,9 @@ contract CoreInvariantTest is Test {
         
         // STATE 3: Finalize
         console.log("STATE 3: Finalizing");
-        uint256 roundBefore = buyerVault.round();
+        uint256 roundBefore = buyerVault.payoutRound();
         buyerVault.finalizeRound();
-        uint256 roundAfter = buyerVault.round();
+        uint256 roundAfter = buyerVault.payoutRound();
         
         assertEq(roundAfter, roundBefore + 1, "VIOLATED: Round did not increment");
         console.log("Round incremented:", roundBefore, "->", roundAfter);
@@ -744,7 +744,7 @@ contract CoreInvariantTest is Test {
         vm.roll(block.number + 30);
         buyerVault.finalizeRound();
         
-        uint256 roundId = buyerVault.round() - 1;
+        uint256 roundId = buyerVault.payoutRound() - 1;
         
         // Find winner in buyers array (not wallets)
         address winner = address(0);
@@ -1080,7 +1080,7 @@ contract CoreInvariantTest is Test {
         
         vm.warp(block.timestamp + 31 days);
         
-        uint256 currentRound = buyerVault.round();
+        uint256 currentRound = buyerVault.payoutRound();
         if (currentRound > 0) {
             uint256 buyerRoundId = currentRound - 1;
             vm.prank(randomUser);

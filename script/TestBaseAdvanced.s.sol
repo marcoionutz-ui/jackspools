@@ -7,7 +7,7 @@ import "forge-std/console.sol";
 /**
  * @title TestBaseAdvanced - Advanced Fork Tests (Phase 17-19)
  * @notice Tests requiring high LP: Multiple rounds, buffer eviction, LP reward full flow
- * @dev Starts with 25 ETH initial LP (Stage 5) to avoid max wallet constraints
+ * @dev Starts with 50 ETH initial LP (Stage 3) to avoid max wallet constraints
  */
 
 interface IERC20 {
@@ -222,15 +222,15 @@ contract TestBaseAdvanced is Script {
         
         // Add HIGH initial liquidity (25 ETH = Stage 5)
         console.log("\nAdding HIGH initial liquidity (25 ETH)...");
-        token.addInitialLiquidity{value: 25 ether}();
+        token.addInitialLiquidity{value: 50 ether}();
         
         pair = token.PAIR();
         uint256 lpValue = token.getLpValue();
         
         console.log("  Pair:", pair);
         console.log("  LP Value:", lpValue / 1e18, "ETH");
-        console.log("  Stage: 5 (>20 ETH)");
-        console.log("  Max wallet: UNLIMITED");
+        console.log("  Stage: 3 (50 ETH)");
+        console.log("  Max wallet: 60M tokens (Stage 3)");
         
         // Enable trading
         token.enableTrading();

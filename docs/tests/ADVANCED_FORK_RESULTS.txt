@@ -1,4 +1,75 @@
-No files changed, compilation skipped
+Compiling 1 files with Solc 0.8.33
+Solc 0.8.33 finished in 2.21s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+   --> script/TestBaseAdvanced.s.sol:403:5:
+    |
+403 | 			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
+    | 			 ^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> script/TestBaseAdvanced.s.sol:443:4:
+    |
+443 | 		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(smallLP, balance);
+    | 		 ^^^^^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> script/TestBaseAdvanced.s.sol:403:26:
+    |
+403 | 			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
+    | 			                      ^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> script/TestBaseAdvanced.s.sol:443:25:
+    |
+443 | 		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(smallLP, balance);
+    | 		                      ^^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> script/TestBaseAdvanced.s.sol:403:44:
+    |
+403 | 			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
+    | 			                                        ^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> script/TestBaseAdvanced.s.sol:443:43:
+    |
+443 | 		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(smallLP, balance);
+    | 		                                        ^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> script/TestBaseAdvanced.s.sol:403:5:
+    |
+403 | 			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
+    | 			 ^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> script/TestBaseAdvanced.s.sol:403:26:
+    |
+403 | 			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
+    | 			                      ^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> script/TestBaseAdvanced.s.sol:403:44:
+    |
+403 | 			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
+    | 			                                        ^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> script/TestBaseAdvanced.s.sol:647:4:
+    |
+647 | 		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(user, lpTokens);
+    | 		 ^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> script/TestBaseAdvanced.s.sol:647:25:
+    |
+647 | 		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(user, lpTokens);
+    | 		                      ^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> script/TestBaseAdvanced.s.sol:647:43:
+    |
+647 | 		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(user, lpTokens);
+    | 		                                        ^^^^^^^^^^^^^^^^^
+
 Script ran successfully.
 
 == Logs ==
@@ -24,9 +95,9 @@ Connections configured
   
 Adding HIGH initial liquidity (25 ETH)...
     Pair: 0xBb5F6de7115d1f1532eB1EaadCFD9170a6cd1A94
-    LP Value: 50 ETH
-    Stage: 5 (>20 ETH)
-    Max wallet: UNLIMITED
+    LP Value: 100 ETH
+    Stage: 3 (50 ETH)
+    Max wallet: 60M tokens (Stage 3)
     Trading: ENABLED
   
 Phase 1 complete!
@@ -38,27 +109,27 @@ Phase 1 complete!
   Testing 3 consecutive buyer reward rounds...
 
   Round 2:
-      [GAS] First buy: 414634
-      [GAS] Process taxes (periodic): 240301
-      [GAS] Process taxes (periodic): 381225
-      [GAS] Final tax processing: 240140
-      [GAS] Buyer finalize: 317110
+      [GAS] First buy: 416200
+      [GAS] Process taxes (periodic): 240320
+      [GAS] Process taxes (periodic): 379563
+      [GAS] Final tax processing: 238472
+      [GAS] Buyer finalize: 317035
     PASS: Round 2 completed
 
   Round 3:
-      [GAS] First buy: 277239
-      [GAS] Process taxes (periodic): 238301
-      [GAS] Process taxes (periodic): 291125
-      [GAS] Final tax processing: 240140
-      [GAS] Buyer finalize: 225671
+      [GAS] First buy: 278805
+      [GAS] Process taxes (periodic): 238320
+      [GAS] Process taxes (periodic): 289463
+      [GAS] Final tax processing: 238493
+      [GAS] Buyer finalize: 225638
     PASS: Round 3 completed
 
   Round 4:
-      [GAS] First buy: 277245
-      [GAS] Process taxes (periodic): 238301
-      [GAS] Process taxes (periodic): 271225
-      [GAS] Final tax processing: 240140
-      [GAS] Buyer finalize: 225553
+      [GAS] First buy: 278895
+      [GAS] Process taxes (periodic): 238341
+      [GAS] Process taxes (periodic): 238341
+      [GAS] Final tax processing: 269584
+      [GAS] Buyer finalize: 238392
     PASS: Round 4 completed
 
   PASS: 3 consecutive rounds VERIFIED!
@@ -76,8 +147,8 @@ Phase 1 complete!
   SCENARIO A: Fill LP buffer to capacity (400 users)
     Each user: Buy tokens -> Add LP with 0.5 ETH
 
-      [GAS] Buy for LP: 277246
-      [GAS] Add LP: 315562
+      [GAS] Buy for LP: 278897
+      [GAS] Add LP: 315710
        100 LPs added...
        200 LPs added...
        300 LPs added...
@@ -92,7 +163,7 @@ Phase 1 complete!
   SCENARIO B: User 401 tries with SMALL LP (0.2 ETH)
     Expected: REJECTED (can't evict 0.5 ETH contributors)
 
-    [GAS] Small LP add: 502852
+    [GAS] Small LP add: 502989
     User 401 eligible: true (reached lifetime threshold?)
     Participants after small LP: 400
     (Should be 400 if rejected, 400 if evicted someone)
@@ -100,7 +171,7 @@ Phase 1 complete!
   SCENARIO C: User 402 tries with LARGE LP (2.0 ETH)
     Expected: EVICTS lowest contributor (0.5 ETH users)
 
-    [GAS] Large LP (eviction): 553230
+    [GAS] Large LP (eviction): 553414
     Participants before: 400
     Participants after: 400
     (Should stay 400 - eviction replaces, doesn't add)
@@ -110,15 +181,15 @@ Phase 1 complete!
 
   SCENARIO D: Trigger LP snapshot with full buffer
     Executing 50 sells to fund LP pot...
-      [GAS] Sell: 114745
-      [GAS] Process taxes (sells): 284046
-      [GAS] Process taxes (sells): 252961
-      [GAS] Process taxes (sells): 252961
-      [GAS] Process taxes (sells): 252961
-      [GAS] Process taxes (sells): 252961
+      [GAS] Sell: 114741
+      [GAS] Process taxes (sells): 282473
+      [GAS] Process taxes (sells): 251382
+      [GAS] Process taxes (sells): 251382
+      [GAS] Process taxes (sells): 251382
+      [GAS] Process taxes (sells): 251382
   
   LP pot: 0 ETH
-    Threshold: 1 ETH
+    Threshold: 15 ETH
     Snapshot taken: false
     (Snapshot may not trigger - that's OK for this test)
 
@@ -186,364 +257,15 @@ Phase 18 complete!
      100 sells executed
     All 100 sells completed
 
-    [GAS] Final tax processing: 614699
+    [GAS] Final tax processing: 251381
   LP Reward status:
-    Round: 1
+    Round: 0
     Participants: 400
     Pool: 3 ETH
-    Threshold: 1 ETH
-    Snapshot: true
+    Threshold: 35 ETH
+    Snapshot: false
   
-Finalizing LP round...
-    [GAS] LP Finalize (400 participants): 3821460
-  
-Top 100 LP contributors:
-  
-TOP 10 (60% of pool):
-    # 1
-      Address: 0x30D37edD1c7e5aF9e7FCb4a7ea73849173BEf0e4
-      Contribution: 450196594045472251 wei
-      Reward: 564629676974442148 wei
-      Reward (ETH): 0
-    # 2
-      Address: 0x917f03dd0B55aF4c14c340c6B9F129bcB8edd16E
-      Contribution: 127894775302965538 wei
-      Reward: 160403669466096354 wei
-      Reward (ETH): 0
-    # 3
-      Address: 0x2883D3cDc8340092d60BB59a886FF84E4ee6154a
-      Contribution: 127729427031558861 wei
-      Reward: 160196292195127475 wei
-      Reward (ETH): 0
-    # 4
-      Address: 0x9c1f7a1c00F011ae672f8478D2338d136C090640
-      Contribution: 127564399367981836 wei
-      Reward: 159989317025590917 wei
-      Reward (ETH): 0
-    # 5
-      Address: 0x56DF876feae440e31741a8405a683B548eBfb7E0
-      Contribution: 127399691483691359 wei
-      Reward: 159782742918340602 wei
-      Reward (ETH): 0
-    # 6
-      Address: 0x14BD3D670e7e07896450435A2B928588B88fa297
-      Contribution: 127235302552819488 wei
-      Reward: 159576568837585599 wei
-      Reward (ETH): 0
-    # 7
-      Address: 0x1c36194c14Eb8035c4736F7420E9F0b4c653524A
-      Contribution: 127071231752163091 wei
-      Reward: 159370793750877141 wei
-      Reward (ETH): 0
-    # 8
-      Address: 0xf25BfbE8bc5F18aeE1B1c100e30708287921De60
-      Contribution: 126907478261173525 wei
-      Reward: 159165416629095680 wei
-      Reward (ETH): 0
-    # 9
-      Address: 0x0B19d564f5017FeE0bF02118FA28bB1d95C37D2E
-      Contribution: 126744041261946376 wei
-      Reward: 158960436446438020 wei
-      Reward (ETH): 0
-    # 10
-      Address: 0x7fc6E4d454F15989c0Dd40A38644a5Ab67E28d0a
-      Contribution: 126580919939211239 wei
-      Reward: 158755852180404499 wei
-      Reward (ETH): 0
-  
-RANKS 11-60 (40% of pool):
-    # 11
-      Address: 0xAa2D461e1fD155c8c8410dff1D735eB7bF31caeC
-      Contribution: 126418113480321542 wei
-      Reward: 35373508047701140 wei
-      Reward (ETH): 0
-    # 12
-      Address: 0xe51df165e35D0602A0c8E958100E4b4556a6150F
-      Contribution: 98198816391856769 wei
-      Reward: 27477364803840268 wei
-      Reward (ETH): 0
-    # 13
-      Address: 0x95e4c6CA2bffB9DaF13b91208167171a3D01553E
-      Contribution: 98072677046206040 wei
-      Reward: 27442069298823873 wei
-      Reward (ETH): 0
-    # 14
-      Address: 0x6aa051AB6352449D3783C259bEd7d112dd4cFFA7
-      Contribution: 97946780710647948 wei
-      Reward: 27406841791337508 wei
-      Reward (ETH): 0
-    # 15
-      Address: 0xB6857DFF013e7CA8c3f3f22B44E421f0160617Ac
-      Contribution: 97821126761208668 wei
-      Reward: 27371682106784806 wei
-      Reward (ETH): 0
-    # 16
-      Address: 0x753c6fd1473ee9B9207582A3Df72baC104B26100
-      Contribution: 97695714575916102 wei
-      Reward: 27336590071129512 wei
-      Reward (ETH): 0
-    # 17
-      Address: 0x4f434C67b595993626BB9f070BE8a3c7bc16783D
-      Contribution: 97570543534792176 wei
-      Reward: 27301565510893328 wei
-      Reward (ETH): 0
-    # 18
-      Address: 0x696B5E460fA730Bf6b542a63d0a5c9ac4792F294
-      Contribution: 97445613019845175 wei
-      Reward: 27266608253153763 wei
-      Reward (ETH): 0
-    # 19
-      Address: 0xe893A576dB28847ef5dcEbff76c83cA641470DeA
-      Contribution: 97320922415062108 wei
-      Reward: 27231718125542001 wei
-      Reward (ETH): 0
-    # 20
-      Address: 0x4E2FCDCc6Db8f2FCF6854DFeA4372Ae33546f18A
-      Contribution: 97196471106401109 wei
-      Reward: 27196894956240776 wei
-      Reward (ETH): 0
-    # 21
-      Address: 0xD9B73be3e7C1A7E33511cb39cc1e02B01831cB3c
-      Contribution: 97072258481783875 wei
-      Reward: 27162138573982250 wei
-      Reward (ETH): 0
-    # 22
-      Address: 0x29A7172A54B8c2DCeEc628fa0d309Fcb82631c07
-      Contribution: 96948283931088133 wei
-      Reward: 27127448808045910 wei
-      Reward (ETH): 0
-    # 23
-      Address: 0x2d39403A9283270d0Df51aa85249C34c4C6c2322
-      Contribution: 96824546846140144 wei
-      Reward: 27092825488256471 wei
-      Reward (ETH): 0
-    # 24
-      Address: 0x2AE79C5D58153C830B5c3e285Ff7dAF4369723Cb
-      Contribution: 96701046620707240 wei
-      Reward: 27058268444981784 wei
-      Reward (ETH): 0
-    # 25
-      Address: 0xf0C67E11325484fCc19C5Efb33424C701F61Fb4C
-      Contribution: 96577782650490391 wei
-      Reward: 27023777509130760 wei
-      Reward (ETH): 0
-    # 26
-      Address: 0xa37242d711510374a5811dE0d0b9978a7B1af6a9
-      Contribution: 96454754333116810 wei
-      Reward: 26989352512151297 wei
-      Reward (ETH): 0
-    # 27
-      Address: 0x530aeb82dECb2654C6Dce758561B5F622b7da791
-      Contribution: 96331961068132591 wei
-      Reward: 26954993286028223 wei
-      Reward (ETH): 0
-    # 28
-      Address: 0x1E82EC9621AC210BE44aa839C80Ba8c81274810e
-      Contribution: 96209402256995374 wei
-      Reward: 26920699663281243 wei
-      Reward (ETH): 0
-    # 29
-      Address: 0xe20C8dd6215f27ed64F641fa24a093a13309f658
-      Contribution: 96087077303067047 wei
-      Reward: 26886471476962896 wei
-      Reward (ETH): 0
-    # 30
-      Address: 0x61eF400Aa98Bf322c9db680F5705e847c10C6B2F
-      Contribution: 95964985611606482 wei
-      Reward: 26852308560656524 wei
-      Reward (ETH): 0
-    # 31
-      Address: 0x0d43038DcaE108893e1d942C620373374847808a
-      Contribution: 95843126589762300 wei
-      Reward: 26818210748474244 wei
-      Reward (ETH): 0
-    # 32
-      Address: 0x00fc0036Af03685C78c2C8dF2e6313Cb1f48E61E
-      Contribution: 95721499646565670 wei
-      Reward: 26784177875054937 wei
-      Reward (ETH): 0
-    # 33
-      Address: 0xC52FDCb30e3E6A6B672ed451743548CBD5ab3832
-      Contribution: 95600104192923138 wei
-      Reward: 26750209775562242 wei
-      Reward (ETH): 0
-    # 34
-      Address: 0x4602192B7D0Fb5c7Ae62beBba624990Df69150F4
-      Contribution: 95478939641609490 wei
-      Reward: 26716306285682553 wei
-      Reward (ETH): 0
-    # 35
-      Address: 0x2ab72077dF7a994018FcC684FE08CDD0A611Ee8D
-      Contribution: 95358005407260646 wei
-      Reward: 26682467241623038 wei
-      Reward (ETH): 0
-    # 36
-      Address: 0xec9ac279F4540Ce9f4cd75758Ef1B70496BFcd90
-      Contribution: 95237300906366587 wei
-      Reward: 26648692480109654 wei
-      Reward (ETH): 0
-    # 37
-      Address: 0xB2D7a48EEEA3f08Ad5D82C213bAb3cF1da3D20d4
-      Contribution: 95116825557264308 wei
-      Reward: 26614981838385180 wei
-      Reward (ETH): 0
-    # 38
-      Address: 0x6e8aFC41404CE9B19AbF25825dEdAC11A14Fb47B
-      Contribution: 94996578780130811 wei
-      Reward: 26581335154207251 wei
-      Reward (ETH): 0
-    # 39
-      Address: 0x493cA572691A352bDB2339854601fd416A0f6ea1
-      Contribution: 94876559996976117 wei
-      Reward: 26547752265846409 wei
-      Reward (ETH): 0
-    # 40
-      Address: 0x05Eb372aA50C7849AEF7E0E636dbb6083f32BB44
-      Contribution: 94756768631636325 wei
-      Reward: 26514233012084156 wei
-      Reward (ETH): 0
-    # 41
-      Address: 0x1a6a5C5A9C6e4a1fC06114dd4Cffc47a6BADA3Cc
-      Contribution: 94637204109766686 wei
-      Reward: 26480777232211017 wei
-      Reward (ETH): 0
-    # 42
-      Address: 0x594cC42633Db045941990B0C75c3A274bc110b79
-      Contribution: 94517865858834713 wei
-      Reward: 26447384766024612 wei
-      Reward (ETH): 0
-    # 43
-      Address: 0xa4425f363404D3D307884f92b01aB393d564f9B9
-      Contribution: 94398753308113331 wei
-      Reward: 26414055453827741 wei
-      Reward (ETH): 0
-    # 44
-      Address: 0xBC9801A2238013543f75aa10b9f57c842405f91C
-      Contribution: 94279865888674039 wei
-      Reward: 26380789136426471 wei
-      Reward (ETH): 0
-    # 45
-      Address: 0x28777989A40d989853EBeB0AE1df202585E25323
-      Contribution: 94161203033380120 wei
-      Reward: 26347585655128231 wei
-      Reward (ETH): 0
-    # 46
-      Address: 0xBEFC30b1E4221db87f856336BC1AD273DC24d9c2
-      Contribution: 94042764176879866 wei
-      Reward: 26314444851739922 wei
-      Reward (ETH): 0
-    # 47
-      Address: 0xE735776f1D2203908E3B33c5093a6cB397F8849e
-      Contribution: 93924548755599846 wei
-      Reward: 26281366568566031 wei
-      Reward (ETH): 0
-    # 48
-      Address: 0x439539C712561C9BC3077f4795F6BEbbd1B55A2d
-      Contribution: 93806556207738194 wei
-      Reward: 26248350648406752 wei
-      Reward (ETH): 0
-    # 49
-      Address: 0x49792E35A441CD8e319D38A5A4D83E12EE0D364D
-      Contribution: 93688785973257929 wei
-      Reward: 26215396934556120 wei
-      Reward (ETH): 0
-    # 50
-      Address: 0x4164c65A44D5B98cf3FA37456CaA355AB6EE7cc8
-      Contribution: 93571237493880310 wei
-      Reward: 26182505270800146 wei
-      Reward (ETH): 0
-    # 51
-      Address: 0xD7bcA6dD3E32f3623E8c628e6eBc9D72369c8F1c
-      Contribution: 93453910213078210 wei
-      Reward: 26149675501414970 wei
-      Reward (ETH): 0
-    # 52
-      Address: 0x3be5101c0CCB614D9bB34Fa7c67704B1fc8903aE
-      Contribution: 89860180086095822 wei
-      Reward: 25144100919827295 wei
-      Reward (ETH): 0
-    # 53
-      Address: 0x6a2937015ddc5e23B550084ccB4D9950Eb8FD574
-      Contribution: 89859822491690527 wei
-      Reward: 25144000860047686 wei
-      Reward (ETH): 0
-    # 54
-      Address: 0xDccb872B3E1dC8047Fe5334bD4bE035F1f5b1690
-      Contribution: 89859466857138621 wei
-      Reward: 25143901348661718 wei
-      Reward (ETH): 0
-    # 55
-      Address: 0x9C4040b9342AC1AACAC33b990AC319ED49F2F34E
-      Contribution: 89859113166368558 wei
-      Reward: 25143802381172354 wei
-      Reward (ETH): 0
-    # 56
-      Address: 0xE192AbD74994b2C690699660A979d0028bC27132
-      Contribution: 89858761403484071 wei
-      Reward: 25143703953131603 wei
-      Reward (ETH): 0
-    # 57
-      Address: 0x0e3e2f99132E0B9fa315A927DF422a53Ca4F8963
-      Contribution: 89858411552761782 wei
-      Reward: 25143606060139850 wei
-      Reward (ETH): 0
-    # 58
-      Address: 0x7A4B940Dc9abeB09f3Fc78E4E79006A646e290F6
-      Contribution: 89858063598648859 wei
-      Reward: 25143508697845201 wei
-      Reward (ETH): 0
-    # 59
-      Address: 0x500cB31b3F2C27323cB2c2a4f807ACE37eAA1361
-      Contribution: 89857717525760712 wei
-      Reward: 25143411861942837 wei
-      Reward (ETH): 0
-    # 60
-      Address: 0x38f963AAD4CB31A26FBB3d9ff9e0c2Deaa2c8522
-      Contribution: 89857373318878720 wei
-      Reward: 25143315548174382 wei
-      Reward (ETH): 0
-  
-Verifying reward distribution:
-    Total winners: 60
-    Pool distributed: 3 ETH
-  
-  TOP 10 TIER:
-      Total contributions: 1 ETH
-      Total rewards: 2 ETH
-      % of pool: 59 %
-  
-  RANKS 11-60 TIER:
-      Total contributions: 4 ETH
-      Total rewards: 1 ETH
-      % of pool: 39 %
-  
-  OVERALL:
-      All rewards: 3 ETH
-  
-  EXPECTED vs ACTUAL:
-      Top 10 expected (60%): 2 ETH
-      Top 10 actual: 2 ETH
-      Ranks 11-60 expected (40%): 1 ETH
-      Ranks 11-60 actual: 1 ETH
-  
-  PROPORTIONAL DISTRIBUTION CHECK:
-      User #0 (10 ETH): 564 finney
-      User #9 (10 ETH): 158 finney
-      Ratio: 355 / 100 (expect ~100)
-  
-    User #10 (5 ETH): 35 finney
-      User #59 (5 ETH): 25 finney
-      Ratio: 140 / 100 (expect ~100)
-  
-    Cross-tier:
-      User #0 reward: 564 finney (from 60% pool)
-      User #10 reward: 35 finney (from 40% pool)
-      Ratio: 159 / 10 (expect ~60, i.e. 6x)
-  
-  PASS: Reward distribution VERIFIED!
-    PASS: Proportional rewards VERIFIED!
-  
-PASS: LP Reward full flow VERIFIED!
+Note: Threshold not reached (need more activity)
   Phase 19 complete!
 
   
@@ -556,4 +278,4 @@ PASS: LP Reward full flow VERIFIED!
 Error: Internal EVM error during simulation
 
 Context:
-- transaction validation error: lack of funds (1076149741222800) for max fee (25000000000000000000)
+- transaction validation error: lack of funds (1076149741222800) for max fee (50000000000000000000)

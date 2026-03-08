@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.33;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title JACKs LP Vault - Liquidity Provider Rewards
- * @notice Part of the JACKs Pots ecosystem on Base.
+ * @notice Part of the JACKs Pools ecosystem on Base.
  * @notice Handles the collection and distribution of rewards for liquidity providers.
  * @notice Operates autonomously once configured; no external control or owner intervention.
  * @dev Receives a share of sell taxes, tracks LP contributions, and finalizes rounds
@@ -63,30 +63,30 @@ contract JACKsLPVault is ReentrancyGuard {
 	uint256 public constant MAX_PARTICIPANTS = 400; // Safety limit (gas optimized)
 	
 	// Stage LP thresholds
-	uint256 private constant STAGE_2_LP_THRESHOLD = 2 ether;
-	uint256 private constant STAGE_3_LP_THRESHOLD = 5 ether;
-	uint256 private constant STAGE_4_LP_THRESHOLD = 10 ether;
-	uint256 private constant STAGE_5_LP_THRESHOLD = 20 ether;
+	uint256 private constant STAGE_2_LP_THRESHOLD = 10 ether;
+	uint256 private constant STAGE_3_LP_THRESHOLD = 50 ether;
+	uint256 private constant STAGE_4_LP_THRESHOLD = 150 ether;
+	uint256 private constant STAGE_5_LP_THRESHOLD = 500 ether;
 
-	// Stage 1: Requirements (LP < 2 ETH)
+	// Stage 1: Requirements (LP < 10 ETH)
 	uint256 private constant STAGE_1_MIN_LP_REQUIRED = 0.0086 ether;  // $30 @ $3500/ETH
-	uint256 private constant STAGE_1_POT_THRESHOLD = 0.086 ether;     // $300 @ $3500/ETH
+	uint256 private constant STAGE_1_POOL_THRESHOLD = 0.2 ether;
 
-	// Stage 2: Requirements (LP 2-5 ETH)
+	// Stage 2: Requirements (LP 10-50 ETH)
 	uint256 private constant STAGE_2_MIN_LP_REQUIRED = 0.01 ether;    // $35 @ $3500/ETH
-	uint256 private constant STAGE_2_POT_THRESHOLD = 0.257 ether;     // $900 @ $3500/ETH
+	uint256 private constant STAGE_2_POOL_THRESHOLD = 0.75 ether;
 
-	// Stage 3: Requirements (LP 5-10 ETH)
+	// Stage 3: Requirements (LP 50-150 ETH)
 	uint256 private constant STAGE_3_MIN_LP_REQUIRED = 0.011 ether;   // $40 @ $3500/ETH
-	uint256 private constant STAGE_3_POT_THRESHOLD = 0.514 ether;     // $1,800 @ $3500/ETH
+	uint256 private constant STAGE_3_POOL_THRESHOLD = 8 ether;
 
-	// Stage 4: Requirements (LP 10-20 ETH)
+	// Stage 4: Requirements (LP 150-500 ETH)
 	uint256 private constant STAGE_4_MIN_LP_REQUIRED = 0.013 ether;   // $45 @ $3500/ETH
-	uint256 private constant STAGE_4_POT_THRESHOLD = 1.03 ether;      // $3,600 @ $3500/ETH
+	uint256 private constant STAGE_4_POOL_THRESHOLD = 15 ether;
 
-	// Stage 5: Requirements (LP > 20 ETH)
+	// Stage 5: Requirements (LP > 500 ETH)
 	uint256 private constant STAGE_5_MIN_LP_REQUIRED = 0.014 ether;   // $50 @ $3500/ETH
-	uint256 private constant STAGE_5_POT_THRESHOLD = 1.71 ether;      // $6,000 @ $3500/ETH
+	uint256 private constant STAGE_5_POOL_THRESHOLD = 35 ether;
     
     // Events
     event LPContributed(address indexed user, uint256 ethAmount, uint256 round);
@@ -232,9 +232,9 @@ contract JACKsLPVault is ReentrancyGuard {
 					emit SnapshotReset(snapshotRound, "14 day timeout");
 				}
 
-				// Check snapshot with availablePot (not raw balance!)
-				uint256 availablePot = address(this).balance - _getTotalPendingClaims();
-				if (!snapshotTaken && availablePot >= getPotThreshold()) {
+				// Check snapshot with availablePool (not raw balance!)
+				uint256 availablePool = address(this).balance - _getTotalPendingClaims();
+				if (!snapshotTaken && availablePool >= getPoolThreshold()) {
 					if (bufferParticipants[activeBuffer].length > 0) {
 						_takeSnapshot();
 					}
@@ -275,7 +275,7 @@ contract JACKsLPVault is ReentrancyGuard {
     
     /**
 	 * @notice Finalize round and calculate rewards for top 100
-	 * @dev Distributes pot: 60% to top 10 (proportional), 40% to ranks 11-100 (proportional)
+	 * @dev Distributes pool: 60% to top 10 (proportional), 40% to ranks 11-100 (proportional)
 	 * @dev Participants can finalize immediately, anyone can finalize after 7 days
 	 */
     function finalizeRound() external nonReentrant {
@@ -294,11 +294,10 @@ contract JACKsLPVault is ReentrancyGuard {
 			"Only participants or wait 7 days"     
 		);                          
 		
-		uint256 potAmount = address(this).balance - _getTotalPendingClaims();
+		uint256 poolAmount = address(this).balance - _getTotalPendingClaims();
         
         // Get top 100 contributors
-		(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(buffer);
-		// Ensure we have at least 1 winner
+		(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(buffer);		// Ensure we have at least 1 winner
 		require(topContributors.length > 0, "No valid contributions");
 
 		// Determine actual winner counts
@@ -315,8 +314,8 @@ contract JACKsLPVault is ReentrancyGuard {
 		// Distribute 60% to top 10 (proportional)
 		if (totalTopContributions > 0) {
 			for (uint256 i = 0; i < topCount; i++) {
-				// Combined: (potAmount * 6000 * contrib) / (10000 * total)
-				uint256 reward = (potAmount * 6000 * contributions[i]) / (10000 * totalTopContributions);
+				// Combined: (poolAmount * 6000 * contrib) / (10000 * total)
+				uint256 reward = (poolAmount * 6000 * contributions[i]) / (10000 * totalTopContributions);
 				roundRewards[snapshotRound][topContributors[i]] = reward;
 			}
 		}
@@ -331,26 +330,26 @@ contract JACKsLPVault is ReentrancyGuard {
 			// Distribute 40% to ranks 11-60 (proportional)
 			if (totalSecondaryContributions > 0) {
 				for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
-					// Combined: (potAmount * 4000 * contrib) / (10000 * total)
-					uint256 reward = (potAmount * 4000 * contributions[i]) / (10000 * totalSecondaryContributions);
+					// Combined: (poolAmount * 4000 * contrib) / (10000 * total)
+					uint256 reward = (poolAmount * 4000 * contributions[i]) / (10000 * totalSecondaryContributions);
 					roundRewards[snapshotRound][topContributors[i]] += reward;
 				}
 			}
 		}
 		
 			// Track total distributed amount
-			totalDistributed += potAmount;
+			totalDistributed += poolAmount;
 			
 			// Mark round as finalized
 			rounds[snapshotRound] = RoundInfo({
-				totalDistributed: potAmount,
+				totalDistributed: poolAmount,
 				winnersCount: topContributors.length,
 				timestamp: block.timestamp,
 				finalized: true
 			});
 			
 			// Emit winners in event 
-			emit RoundFinalized(snapshotRound, potAmount, topContributors.length, topContributors);
+			emit RoundFinalized(snapshotRound, poolAmount, topContributors.length, topContributors);
         
 			// Allow next snapshot
 			snapshotTaken = false;
@@ -374,7 +373,7 @@ contract JACKsLPVault is ReentrancyGuard {
     
 	/**
 	 * @notice Get total pending claims across all rounds
-	 * @dev Used to calculate available pot without double-allocating
+	 * @dev Used to calculate available pool without double-allocating
 	 */
 	function _getTotalPendingClaims() internal view returns (uint256) {
 		return totalDistributed - totalClaimed;
@@ -463,6 +462,88 @@ contract JACKsLPVault is ReentrancyGuard {
         }
         return total;
     }
+	
+	/**
+	 * @notice Internal helper to get top N contributors (view-only, supports up to 100)
+	 * @dev Extended version for Top 100 visibility - used ONLY by view functions
+	 * @param bufferIndex Buffer to query (0 or 1)
+	 * @param limit Maximum entries to return (clamped to [1, 100])
+	 * @return topAddresses Sorted addresses (descending by contribution)
+	 * @return topContributions Sorted contributions (descending)
+	 */
+	function _getTopContributorsLimited(
+		uint256 bufferIndex,
+		uint256 limit
+	) internal view returns (
+		address[] memory topAddresses,
+		uint256[] memory topContributions
+	) {
+		require(bufferIndex < 2, "Invalid buffer"); // VALIDATION ADDED
+		
+		address[] memory participants = bufferParticipants[bufferIndex];
+		uint256 n = participants.length;
+
+		if (n == 0) {
+			return (new address[](0), new uint256[](0));
+		}
+
+		// Clamp limit to [1, 100]
+		uint256 k = limit;
+		if (k < 1) k = 1;
+		if (k > 100) k = 100;
+		if (n < k) k = n;
+
+		// Temporary top-k arrays (kept sorted desc)
+		address[] memory topA = new address[](k);
+		uint256[] memory topV = new uint256[](k);
+		uint256 topSize = 0;
+
+		for (uint256 i = 0; i < n; i++) {
+			address user = participants[i];
+			uint256 amt = bufferContributions[bufferIndex][user];
+			if (amt == 0) continue;
+
+			// Case 1: still filling top list
+			if (topSize < k) {
+				uint256 pos = topSize;
+
+				// Shift right until correct position found
+				while (pos > 0 && amt > topV[pos - 1]) {
+					topA[pos] = topA[pos - 1];
+					topV[pos] = topV[pos - 1];
+					pos--;
+				}
+
+				topA[pos] = user;
+				topV[pos] = amt;
+				topSize++;
+				continue;
+			}
+
+			// Case 2: already full => only insert if beats current smallest (last)
+			if (amt <= topV[k - 1]) continue;
+
+			uint256 p = k - 1;
+
+			// Shift right from end until correct position
+			while (p > 0 && amt > topV[p - 1]) {
+				topA[p] = topA[p - 1];
+				topV[p] = topV[p - 1];
+				p--;
+			}
+
+			topA[p] = user;
+			topV[p] = amt;
+		}
+
+		// Shrink output if we skipped zeros
+		topAddresses = new address[](topSize);
+		topContributions = new uint256[](topSize);
+		for (uint256 j = 0; j < topSize; j++) {
+			topAddresses[j] = topA[j];
+			topContributions[j] = topV[j];
+		}
+	}
     
     // ============================================
     // CLAIM FUNCTIONS
@@ -546,8 +627,8 @@ contract JACKsLPVault is ReentrancyGuard {
         emit Funded(msg.sender, msg.value, address(this).balance);
         
         // Check if we should take snapshot
-        uint256 availablePot = address(this).balance - _getTotalPendingClaims();
-		if (!snapshotTaken && availablePot >= getPotThreshold()) {
+        uint256 availablePool = address(this).balance - _getTotalPendingClaims();
+		if (!snapshotTaken && availablePool >= getPoolThreshold()) {
             if (bufferParticipants[activeBuffer].length > 0) {
                 _takeSnapshot();
             }
@@ -584,14 +665,14 @@ contract JACKsLPVault is ReentrancyGuard {
 		return STAGE_5_MIN_LP_REQUIRED;
 	}
 		
-    function getPotThreshold() public view returns (uint256) {
+    function getPoolThreshold() public view returns (uint256) {
 		uint256 stage = getCurrentStage();
 		
-		if (stage == 1) return STAGE_1_POT_THRESHOLD;
-		if (stage == 2) return STAGE_2_POT_THRESHOLD;
-		if (stage == 3) return STAGE_3_POT_THRESHOLD;
-		if (stage == 4) return STAGE_4_POT_THRESHOLD;
-		return STAGE_5_POT_THRESHOLD;
+		if (stage == 1) return STAGE_1_POOL_THRESHOLD;
+		if (stage == 2) return STAGE_2_POOL_THRESHOLD;
+		if (stage == 3) return STAGE_3_POOL_THRESHOLD;
+		if (stage == 4) return STAGE_4_POOL_THRESHOLD;
+		return STAGE_5_POOL_THRESHOLD;
 	}
     
     // ============================================
@@ -617,7 +698,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		contributions = new uint256[](returnCount);
 		estimatedRewards = new uint256[](returnCount);
 		
-		uint256 potAmount = address(this).balance - _getTotalPendingClaims();
+		uint256 poolAmount = address(this).balance - _getTotalPendingClaims();
 		
 		// Determine actual counts
 		uint256 topCount = topAddresses.length < TOP_WINNERS ? topAddresses.length : TOP_WINNERS;
@@ -642,11 +723,11 @@ contract JACKsLPVault is ReentrancyGuard {
 			contributions[i] = topContributions[i];
 			
 			if (i < topCount && topTierTotal > 0) {
-				// Top 10: share of 60% pot - FIXED: combined operation
-				estimatedRewards[i] = (potAmount * 6000 * topContributions[i]) / (10000 * topTierTotal);
+				// Top 10: share of 60% pool - FIXED: combined operation
+				estimatedRewards[i] = (poolAmount * 6000 * topContributions[i]) / (10000 * topTierTotal);
 			} else if (i >= topCount && i < topCount + secondaryCount && secondaryTotal > 0) {
-				// Ranks 11-60: share of 40% pot - FIXED: combined operation
-				estimatedRewards[i] = (potAmount * 4000 * topContributions[i]) / (10000 * secondaryTotal);
+				// Ranks 11-60: share of 40% pool - FIXED: combined operation
+				estimatedRewards[i] = (poolAmount * 4000 * topContributions[i]) / (10000 * secondaryTotal);
 			} else {
 				estimatedRewards[i] = 0;
 			}
@@ -684,7 +765,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		if (currentContribution > 0 && currentRank <= TOTAL_WINNERS) {
 			(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(bufferIndex);
 			
-			uint256 potAmount = address(this).balance - _getTotalPendingClaims();
+			uint256 poolAmount = address(this).balance - _getTotalPendingClaims();
 			uint256 topCount = topContributors.length < TOP_WINNERS ? topContributors.length : TOP_WINNERS;
 			
 			if (currentRank <= TOP_WINNERS) {
@@ -695,7 +776,7 @@ contract JACKsLPVault is ReentrancyGuard {
 				}
 				
 				if (topTierTotal > 0) {
-					estimatedReward = (potAmount * 6000 * currentContribution) / (10000 * topTierTotal);
+					estimatedReward = (poolAmount * 6000 * currentContribution) / (10000 * topTierTotal);
 				}
 			} else {
 				// User in ranks 11-60 - FIXED: combined operation
@@ -708,7 +789,7 @@ contract JACKsLPVault is ReentrancyGuard {
 				}
 				
 				if (secondaryTotal > 0) {
-					estimatedReward = (potAmount * 4000 * currentContribution) / (10000 * secondaryTotal);
+					estimatedReward = (poolAmount * 4000 * currentContribution) / (10000 * secondaryTotal);
 				}
 			}
 		}
@@ -725,6 +806,284 @@ contract JACKsLPVault is ReentrancyGuard {
 		return (currentContribution, lifetimeContribution, currentRank, estimatedReward, unclaimedRewards);
 	}
     
+	/**
+	 * @notice Get leaderboard from specified buffer (supports Top 100)
+	 * @dev Generic function - can query any buffer (active or snapshot)
+	 * @dev VALIDATION: bufferIndex must be 0 or 1, count must be 1-100
+	 * @dev Top 100 visibility: rank 1-100 visible, only rank 1-60 get rewards
+	 * @param bufferIndex Buffer to query (0 or 1)
+	 * @param count Number of top contributors to return (1-100)
+	 * @return addresses Array of contributor addresses (sorted DESC)
+	 * @return contributions Array of ETH contributions
+	 * @return estimatedRewards Estimated rewards (0 for rank > 60)
+	 * @return availablePoolUsedForEstimation Available pool used for calculations
+	 */
+	function getLeaderboardForBuffer(
+		uint256 bufferIndex,
+		uint256 count
+	) public view returns (
+		address[] memory addresses,
+		uint256[] memory contributions,
+		uint256[] memory estimatedRewards,
+		uint256 availablePoolUsedForEstimation
+	) {
+		require(bufferIndex < 2, "Invalid buffer");
+		require(count >= 1 && count <= 100, "Invalid count");
+		
+		// Get top contributors (up to 100)
+		(address[] memory topAddrs, uint256[] memory topContribs) = 
+			_getTopContributorsLimited(bufferIndex, count);
+		
+		uint256 returnCount = topAddrs.length;
+		
+		addresses = new address[](returnCount);
+		contributions = new uint256[](returnCount);
+		estimatedRewards = new uint256[](returnCount);
+		
+		// UNDERFLOW PROTECTION
+		uint256 pending = _getTotalPendingClaims();
+		uint256 bal = address(this).balance;
+		availablePoolUsedForEstimation = bal > pending ? bal - pending : 0;
+		
+		// Determine actual winner counts
+		uint256 topCount = returnCount < TOP_WINNERS ? returnCount : TOP_WINNERS;
+		uint256 secondaryCount = returnCount > TOP_WINNERS ? 
+			(returnCount < TOTAL_WINNERS ? returnCount - TOP_WINNERS : SECONDARY_WINNERS) : 0;
+		
+		// Calculate top tier total (ranks 1-10)
+		uint256 topTierTotal = 0;
+		for (uint256 i = 0; i < topCount; i++) {
+			topTierTotal += topContribs[i];
+		}
+		
+		// Calculate secondary tier total (ranks 11-60)
+		uint256 secondaryTotal = 0;
+		for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
+			secondaryTotal += topContribs[i];
+		}
+		
+		// Assign data with tier-aware reward estimation
+		for (uint256 i = 0; i < returnCount; i++) {
+			addresses[i] = topAddrs[i];
+			contributions[i] = topContribs[i];
+			
+			// IMPORTANT: estimatedRewards calculated ONLY for rank 1-60
+			// Rank 61-100: set explicitly to 0
+			if (i < topCount && topTierTotal > 0) {
+				// Top 10: share of 60% pool
+				estimatedRewards[i] = (availablePoolUsedForEstimation * 6000 * topContribs[i]) / (10000 * topTierTotal);
+			} else if (i >= topCount && i < topCount + secondaryCount && secondaryTotal > 0) {
+				// Ranks 11-60: share of 40% pool
+				estimatedRewards[i] = (availablePoolUsedForEstimation * 4000 * topContribs[i]) / (10000 * secondaryTotal);
+			} else {
+				// Rank 61-100: no rewards
+				estimatedRewards[i] = 0;
+			}
+		}
+		
+		return (addresses, contributions, estimatedRewards, availablePoolUsedForEstimation);
+	}
+	
+	/**
+	 * @notice Convenience wrapper for active buffer leaderboard
+	 * @dev Calls getLeaderboardForBuffer(activeBuffer, count)
+	 */
+	function getActiveBufferLeaderboard(uint256 count) external view returns (
+		address[] memory addresses,
+		uint256[] memory contributions,
+		uint256[] memory estimatedRewards,
+		uint256 availablePoolUsedForEstimation
+	) {
+		return getLeaderboardForBuffer(activeBuffer, count);
+	}
+	
+	/**
+	 * @notice Convenience wrapper for snapshot buffer leaderboard
+	 * @dev Calls getLeaderboardForBuffer(snapshotBuffer, count)
+	 * @dev Reverts if no snapshot taken
+	 */
+	function getSnapshotBufferLeaderboard(uint256 count) external view returns (
+		address[] memory addresses,
+		uint256[] memory contributions,
+		uint256[] memory estimatedRewards,
+		uint256 availablePoolUsedForEstimation
+	) {
+		require(snapshotTaken, "No snapshot taken");
+		return getLeaderboardForBuffer(snapshotBuffer, count);
+	}
+	
+	/**
+	 * @notice Get user's position in a specific buffer
+	 * @dev OPTIMIZED: Only searches top 60 list, doesn't iterate all 400 participants
+	 * @param bufferIndex Buffer to check (0 or 1)
+	 * @param user Address to check
+	 * @return contribution User's total contribution in this buffer
+	 * @return rank User's rank (1-60 if in rewards, 0 if outside top 60)
+	 * @return tier Reward tier: 0=no rewards, 1=top10 (60%), 2=secondary (40%)
+	 * @return isEligible Has user met lifetime LP threshold?
+	 */
+	function getUserBufferPosition(
+		uint256 bufferIndex,
+		address user
+	) external view returns (
+		uint256 contribution,
+		uint256 rank,
+		uint8 tier,
+		bool isEligible
+	) {
+		require(bufferIndex < 2, "Invalid buffer");
+		
+		contribution = bufferContributions[bufferIndex][user];
+		isEligible = lifetimeContributions[user] >= getMinLpRequired();
+		
+		// Get top 60 list only (optimized) - FIX UNUSED VARIABLE WARNING
+		(address[] memory topAddrs,) = _getTopContributors(bufferIndex);
+		
+		// Search for user in top 60
+		rank = 0;
+		for (uint256 i = 0; i < topAddrs.length; i++) {
+			if (topAddrs[i] == user) {
+				rank = i + 1; // 1-indexed
+				break;
+			}
+		}
+		
+		// Calculate tier
+		if (rank == 0) {
+			tier = 0; // Outside top 60
+		} else if (rank <= TOP_WINNERS) {
+			tier = 1; // Top 10 (60% pool)
+		} else {
+			tier = 2; // Ranks 11-60 (40% pool)
+		}
+		
+		return (contribution, rank, tier, isEligible);
+	}
+	
+	/**
+	 * @notice Get entry cutoffs for reward tiers in a buffer
+	 * @dev Shows minimum contribution needed for rewards
+	 * @param bufferIndex Buffer to check (0 or 1)
+	 * @return top10Cutoff Minimum ETH to be in top 10 (0 if < 10 participants)
+	 * @return top60Cutoff Minimum ETH to be in top 60 (0 if < 60 participants)
+	 * @return participantsCount Total competitors in this buffer
+	 */
+	function getBufferCutoffs(uint256 bufferIndex) external view returns (
+		uint256 top10Cutoff,
+		uint256 top60Cutoff,
+		uint256 participantsCount
+	) {
+		require(bufferIndex < 2, "Invalid buffer");
+		
+		(address[] memory topAddrs, uint256[] memory topContribs) = _getTopContributors(bufferIndex);
+		participantsCount = bufferParticipants[bufferIndex].length;
+		
+		top10Cutoff = (topAddrs.length >= TOP_WINNERS) ? topContribs[TOP_WINNERS - 1] : 0;
+		top60Cutoff = (topAddrs.length >= TOTAL_WINNERS) ? topContribs[TOTAL_WINNERS - 1] : 0;
+		
+		return (top10Cutoff, top60Cutoff, participantsCount);
+	}
+	
+	/**
+	 * @notice Get complete round state in single call
+	 * @dev Batch info for dashboard/header display
+	 * @return currentStage Current stage (1-5) based on LP value
+	 * @return currentRoundNum Current round number
+	 * @return isSnapshotTaken Is a snapshot frozen and awaiting finalize?
+	 * @return activeBufferNum Which buffer is currently active (0 or 1)
+	 * @return snapshotBufferNum Which buffer is frozen (if snapshot taken)
+	 * @return poolThreshold ETH needed to trigger next snapshot
+	 * @return availablePool Current pool size (minus pending claims)
+	 * @return pendingClaims Total unclaimed rewards from past rounds
+	 * @return minLpRequired Lifetime LP needed for eligibility
+	 * @return activeParticipants Competitors in active buffer
+	 * @return snapshotParticipants Competitors in snapshot buffer (0 if no snapshot)
+	 */
+	function getRoundState() external view returns (
+		uint256 currentStage,
+		uint256 currentRoundNum,
+		bool isSnapshotTaken,
+		uint256 activeBufferNum,
+		uint256 snapshotBufferNum,
+		uint256 poolThreshold,
+		uint256 availablePool,
+		uint256 pendingClaims,
+		uint256 minLpRequired,
+		uint256 activeParticipants,
+		uint256 snapshotParticipants
+	) {
+		currentStage = getCurrentStage();
+		currentRoundNum = currentRound;
+		isSnapshotTaken = snapshotTaken;
+		activeBufferNum = activeBuffer;
+		snapshotBufferNum = snapshotTaken ? snapshotBuffer : activeBuffer;
+		poolThreshold = getPoolThreshold();
+		
+		// UNDERFLOW PROTECTION
+		pendingClaims = _getTotalPendingClaims();
+		uint256 bal = address(this).balance;
+		availablePool = bal > pendingClaims ? bal - pendingClaims : 0;
+		
+		minLpRequired = getMinLpRequired();
+		activeParticipants = bufferParticipants[activeBuffer].length;
+		snapshotParticipants = snapshotTaken ? bufferParticipants[snapshotBuffer].length : 0;
+		
+		return (
+			currentStage,
+			currentRoundNum,
+			isSnapshotTaken,
+			activeBufferNum,
+			snapshotBufferNum,
+			poolThreshold,
+			availablePool,
+			pendingClaims,
+			minLpRequired,
+			activeParticipants,
+			snapshotParticipants
+		);
+	}
+	
+	/**
+	 * @notice Get progress toward next snapshot
+	 * @dev Powers progress bars and countdown UI
+	 * @return currentPool Current available pool (minus pending claims)
+	 * @return poolThreshold ETH needed to trigger snapshot
+	 * @return progressBps Progress in basis points (0-10000, for percentage)
+	 * @return remainingToThreshold ETH still needed
+	 * @return canSnapshot Can snapshot be taken right now?
+	 */
+	function getSnapshotProgress() external view returns (
+		uint256 currentPool,
+		uint256 poolThreshold,
+		uint256 progressBps,
+		uint256 remainingToThreshold,
+		bool canSnapshot
+	) {
+		// UNDERFLOW PROTECTION
+		uint256 pending = _getTotalPendingClaims();
+		uint256 bal = address(this).balance;
+		currentPool = bal > pending ? bal - pending : 0;
+		
+		poolThreshold = getPoolThreshold();
+		
+		// Division by zero protection
+		if (poolThreshold == 0) {
+			progressBps = 0;
+			remainingToThreshold = 0;
+			canSnapshot = false;
+		} else if (currentPool >= poolThreshold) {
+			progressBps = 10000; // 100%
+			remainingToThreshold = 0;
+			canSnapshot = !snapshotTaken && bufferParticipants[activeBuffer].length > 0;
+		} else {
+			progressBps = (currentPool * 10000) / poolThreshold;
+			remainingToThreshold = poolThreshold - currentPool;
+			canSnapshot = false;
+		}
+		
+		return (currentPool, poolThreshold, progressBps, remainingToThreshold, canSnapshot);
+	}
+	
     /**
      * @notice Get user's claimable rounds
      */
@@ -888,7 +1247,7 @@ contract JACKsLPVault is ReentrancyGuard {
 			currentRound,
 			bufferParticipants[bufferIndex].length,
 			address(this).balance - _getTotalPendingClaims(),
-			getPotThreshold(),
+			getPoolThreshold(),
 			snapshotTaken,
 			getMinLpRequired(),
 			getCurrentStage()
