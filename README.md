@@ -1,8 +1,8 @@
 # JACKs Pools – Autonomous Reward Distribution Protocol on Base
 
 ## Documentation
- **Whitepaper:** /whitepaper/WHITEPAPER.md
- **Architecture:** /docs/ARCHITECTURE.md
+ **Whitepaper:** [whitepaper/WHITEPAPER.md](whitepaper/WHITEPAPER.md)  
+ **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 JACKs Pools is an autonomous on-chain reward protocol designed for Base that turns
 trading and liquidity activity into recurring reward rounds for participants.
