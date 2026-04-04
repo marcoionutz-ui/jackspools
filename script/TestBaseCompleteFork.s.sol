@@ -43,14 +43,18 @@ interface IJACKsPools {
 interface IJACKsVault {
     function onTaxReceived() external payable;
     function finalizeRound() external;
-    function claim() external;
+    function claimReward(uint256 roundId) external;
+    function claimMultipleRewards(uint256[] calldata roundIds) external;
     function isRoundReady() external view returns (bool);
-    function claimable(address) external view returns (uint256);
     function getPoolSize() external view returns (uint256);
     function getCurrentThreshold() external view returns (uint256);
-    function cleanupExpiredClaims() external returns (uint256);
+    function cleanupExpiredClaimsForRound(uint256 roundId) external returns (uint256);
+    function cleanupExpiredClaimsBatch(uint256 startRound, uint256 endRound) external returns (uint256);
     function payoutRound() external view returns (uint256);
+    function totalClaimed() external view returns (uint256);
     function getRoundInfo(uint256) external view returns (address recipient, uint256 amount, uint256 timestamp, bool claimed);
+    function getClaimableRounds(address user) external view returns (uint256[] memory roundIds, uint256[] memory amounts);
+    function getUserRoundIds(address user) external view returns (uint256[] memory);
 }
 
 interface IJACKsLPVault {
@@ -625,64 +629,30 @@ contract TestBaseCompleteFork is Script, Test {
         
         console.log("\nChecking for winners...");
         uint256 winnerCount = 0;
-        address winner;
-        
-        for (uint i = 0; i < buyers.length; i++) {
-            uint256 claimAmount = vault.claimable(buyers[i]);
-            if (claimAmount > 0) {
-                winnerCount++;
-                winner = buyers[i];
-                console.log("  Winner found:", buyers[i]);
-                console.log("  Claimable:", claimAmount);
-                
-                vm.startBroadcast(winner);
 
-				uint256 gasStart = gasleft();
-				vault.claim();
-				uint256 gasUsed = gasStart - gasleft();
+        uint256 completedRoundId = vault.payoutRound() - 1;
+        (address winner, uint256 claimAmount,,) = vault.getRoundInfo(completedRoundId);
 
-				vm.stopBroadcast();
-
-				console.log("  [GAS] Buyer Claim:", gasUsed);
-                
-                assertEq(vault.claimable(winner), 0, "Claimable should be 0 after claim");
-                console.log("  PASS: Claimed successfully!");
-            }
-        }
-        
-        for (uint i = 0; i < buyIdx; i++) {
-			address freshBuyer = _getUniqueAddr(string(abi.encodePacked("phase6_fresh_", vm.toString(i))));
-			uint256 claimAmount = vault.claimable(freshBuyer);
-			if (claimAmount > 0) {
-				winnerCount++;
-				winner = freshBuyer;
-				console.log("  Winner found (fresh):", freshBuyer);
-				console.log("  Claimable:", claimAmount);
-				
-				vm.startBroadcast(winner);
-				vault.claim();
-				vm.stopBroadcast();
-				
-				assertEq(vault.claimable(winner), 0, "Claimable should be 0 after claim");
-				console.log("  PASS: Claimed successfully!");
-			}
-		}
-        
-		// Check final buyer separat
-		address finalBuyerCheck = _getUniqueAddr("phase6_final_buyer");
-        uint256 finalClaimAmount = vault.claimable(finalBuyerCheck);
-        if (finalClaimAmount > 0) {
+        if (winner != address(0) && claimAmount > 0) {
             winnerCount++;
-            winner = finalBuyerCheck;
-            console.log("  Winner found (final buyer):", finalBuyerCheck);
-            console.log("  Claimable:", finalClaimAmount);
+            console.log("  Winner found:", winner);
+            console.log("  Claimable:", claimAmount);
+
             vm.startBroadcast(winner);
-            vault.claim();
+
+            uint256 gasStart = gasleft();
+            vault.claimReward(completedRoundId);
+            uint256 gasUsed = gasStart - gasleft();
+
             vm.stopBroadcast();
-            assertEq(vault.claimable(winner), 0, "Claimable should be 0 after claim");
+
+            console.log("  [GAS] Buyer Claim:", gasUsed);
+
+            (,,, bool claimed) = vault.getRoundInfo(completedRoundId);
+            assertEq(claimed, true, "Round should be claimed");
             console.log("  PASS: Claimed successfully!");
         }
-		
+
         assertGt(winnerCount, 0, "Should have at least one winner");
         console.log("\nPhase 6 complete!\n");
     }
@@ -781,7 +751,8 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("Test 2: Buyer Vault cleanup");
         vm.startBroadcast(deployer);
 		uint256 gasStart = gasleft();
-		uint256 recoveredBuyer = vault.cleanupExpiredClaims();
+		uint256 buyerRoundId = vault.payoutRound() > 0 ? vault.payoutRound() - 1 : 0;
+		uint256 recoveredBuyer = vault.cleanupExpiredClaimsForRound(buyerRoundId);
 		uint256 gasUsed = gasStart - gasleft();
 		vm.stopBroadcast();
 		console.log("  [GAS] Buyer Cleanup:", gasUsed);
@@ -1027,7 +998,7 @@ contract TestBaseCompleteFork is Script, Test {
         
         console.log("Step 5: Execute cleanup");
         vm.startBroadcast(deployer);
-        uint256 recovered = vault.cleanupExpiredClaims();
+        uint256 recovered = vault.cleanupExpiredClaimsForRound(currentRoundId);
         vm.stopBroadcast();
         
         console.log("  Recovered:", recovered);
@@ -1203,10 +1174,11 @@ contract TestBaseCompleteFork is Script, Test {
         
         console.log("Test 1: Claim before finalize (should REVERT)");
         address earlyClaimUser = _getUniqueAddr("phase14_early_claim");
-        
+
+        uint256 invalidRoundId = vault.payoutRound();
         vm.startBroadcast(earlyClaimUser);
         vm.expectRevert();
-        vault.claim();
+        vault.claimReward(invalidRoundId);
         vm.stopBroadcast();
         console.log("  PASS: Claim correctly reverted before finalize\n");
         
@@ -1261,13 +1233,13 @@ contract TestBaseCompleteFork is Script, Test {
                 
                 if (amount > 0) {
                     vm.startBroadcast(winner);
-                    vault.claim();
+                    vault.claimReward(roundId);
                     vm.stopBroadcast();
                     console.log("  First claim: SUCCESS");
-                    
+
                     vm.startBroadcast(winner);
                     vm.expectRevert();
-                    vault.claim();
+                    vault.claimReward(roundId);
                     vm.stopBroadcast();
                     console.log("  Second claim: REVERTED (correct)");
                     console.log("  PASS: Double claim protection works\n");

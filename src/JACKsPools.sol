@@ -242,6 +242,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     function enableTrading() external onlyOwner {
         require(!tradingEnabled, "Already enabled");
         require(vaultLocked, "Set vault first");
+        require(address(LP_VAULT) != address(0), "Set LP vault first");
+        require(LP_MANAGER != address(0), "Set LP manager first");
         tradingEnabled = true;
         emit TradingEnabled();
     }
@@ -333,7 +335,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			require(block.timestamp >= sellUnlock[from], "Sell locked 2h");
 		}
         
-		// Propagate sell lock on transfers (not to pair/router/exempt)
+		// Intentional design: sell lock propagates on transfers (anti-dump chain)
+        // WARNING: receiving tokens from a locked wallet imposes that sell lock on recipient
         if (from != PAIR && to != PAIR && !isExempt[to] && !isExempt[from]) {
             if (sellUnlock[from] > sellUnlock[to]) {
                 sellUnlock[to] = sellUnlock[from];
@@ -432,16 +435,16 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 		}
     }
     
-    function _processTaxes() private lockSwap {
+    function _processTaxes() private lockSwap returns (uint256 callerReward) {
 		uint256 localReward = _rewardTokens;
 		uint256 localLp = _lpTokens;
 		uint256 localLpReward = _lpRewardTokens;
 
 		uint256 tokensToProcess = localReward + localLp + localLpReward;
-		if (tokensToProcess == 0) return;
+		if (tokensToProcess == 0) return 0;
 
 		uint256 contractBalance = _balances[address(this)];
-		if (contractBalance == 0) return;
+		if (contractBalance == 0) return 0;
 
 		// Scale locals down if we can't cover them (process subset)
 		if (tokensToProcess > contractBalance) {
@@ -452,7 +455,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 
 			// IMPORTANT: recompute actual processable amount after rounding
 			tokensToProcess = localReward + localLp + localLpReward;
-			if (tokensToProcess == 0) return;
+			if (tokensToProcess == 0) return 0;
 		}
 		
 		// Keep half of LP tokens for addLiquidity, swap the other half
@@ -463,7 +466,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 		uint256 swapLpPart = localLp - lpHalf;
 
 		uint256 tokensToSwap = swapReward + swapLpReward + swapLpPart;
-		if (tokensToSwap == 0) return;
+		if (tokensToSwap == 0) return 0;
 
 		uint256 initialBalance = address(this).balance;
 
@@ -489,13 +492,17 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			_lpRewardTokens -= localLpReward;
 
 			uint256 ethReceived = address(this).balance - initialBalance;
-			if (ethReceived == 0) return;
+			if (ethReceived == 0) return 0;
 
-			uint256 ethForReward = (ethReceived * swapReward) / tokensToSwap;
-			uint256 ethForLpReward = (ethReceived * swapLpReward) / tokensToSwap;
+			// Reserve caller reward before any distribution
+			callerReward = (ethReceived * 30) / 10000; // 0.3%
+			uint256 ethToDistribute = ethReceived - callerReward;
+
+			uint256 ethForReward = (ethToDistribute * swapReward) / tokensToSwap;
+			uint256 ethForLpReward = (ethToDistribute * swapLpReward) / tokensToSwap;
 
 			uint256 allocated = ethForReward + ethForLpReward;
-			uint256 ethForLp = ethReceived > allocated ? ethReceived - allocated : 0;
+			uint256 ethForLp = ethToDistribute > allocated ? ethToDistribute - allocated : 0;
 
 			if (ethForReward > 0 && address(VAULT) != address(0)) {
 				try VAULT.onTaxReceived{value: ethForReward}() {} catch {}
@@ -518,9 +525,20 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 				} catch {}
 			}
 
+			// Reset router allowance (security hardening)
+			uint256 residualAllowance = _allowances[address(this)][address(ROUTER)];
+			if (residualAllowance > 0) {
+				_approve(address(this), address(ROUTER), 0);
+			}
 			emit TaxProcessed(ethForReward + ethForLpReward, ethForLp, 0);
 		} catch {
+			// Reset allowance on failure too (swap failed but approve already executed)
+			uint256 residualAllowance = _allowances[address(this)][address(ROUTER)];
+			if (residualAllowance > 0) {
+				_approve(address(this), address(ROUTER), 0);
+			}
 			// FAILED: storage unchanged -> retry possible next time
+			callerReward = 0;
 			emit TaxProcessingFailed(localReward, localLp, localLpReward, "Swap failed");
 		}
 	}
@@ -539,7 +557,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			}
 		} catch {}
 		
-		return 0; // Fallback to 0 if calculation fails
+		return 0; // Intentional: accepts sandwich risk for liveness when quote fails
 	}
     
     function getLpValue() public view returns (uint256) {
@@ -668,8 +686,14 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     // Emergency function to process stuck taxes (owner only, before renounce)
 	function emergencyProcessTaxes() external onlyOwner {
 		require(!_swapping, "Already processing");
-		if (_rewardTokens + _lpTokens > 0) {
-			_processTaxes();
+		if (_rewardTokens + _lpTokens + _lpRewardTokens > 0) {
+			uint256 reward = _processTaxes();
+			if (reward > 0) {
+				// solhint-disable-next-line avoid-low-level-calls
+				(bool success,) = owner.call{value: reward}("");
+				(success);
+				// Intentionally ignore success - consistent with processTaxes pattern
+			}
 		}
 		// Silent success if nothing to process
 	}
@@ -731,22 +755,16 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     /**
      * @notice Process taxes with optional caller reward
      */
-    function _processTaxesWithReward(address caller) private lockSwap {
-        uint256 ethBefore = address(this).balance;
+    function _processTaxesWithReward(address caller) private {
+		uint256 reward = _processTaxes();
 
-		_processTaxes();
-
-		// Reward caller with 0.3% of generated ETH (not for auto-calls)
+		// Send pre-reserved caller reward
 		if (caller != address(this) && caller != address(0)) {
-			uint256 ethGenerated = address(this).balance - ethBefore;
-			uint256 reward = (ethGenerated * 30) / 10000; // 0.3%
-            
-            if (reward > 0) {
-                (bool success,) = caller.call{value: reward}("");
-                // Intentionally ignore success - silent failure for griefing resistance
-				// Tax processing continues regardless of reward payment status
-            }
-        }
+			if (reward > 0) {
+				(bool success,) = caller.call{value: reward}("");
+				// Intentionally ignore success - silent failure for griefing resistance
+			}
+		}
     }
     
     receive() external payable {

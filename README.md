@@ -8,8 +8,8 @@ JACKs Pools is an autonomous on-chain reward protocol designed for Base that tur
 trading and liquidity activity into recurring reward rounds for participants.
 The protocol combines a buyer reward engine with a competitive liquidity leaderboard,
 creating two autonomous engagement loops for traders and liquidity providers.
-It features permanent, ever-growing liquidity, a buyer reward cycle with a
-4,096-entry circular buffer system, an LP reward cycle for top contributors,
+It features permanent, ever-growing liquidity, a buyer reward cycle using a rotating 
+buffer system (512 active entries per round), an LP reward cycle for top contributors,
 and a regenerative economic model where every interaction (buy, sell, LP add)
 strengthens the protocol.
 
@@ -26,21 +26,30 @@ The system is fully non-custodial and non-ruggable:
 
 ## Mainnet Candidate Status
 
-JACKs Pools has completed full end-to-end on-chain validation on Base Sepolia
-and is currently considered a mainnet candidate.
+JACKs Pools has completed:
 
-All critical flows have been executed on-chain using real transactions,
-multiple wallets, and no privileged access.
+- Full end-to-end on-chain validation on Base Sepolia
+- Full lifecycle simulation on Base mainnet fork (16/16 phases)
+- Invariant validation (accounting, lifecycle, idempotency, permissionlessness)
+
+All core flows have been executed using real transactions, multiple wallets,
+and without privileged access.
+
+The current repository state represents the final immutable mainnet candidate,
+pending deployment.
 
 ### Latest Patch
 
-A minor patch was applied to the reward claim path to correctly mark
-rounds as claimed within the internal accounting structures.
+The Buyer Reward Vault claim system was upgraded to a per-round claim model.
 
-This change ensures accurate UI/state reflection and does not alter
-reward logic, eligibility, or payout mechanics.
+- Rewards are claimed by round ID instead of aggregate balances
+- Multiple rounds can be claimed in a single transaction
+- Expired unclaimed rewards are recycled back into the active pool via cleanup
 
-The patch has been validated on Base Sepolia.
+This improves long-term accounting correctness and removes historical state inconsistencies,
+without changing reward logic or eligibility rules.
+
+The updated system has been fully validated on Base Sepolia.
 
 ## Final Design Decisions (Post-Validation)
 
@@ -54,8 +63,8 @@ decisions were made based on real gas usage, user behavior, and griefing analysi
   Burned tokens are permanently removed from total supply and are not routed
   to any externally owned or contract address.
 
-- The snapshot reveal delay was increased to +25 blocks to further separate
-  snapshot state from randomness revelation.
+- The snapshot reveal delay was increased to strengthen separation between 
+  snapshot state and randomness revelation.
 
 - Additional anti-griefing protections were added:
   reward distribution paths are hardened to safely handle contract wallets
@@ -80,7 +89,9 @@ decisions were made based on real gas usage, user behavior, and griefing analysi
 
 ### 2. `JACKsVault.sol` – Buyer Reward Vault
 
-- 8 × 512 circular entry buffers (4,096 total entries)
+- 8 rotating buffers with 512 slots each
+- Maximum active tickets per single round: 512
+- Buffer rotation is used for snapshot/finalization continuity, not concurrent capacity
 - Round-based reward cycles:
   - entries added only if buy size & token balance meet stage requirements
   - one active entry per address per round
@@ -126,11 +137,11 @@ decisions were made based on real gas usage, user behavior, and griefing analysi
 - Rewards funded entirely through protocol activity
 - Permanent liquidity growth mechanism
 - Competitive liquidity leaderboard for LP contributors
-- Deterministic reward logic based on on-chain state
+- Deterministic reward logic based on on-chain state (with entropy derived from block data and user participation)
 
 ## Integration Simulations (Foundry Scripts)
 
-Instead of classical unit tests, the repo uses full integration simulations running on a Base mainnet fork.
+The repository uses both fork-based full integration simulations and invariant testing. 
 
 ## Validation Artifacts
 

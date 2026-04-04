@@ -274,8 +274,8 @@ contract JACKsLPVault is ReentrancyGuard {
     }
     
     /**
-	 * @notice Finalize round and calculate rewards for top 100
-	 * @dev Distributes pool: 60% to top 10 (proportional), 40% to ranks 11-100 (proportional)
+	 * @notice Finalize round and calculate rewards for top 60
+	 * @dev Distributes pool: 60% to top 10 (proportional), 40% to ranks 11-60 (proportional)
 	 * @dev Participants can finalize immediately, anyone can finalize after 7 days
 	 */
     function finalizeRound() external nonReentrant {
@@ -296,7 +296,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		uint256 poolAmount = address(this).balance - _getTotalPendingClaims();
         
-        // Get top 100 contributors
+        // Get top 60 contributors
 		(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(buffer);		// Ensure we have at least 1 winner
 		require(topContributors.length > 0, "No valid contributions");
 
@@ -337,19 +337,23 @@ contract JACKsLPVault is ReentrancyGuard {
 			}
 		}
 		
-			// Track total distributed amount
-			totalDistributed += poolAmount;
+			// Track actual distributed amount (not poolAmount - avoids integer division dust)
+			uint256 actualDistributed = 0;
+			for (uint256 i = 0; i < topCount + secondaryCount; i++) {
+				actualDistributed += roundRewards[snapshotRound][topContributors[i]];
+			}
+			totalDistributed += actualDistributed;
 			
 			// Mark round as finalized
 			rounds[snapshotRound] = RoundInfo({
-				totalDistributed: poolAmount,
+				totalDistributed: actualDistributed,
 				winnersCount: topContributors.length,
 				timestamp: block.timestamp,
 				finalized: true
 			});
 			
 			// Emit winners in event 
-			emit RoundFinalized(snapshotRound, poolAmount, topContributors.length, topContributors);
+			emit RoundFinalized(snapshotRound, actualDistributed, topContributors.length, topContributors);
         
 			// Allow next snapshot
 			snapshotTaken = false;
@@ -382,7 +386,7 @@ contract JACKsLPVault is ReentrancyGuard {
     /**
 	 * @notice Get top contributors from a buffer (optimized for large participant counts)
 	 * @dev Single-pass insertion sort maintaining top K sorted descending
-	 * @dev Complexity: O(n × k) where n=participants, k=100
+	 * @dev Complexity: O(n × k) where n=participants, k=60
 	 * @dev Gas: ~500k-1M for 400 participants (vs 19M bubble sort)
 	 */
 	function _getTopContributors(uint256 bufferIndex)
@@ -397,7 +401,7 @@ contract JACKsLPVault is ReentrancyGuard {
 			return (new address[](0), new uint256[](0));
 		}
 
-		uint256 k = TOTAL_WINNERS; // 100
+		uint256 k = TOTAL_WINNERS;
 		if (n < k) k = n;
 
 		// Temporary top-k arrays (kept sorted desc)

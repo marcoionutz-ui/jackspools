@@ -530,36 +530,28 @@ contract CoreInvariantTest is Test {
         assertEq(buyerVault.payoutRound(), roundAfter, "VIOLATED: Round changed after revert");
         console.log("PASS: Round unchanged after failed finalize");
         
-        // FIX #2: Use dynamic round tracking (not hardcoded 0)
+        // Use dynamic round tracking
         uint256 buyerRoundId = buyerVault.payoutRound() - 1;
-        
-        // Find winner in buyers array (not wallets)
-        address winner = address(0);
-        for (uint256 i = 0; i < buyers.length; i++) {
-            if (buyerVault.claimable(buyers[i]) > 0) {
-                winner = buyers[i];
-                break;
-            }
-        }
-        
-        if (winner != address(0)) {
-            uint256 claimAmount = buyerVault.claimable(winner);
-            
+
+        // Find winner via getRoundInfo
+        (address winner, uint256 claimAmount,,) = buyerVault.getRoundInfo(buyerRoundId);
+
+        if (winner != address(0) && claimAmount > 0) {
             // First claim - should succeed
             vm.prank(winner);
-            buyerVault.claim();
+            buyerVault.claimReward(buyerRoundId);
             console.log("First claim succeeded:", claimAmount);
-            
-            // Second claim - should revert
+
+            // Second claim - should revert (already claimed)
             vm.prank(winner);
-            // FIX #3: Generic expectRevert (no string matching)
             vm.expectRevert();
-            buyerVault.claim();
+            buyerVault.claimReward(buyerRoundId);
             console.log("PASS: Second claim reverted");
-            
+
             // Verify state
-            assertEq(buyerVault.claimable(winner), 0, "VIOLATED: claimable not reset");
-            console.log("PASS: claimable reset to 0");
+            (,,, bool claimed) = buyerVault.getRoundInfo(buyerRoundId);
+            assertEq(claimed, true, "VIOLATED: round not marked claimed");
+            console.log("PASS: round marked as claimed");
         } else {
             console.log("SKIP: No winner found");
         }
@@ -658,34 +650,26 @@ contract CoreInvariantTest is Test {
         assertEq(roundAfter, roundBefore + 1, "VIOLATED: Round did not increment");
         console.log("Round incremented:", roundBefore, "->", roundAfter);
         
-        // STATE 4: Claim
+       // STATE 4: Claim
         console.log("STATE 4: Claiming");
-        address winner = address(0);
         uint256 buyerRoundId = roundAfter - 1;
-        
-        // Find winner in buyers array (not wallets)
-        for (uint256 i = 0; i < buyers.length; i++) {
-            if (buyerVault.claimable(buyers[i]) > 0) {
-                winner = buyers[i];
-                break;
-            }
-        }
-        
-        if (winner != address(0)) {
+
+        (address winner, uint256 claimAmount,,) = buyerVault.getRoundInfo(buyerRoundId);
+
+        if (winner != address(0) && claimAmount > 0) {
             uint256 balanceBefore = winner.balance;
-            uint256 claimAmount = buyerVault.claimable(winner);
-            
+
             vm.prank(winner);
-            buyerVault.claim();
-            
+            buyerVault.claimReward(buyerRoundId);
+
             uint256 balanceAfter = winner.balance;
             assertEq(balanceAfter - balanceBefore, claimAmount, "VIOLATED: Claim amount mismatch");
             console.log("Claim successful, amount:", claimAmount);
-            
-            // STATE 5: Cleanup (expired)
+
+            // STATE 5: Cleanup (already claimed, recovered should be 0)
             console.log("STATE 5: Cleanup");
             vm.warp(block.timestamp + 31 days);
-            
+
             uint256 recovered = buyerVault.cleanupExpiredClaimsForRound(buyerRoundId);
             console.log("Cleanup recovered:", recovered);
         }
@@ -746,40 +730,33 @@ contract CoreInvariantTest is Test {
         
         uint256 roundId = buyerVault.payoutRound() - 1;
         
-        // Find winner in buyers array (not wallets)
-        address winner = address(0);
-        for (uint256 i = 0; i < buyers.length; i++) {
-            if (buyerVault.claimable(buyers[i]) > 0) {
-                winner = buyers[i];
-                break;
-            }
-        }
-        
+        // Find winner via getRoundInfo
+        (address winner, uint256 claimAmount,,) = buyerVault.getRoundInfo(roundId);
+
         require(winner != address(0), "No winner found");
-        
+
         console.log("\n--- Pre-Claim State ---");
-        uint256 claimAmount = buyerVault.claimable(winner);
         uint256 winnerBalanceBefore = winner.balance;
         uint256 vaultBalanceBefore = address(buyerVault).balance;
         uint256 totalClaimedBefore = buyerVault.totalClaimed();
-        
+
         console.log("Winner: %s", winner);
-        console.log("Claimable: %s", claimAmount);
+        console.log("Reward: %s", claimAmount);
         console.log("Winner balance: %s", winnerBalanceBefore);
         console.log("Vault balance: %s", vaultBalanceBefore);
-        
+
         // CRITICAL: Execute claim
         console.log("\n--- Execute Claim ---");
         vm.prank(winner);
-        buyerVault.claim();
+        buyerVault.claimReward(roundId);
         console.log("Claim executed");
-        
+
         // CRITICAL: Verify transfer
         console.log("\n--- Post-Claim Verification ---");
         uint256 winnerBalanceAfter = winner.balance;
         uint256 vaultBalanceAfter = address(buyerVault).balance;
         uint256 totalClaimedAfter = buyerVault.totalClaimed();
-        
+
         assertEq(
             winnerBalanceAfter,
             winnerBalanceBefore + claimAmount,
@@ -789,7 +766,7 @@ contract CoreInvariantTest is Test {
         console.log("  Before: %s", winnerBalanceBefore);
         console.log("  After: %s", winnerBalanceAfter);
         console.log("  Diff: %s", winnerBalanceAfter - winnerBalanceBefore);
-        
+
         assertEq(
             vaultBalanceAfter,
             vaultBalanceBefore - claimAmount,
@@ -799,33 +776,30 @@ contract CoreInvariantTest is Test {
         console.log("  Before: %s", vaultBalanceBefore);
         console.log("  After: %s", vaultBalanceAfter);
         console.log("  Diff: %s", vaultBalanceBefore - vaultBalanceAfter);
-        
-        assertEq(
-            buyerVault.claimable(winner),
-            0,
-            "VIOLATED: Claimable not cleared"
-        );
-        console.log("PASS: Claimable cleared to 0");
-        
+
+        (,,, bool claimedAfter) = buyerVault.getRoundInfo(roundId);
+        assertEq(claimedAfter, true, "VIOLATED: Round not marked claimed");
+        console.log("PASS: Round marked as claimed");
+
         assertEq(
             totalClaimedAfter,
             totalClaimedBefore + claimAmount,
             "VIOLATED: totalClaimed not updated"
         );
         console.log("PASS: totalClaimed updated correctly");
-        
+
         // CRITICAL: Double claim impossible
         console.log("\n--- Double Claim Prevention ---");
         vm.prank(winner);
         vm.expectRevert();
-        buyerVault.claim();
+        buyerVault.claimReward(roundId);
         console.log("PASS: Double claim reverted");
-        
+
         // Verify balances unchanged after revert
         assertEq(winner.balance, winnerBalanceAfter, "VIOLATED: Balance changed after revert");
         assertEq(address(buyerVault).balance, vaultBalanceAfter, "VIOLATED: Vault changed after revert");
         console.log("PASS: Balances unchanged after failed claim");
-        
+
         console.log("\n=== RESULT: COMPLETE CLAIM LIFECYCLE PASS ===");
     }
     
