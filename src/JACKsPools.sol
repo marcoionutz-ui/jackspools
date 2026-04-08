@@ -61,6 +61,7 @@ interface IUniswapV2Router02 {
 interface IUniswapV2Pair {
     function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
     function token0() external view returns (address);
+	function token1() external view returns (address);
     function sync() external;
 }
 
@@ -579,7 +580,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 		} catch {
 			// Return high value to DISABLE max wallet limit on error
 			// This is safer than returning 0 which activates strictest limit
-			return 1000 ether; // force Stage 5 behavior on error
+			return 300 ether; // force Stage 4 behavior on error (fail-safe compromise)
 		}
 	}
 	
@@ -654,13 +655,16 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 	 * @dev Works with any Uniswap V2 fork
 	 */
 	function _isPair(address account) private view returns (bool) {
-		if (account.code.length == 0) return false; // Not a contract
+		if (account.code.length == 0) return false;
 		
-		try IUniswapV2Pair(account).token0() returns (address) {
-			return true; // Has token0() = is a liquidity pair
-		} catch {
-			return false; // Not a pair
-		}
+		try IUniswapV2Pair(account).token0() returns (address t0) {
+			try IUniswapV2Pair(account).token1() returns (address t1) {
+				return (
+					(t0 == address(this) && t1 == WETH) ||
+					(t1 == address(this) && t0 == WETH)
+				);
+			} catch { return false; }
+		} catch { return false; }
 	}
 	
     // Add initial liquidity

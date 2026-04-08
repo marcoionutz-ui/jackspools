@@ -606,62 +606,7 @@ contract JACKsVault is ReentrancyGuard {
             claimedStatus[i] = rounds[rid].claimed;
         }
     }
-    
-    /**
-     * @notice Get all unclaimed rewards
-     */
-    function getUnclaimedRewards() external view returns (
-        uint256[] memory roundIds,
-        address[] memory recipients,
-        uint256[] memory amounts,
-        uint256[] memory timestamps,
-        uint256[] memory secondsRemaining
-    ) {
-        uint256 unclaimedCount = 0;
-        for (uint256 i = 0; i < payoutRound; i++) {
-            if (!rounds[i].claimed && rounds[i].amount > 0 &&
-                block.timestamp <= rounds[i].timestamp + MAX_CLAIM_DELAY) {
-                unclaimedCount++;
-            }
-        }
         
-        if (unclaimedCount == 0) {
-            return (
-                new uint256[](0),
-                new address[](0),
-                new uint256[](0),
-                new uint256[](0),
-                new uint256[](0)
-            );
-        }
-        
-        roundIds = new uint256[](unclaimedCount);
-        recipients = new address[](unclaimedCount);
-        amounts = new uint256[](unclaimedCount);
-        timestamps = new uint256[](unclaimedCount);
-        secondsRemaining = new uint256[](unclaimedCount);
-        
-        uint256 index = 0;
-        for (uint256 i = 0; i < payoutRound; i++) {
-            if (!rounds[i].claimed && rounds[i].amount > 0 &&
-                block.timestamp <= rounds[i].timestamp + MAX_CLAIM_DELAY) {
-                roundIds[index] = i;
-                recipients[index] = rounds[i].recipient;
-                amounts[index] = rounds[i].amount;
-                timestamps[index] = rounds[i].timestamp;
-                
-                uint256 deadline = rounds[i].timestamp + MAX_CLAIM_DELAY;
-				if (block.timestamp < deadline) {
-                    secondsRemaining[index] = deadline - block.timestamp;
-                } else {
-                    secondsRemaining[index] = 0;
-                }
-                
-                index++;
-            }
-        }
-    }
-    
     /**
      * @notice Get aggregate statistics
      */
@@ -684,37 +629,7 @@ contract JACKsVault is ReentrancyGuard {
 		currentThreshold = getCurrentThreshold();
 		roundReady = snapshotTaken;
 	}
-    
-	/**
-	 * @notice Get current active buffer info
-	 */
-	function getActiveBufferInfo() external view returns (
-		uint256 size,
-		uint256 capacity,
-		uint256 bufferNum
-	) {
-		size = buffers[activeBufferNum].size;
-		capacity = BUFFER_CAPACITY;
-		bufferNum = activeBufferNum;
-	}
-
-	/**
-	 * @notice Get snapshot buffer info
-	 */
-	function getSnapshotBufferInfo() external view returns (
-		uint256 size,
-		bool taken,
-		uint256 timestamp,
-		uint256 roundNumber,
-		uint256 bufferNum
-	) {
-		size = buffers[snapshotBufferNum].size;
-		taken = snapshotTaken;
-		timestamp = snapshotTimestamp;
-		roundNumber = snapshotRound;
-		bufferNum = snapshotBufferNum;
-	}
-
+    	
 	/**
 	 * @notice Get entries from active buffer
 	 */
@@ -753,26 +668,6 @@ contract JACKsVault is ReentrancyGuard {
 		}
 	}
 	
-	/**
-	 * @notice Get number of entries in the current active buffer
-	 */
-	function getTotalActiveEntries() external view returns (uint256) {
-		return buffers[activeBufferNum].size;
-	}
-
-	/**
-	 * @notice Get all buffer statuses (for monitoring)
-	 */
-	function getAllBufferStatuses() external view returns (
-		uint256[8] memory sizes,
-		uint256[8] memory indices
-	) {
-		for (uint256 i = 0; i < BUFFER_COUNT; i++) {
-			sizes[i] = buffers[i].size;
-			indices[i] = buffers[i].index;
-		}
-	}
-	
     /**
      * @notice Get list of unique recipient addresses
      */
@@ -780,52 +675,6 @@ contract JACKsVault is ReentrancyGuard {
         return uniqueRecipients;
     }
     
-    /**
-     * @notice Get top N recipients by total amount received
-     */
-    function getTopRecipients(uint256 count) external view returns (
-        address[] memory topRecipients,
-        uint256[] memory topAmounts
-    ) {
-        uint256 totalUnique = uniqueRecipients.length;
-        if (totalUnique == 0) {
-            return (new address[](0), new uint256[](0));
-        }
-        
-        uint256 resultCount = count > totalUnique ? totalUnique : count;
-        
-        address[] memory allRecipients = new address[](totalUnique);
-        uint256[] memory allAmounts = new uint256[](totalUnique);
-        
-        for (uint256 i = 0; i < totalUnique; i++) {
-            allRecipients[i] = uniqueRecipients[i];
-            allAmounts[i] = recipientHistory[uniqueRecipients[i]];
-        }
-        
-        // Simple bubble sort for small datasets
-        for (uint256 i = 0; i < totalUnique; i++) {
-            for (uint256 j = i + 1; j < totalUnique; j++) {
-                if (allAmounts[j] > allAmounts[i]) {
-                    uint256 tempAmount = allAmounts[i];
-                    allAmounts[i] = allAmounts[j];
-                    allAmounts[j] = tempAmount;
-                    
-                    address tempAddress = allRecipients[i];
-                    allRecipients[i] = allRecipients[j];
-                    allRecipients[j] = tempAddress;
-                }
-            }
-        }
-        
-        topRecipients = new address[](resultCount);
-        topAmounts = new uint256[](resultCount);
-        
-        for (uint256 i = 0; i < resultCount; i++) {
-            topRecipients[i] = allRecipients[i];
-            topAmounts[i] = allAmounts[i];
-        }
-    }
-	
     /**
 	 * @notice Claim reward from a specific round
 	 * @param roundId Round ID to claim
@@ -969,7 +818,9 @@ contract JACKsVault is ReentrancyGuard {
      * @notice Get potential round reward
      */
     function getRoundReward() external view returns (uint256) {
-        uint256 pool = address(this).balance - _getTotalPendingClaims();
+        uint256 rrPending = _getTotalPendingClaims();
+        uint256 rrBal = address(this).balance;
+        uint256 pool = rrBal > rrPending ? rrBal - rrPending : 0;
         if (pool >= getCurrentThreshold()) {
             return pool;
         }
@@ -1064,37 +915,49 @@ contract JACKsVault is ReentrancyGuard {
 			recovered += cleanupExpiredClaimsForRound(i);
 		}
 	}
-
+	
 	/**
-	 * @notice Get list of rounds that need cleanup
-	 * @return roundIds Array of round IDs with expired unclaimed rewards
+	 * @notice Get expired rounds within a range (paginated)
+	 * @dev getExpiredRounds() scans 0..payoutRound and becomes slow over time.
+	 *      Use this for bounded, predictable gas in long-running protocols.
+	 * @param fromRound Start round (inclusive)
+	 * @param toRound End round (exclusive, auto-capped at payoutRound)
 	 */
-	function getExpiredRounds() external view returns (uint256[] memory roundIds) {
+	function getExpiredRoundsInRange(
+		uint256 fromRound,
+		uint256 toRound
+	) external view returns (uint256[] memory roundIds) {
+		if (toRound > payoutRound) toRound = payoutRound;
+		require(fromRound <= toRound, "Invalid range");
+
 		uint256 count = 0;
-		
-		for (uint256 i = 0; i < payoutRound; i++) {
-			if (!rounds[i].claimed && 
+		for (uint256 i = fromRound; i < toRound; i++) {
+			if (
+				!rounds[i].claimed &&
 				rounds[i].amount > 0 &&
-				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
+				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY
+			) {
 				count++;
 			}
 		}
-		
+
 		roundIds = new uint256[](count);
-		uint256 index = 0;
-		
-		for (uint256 i = 0; i < payoutRound; i++) {
-			if (!rounds[i].claimed && 
+		uint256 idx = 0;
+
+		for (uint256 i = fromRound; i < toRound; i++) {
+			if (
+				!rounds[i].claimed &&
 				rounds[i].amount > 0 &&
-				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY) {
-				roundIds[index] = i;
-				index++;
+				block.timestamp > rounds[i].timestamp + MAX_CLAIM_DELAY
+			) {
+				roundIds[idx] = i;
+				idx++;
 			}
 		}
-		
+
 		return roundIds;
 	}
-	
+
 	/**
 	 * @notice Get complete buyer round state in single call
 	 * @dev Batch info for dashboard/header display

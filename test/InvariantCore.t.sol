@@ -276,7 +276,7 @@ contract CoreInvariantTest is Test {
     }
     
     function _fundLPPotToThreshold() internal returns (uint256) {
-        (,, uint256 lpPot, uint256 threshold,,,) = lpVault.getCurrentRoundStatus();
+        (,,,,, uint256 threshold, uint256 lpPot,,,,) = lpVault.getRoundState();
         
         console.log("LP funding with BATCH approach ...");
         
@@ -312,7 +312,7 @@ contract CoreInvariantTest is Test {
             token.processTaxes();
             
             // Now lpPot is ACTUALLY updated - check it
-            (,, lpPot,,,,) = lpVault.getCurrentRoundStatus();
+            (,,,,,, lpPot,,,,) = lpVault.getRoundState();
         }
         
         console.log("  Final lpPot: %s (threshold: %s)", lpPot, threshold);
@@ -458,7 +458,7 @@ contract CoreInvariantTest is Test {
         
         // FORCE funding to threshold
         uint256 lpPot = _fundLPPotToThreshold();
-        (,, uint256 checkPot, uint256 lpThreshold, bool snapshot,,) = lpVault.getCurrentRoundStatus();
+        (,, bool snapshot,,, uint256 lpThreshold, uint256 checkPot,,,,) = lpVault.getRoundState();
         
         console.log("LP Pot:", lpPot);
         console.log("LP Threshold:", lpThreshold);
@@ -567,7 +567,7 @@ contract CoreInvariantTest is Test {
         
         _fundLPPotToThreshold();
         
-        (,,,, bool snapshot,,) = lpVault.getCurrentRoundStatus();
+        (,, bool snapshot,,,,,,,,) = lpVault.getRoundState();
         
         if (snapshot) {
             address participant = wallets[0];
@@ -687,7 +687,7 @@ contract CoreInvariantTest is Test {
         // Fund pot
         _fundLPPotToThreshold();
         
-        (,,,, bool snapshot,,) = lpVault.getCurrentRoundStatus();
+        (,, bool snapshot,,,,,,,,) = lpVault.getRoundState();
         
         if (snapshot) {
             console.log("STATE 2: LP Snapshot taken");
@@ -1100,7 +1100,7 @@ contract CoreInvariantTest is Test {
 		
         _fundLPPotToThreshold();
         
-        (,,,, bool snapshot,,) = lpVault.getCurrentRoundStatus();
+       (,, bool snapshot,,,,,,,,) = lpVault.getRoundState();
         
         if (snapshot) {
             // Wait for 7-day timeout

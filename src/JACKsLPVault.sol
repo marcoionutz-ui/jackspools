@@ -167,7 +167,7 @@ contract JACKsLPVault is ReentrancyGuard {
 	
     /**
 	 * @notice Record LP contribution from user
-	 * @dev Called by token contract when user adds LP through site
+	 * @dev Called by LP_MANAGER (or token contract) when user adds LP through site
 	 * @dev Accepts any amount - eligibility based on lifetime contributions
 	 */
 	function recordLpContribution(address user, uint256 ethAmount) external {
@@ -682,134 +682,7 @@ contract JACKsLPVault is ReentrancyGuard {
     // ============================================
     // VIEW FUNCTIONS
     // ============================================
-    
-    /**
-	 * @notice Get leaderboard - top contributors in current round
-	 */
-	function getLeaderboard(uint256 count) external view returns (
-		address[] memory addresses,
-		uint256[] memory contributions,
-		uint256[] memory estimatedRewards
-	) {
-		// Use snapshot buffer if snapshot taken, otherwise active buffer
-		uint256 bufferIndex = snapshotTaken ? snapshotBuffer : activeBuffer;
-		uint256 participants = bufferParticipants[bufferIndex].length;
-		uint256 returnCount = participants < count ? participants : count;
-		
-		(address[] memory topAddresses, uint256[] memory topContributions) = _getTopContributors(bufferIndex);
-		
-		addresses = new address[](returnCount);
-		contributions = new uint256[](returnCount);
-		estimatedRewards = new uint256[](returnCount);
-		
-		uint256 poolAmount = address(this).balance - _getTotalPendingClaims();
-		
-		// Determine actual counts
-		uint256 topCount = topAddresses.length < TOP_WINNERS ? topAddresses.length : TOP_WINNERS;
-		uint256 secondaryCount = topAddresses.length > TOP_WINNERS ? 
-			(topAddresses.length < TOTAL_WINNERS ? topAddresses.length - TOP_WINNERS : SECONDARY_WINNERS) : 0;
-		
-		// Calculate top tier total (ranks 1-10)
-		uint256 topTierTotal = 0;
-		for (uint256 i = 0; i < topCount; i++) {
-			topTierTotal += topContributions[i];
-		}
-		
-		// Calculate secondary tier total (ranks 11-60)
-		uint256 secondaryTotal = 0;
-		for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
-			secondaryTotal += topContributions[i];
-		}
-		
-		// Assign data with tier-aware reward estimation - FIXED: combined multiply-divide
-		for (uint256 i = 0; i < returnCount; i++) {
-			addresses[i] = topAddresses[i];
-			contributions[i] = topContributions[i];
-			
-			if (i < topCount && topTierTotal > 0) {
-				// Top 10: share of 60% pool - FIXED: combined operation
-				estimatedRewards[i] = (poolAmount * 6000 * topContributions[i]) / (10000 * topTierTotal);
-			} else if (i >= topCount && i < topCount + secondaryCount && secondaryTotal > 0) {
-				// Ranks 11-60: share of 40% pool - FIXED: combined operation
-				estimatedRewards[i] = (poolAmount * 4000 * topContributions[i]) / (10000 * secondaryTotal);
-			} else {
-				estimatedRewards[i] = 0;
-			}
-		}
-		
-		return (addresses, contributions, estimatedRewards);
-	}
-    
-    /**
-	 * @notice Get user stats
-	 */
-	function getUserStats(address user) external view returns (
-		uint256 currentContribution,
-		uint256 lifetimeContribution,
-		uint256 currentRank,
-		uint256 estimatedReward,
-		uint256 unclaimedRewards
-	) {
-		// Use snapshot buffer if snapshot taken, otherwise active buffer
-		uint256 bufferIndex = snapshotTaken ? snapshotBuffer : activeBuffer;
-		currentContribution = bufferContributions[bufferIndex][user];
-		lifetimeContribution = lifetimeContributions[user];
-		
-		// Calculate rank
-		currentRank = 0;
-		address[] memory participants = bufferParticipants[bufferIndex];
-		for (uint256 i = 0; i < participants.length; i++) {
-			if (bufferContributions[bufferIndex][participants[i]] > currentContribution) {
-				currentRank++;
-			}
-		}
-		currentRank++; // 1-indexed
-		
-		// Tier-aware estimated reward calculation 
-		if (currentContribution > 0 && currentRank <= TOTAL_WINNERS) {
-			(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(bufferIndex);
-			
-			uint256 poolAmount = address(this).balance - _getTotalPendingClaims();
-			uint256 topCount = topContributors.length < TOP_WINNERS ? topContributors.length : TOP_WINNERS;
-			
-			if (currentRank <= TOP_WINNERS) {
-				// User in top 10 - FIXED: combined operation
-				uint256 topTierTotal = 0;
-				for (uint256 i = 0; i < topCount; i++) {
-					topTierTotal += contributions[i];
-				}
-				
-				if (topTierTotal > 0) {
-					estimatedReward = (poolAmount * 6000 * currentContribution) / (10000 * topTierTotal);
-				}
-			} else {
-				// User in ranks 11-60 - FIXED: combined operation
-				uint256 secondaryCount = topContributors.length > TOP_WINNERS ? 
-					(topContributors.length < TOTAL_WINNERS ? topContributors.length - TOP_WINNERS : SECONDARY_WINNERS) : 0;
-				
-				uint256 secondaryTotal = 0;
-				for (uint256 i = topCount; i < topCount + secondaryCount; i++) {
-					secondaryTotal += contributions[i];
-				}
-				
-				if (secondaryTotal > 0) {
-					estimatedReward = (poolAmount * 4000 * currentContribution) / (10000 * secondaryTotal);
-				}
-			}
-		}
-			
-		// Unclaimed rewards
-		for (uint256 i = 0; i < currentRound; i++) {
-			if (!hasClaimed[i][user] && roundRewards[i][user] > 0) {
-				if (block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE) {
-					unclaimedRewards += roundRewards[i][user];
-				}
-			}
-		}
-		
-		return (currentContribution, lifetimeContribution, currentRank, estimatedReward, unclaimedRewards);
-	}
-    
+        
 	/**
 	 * @notice Get leaderboard from specified buffer (supports Top 100)
 	 * @dev Generic function - can query any buffer (active or snapshot)
@@ -1087,47 +960,91 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		return (currentPool, poolThreshold, progressBps, remainingToThreshold, canSnapshot);
 	}
-	
-    /**
-     * @notice Get user's claimable rounds
-     */
-    function getClaimableRounds(address user) external view returns (
-        uint256[] memory roundIds,
-        uint256[] memory amounts
-    ) {
-        // Count claimable
-        uint256 count = 0;
-        for (uint256 i = 0; i < currentRound; i++) {
-            if (
-                rounds[i].finalized &&
-                !hasClaimed[i][user] &&
-                roundRewards[i][user] > 0 &&
-                block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE
-            ) {
-                count++;
-            }
-        }
-        
-        roundIds = new uint256[](count);
-        amounts = new uint256[](count);
-        
-        uint256 index = 0;
-        for (uint256 i = 0; i < currentRound; i++) {
-            if (
-                rounds[i].finalized &&
-                !hasClaimed[i][user] &&
-                roundRewards[i][user] > 0 &&
-                block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE
-            ) {
-                roundIds[index] = i;
-                amounts[index] = roundRewards[i][user];
-                index++;
-            }
-        }
-        
-        return (roundIds, amounts);
-    }
-    
+	        
+	/**
+	 * @notice Get unclaimed rewards for a user within a round range (paginated)
+	 * @dev getUserStats().unclaimedRewards is disabled (unbounded loop, immutable protocol).
+	 *      Use this function for accurate, bounded queries.
+	 *      CLAIM_DEADLINE is 30 days — only recent rounds can have claimable rewards.
+	 *      fromRound/toRound should be determined by indexer from RoundFinalized events,
+	 *      not hardcoded — round frequency varies by stage and trading activity.
+	 * @param user Address to check
+	 * @param fromRound Start round (inclusive)
+	 * @param toRound End round (exclusive, auto-capped at currentRound)
+	 * @return total Sum of unclaimed non-expired rewards in range
+	 */
+	function getUnclaimedRewardsInRange(
+		address user,
+		uint256 fromRound,
+		uint256 toRound
+	) external view returns (uint256 total) {
+		if (toRound > currentRound) toRound = currentRound;
+		require(fromRound <= toRound, "Invalid range");
+
+		for (uint256 i = fromRound; i < toRound; i++) {
+			if (
+				!hasClaimed[i][user] &&
+				roundRewards[i][user] > 0 &&
+				block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE
+			) {
+				total += roundRewards[i][user];
+			}
+		}
+	}
+
+	/**
+	 * @notice Get user's claimable rounds within a range (paginated)
+	 * @dev getClaimableRounds() scans 0..currentRound and becomes slow over time.
+	 *      Use this for bounded, predictable gas in long-running protocols.
+	 *      fromRound/toRound should be determined by indexer from RoundFinalized events,
+	 *      not hardcoded — round frequency varies by stage and trading activity.
+	 * @param user Address to check
+	 * @param fromRound Start round (inclusive)
+	 * @param toRound End round (exclusive, auto-capped at currentRound)
+	 */
+	function getClaimableRoundsInRange(
+		address user,
+		uint256 fromRound,
+		uint256 toRound
+	) external view returns (
+		uint256[] memory roundIds,
+		uint256[] memory amounts
+	) {
+		if (toRound > currentRound) toRound = currentRound;
+		require(fromRound <= toRound, "Invalid range");
+
+		uint256 count = 0;
+		for (uint256 i = fromRound; i < toRound; i++) {
+			if (
+				rounds[i].finalized &&
+				!hasClaimed[i][user] &&
+				roundRewards[i][user] > 0 &&
+				block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE
+			) {
+				count++;
+			}
+		}
+
+		roundIds = new uint256[](count);
+		amounts = new uint256[](count);
+		uint256 idx = 0;
+
+		for (uint256 i = fromRound; i < toRound; i++) {
+			if (
+				rounds[i].finalized &&
+				!hasClaimed[i][user] &&
+				roundRewards[i][user] > 0 &&
+				block.timestamp <= rounds[i].timestamp + CLAIM_DEADLINE
+			) {
+				roundIds[idx] = i;
+				amounts[idx] = roundRewards[i][user];
+				idx++;
+			}
+		}
+
+		return (roundIds, amounts);
+	}
+
 	/**
 	 * @notice Cleanup expired claims for a specific round
 	 * @dev Permissive: processes provided winners, verifies via roundRewards
@@ -1189,84 +1106,47 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		return recovered;
 	}
-
-	/**
-	 * @notice Get list of rounds that need cleanup
-	 * @dev Returns only round IDs - caller must fetch winner lists from RoundFinalized events
-	 * @return roundIds Array of round IDs with expired unclaimed rewards
-	 */
-	function getExpiredRounds() external view returns (uint256[] memory roundIds) {
-		uint256 count = 0;
 		
-		// Count expired rounds
-		for (uint256 i = 0; i < currentRound; i++) {
-			if (rounds[i].finalized && 
-				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE) {
+    /**
+	 * @notice Get expired rounds within a range (paginated)
+	 * @dev getExpiredRounds() scans 0..currentRound and becomes slow over time.
+	 *      Use this for bounded, predictable gas in long-running protocols.
+	 * @param fromRound Start round (inclusive)
+	 * @param toRound End round (exclusive, auto-capped at currentRound)
+	 */
+	function getExpiredRoundsInRange(
+		uint256 fromRound,
+		uint256 toRound
+	) external view returns (uint256[] memory roundIds) {
+		if (toRound > currentRound) toRound = currentRound;
+		require(fromRound <= toRound, "Invalid range");
+
+		uint256 count = 0;
+		for (uint256 i = fromRound; i < toRound; i++) {
+			if (
+				rounds[i].finalized &&
+				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE
+			) {
 				count++;
 			}
 		}
-		
+
 		roundIds = new uint256[](count);
-		uint256 index = 0;
-		
-		for (uint256 i = 0; i < currentRound; i++) {
-			if (rounds[i].finalized && 
-				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE) {
-				roundIds[index] = i;
-				index++;
+		uint256 idx = 0;
+
+		for (uint256 i = fromRound; i < toRound; i++) {
+			if (
+				rounds[i].finalized &&
+				block.timestamp > rounds[i].timestamp + CLAIM_DEADLINE
+			) {
+				roundIds[idx] = i;
+				idx++;
 			}
 		}
-		
+
 		return roundIds;
 	}
-	
-    /**
-     * @notice Get round info
-     */
-    function getRoundInfo(uint256 roundId) external view returns (
-        uint256 roundDistributed,
-        uint256 winnersCount,
-        uint256 timestamp,
-        bool finalized
-    ) {
-        RoundInfo memory info = rounds[roundId];
-        return (info.totalDistributed, info.winnersCount, info.timestamp, info.finalized);
-    }
-    
-    /**
-     * @notice Get current round status
-     */
-    function getCurrentRoundStatus() external view returns (
-		uint256 roundId,
-		uint256 participants,
-		uint256 poolBalance,
-		uint256 threshold,
-		bool snapshotTaken_,
-		uint256 minLpRequired,
-		uint256 stage
-	) {
-		// Use snapshot buffer if snapshot taken, otherwise active buffer
-		uint256 bufferIndex = snapshotTaken ? snapshotBuffer : activeBuffer;
-		return (
-			currentRound,
-			bufferParticipants[bufferIndex].length,
-			address(this).balance - _getTotalPendingClaims(),
-			getPoolThreshold(),
-			snapshotTaken,
-			getMinLpRequired(),
-			getCurrentStage()
-		);
-	}
-	
-	/**
-     * @notice Get snapshot buffer index
-     * @dev Returns which buffer is currently frozen for finalization
-     * @return bufferIndex The snapshot buffer (0 or 1)
-     */
-    function getSnapshotBuffer() external view returns (uint256) {
-        return snapshotTaken ? snapshotBuffer : activeBuffer;
-    }
-	
+
 	/**
 	 * @notice Check if user is eligible for LP Reward Round
 	 * @param user Address to check

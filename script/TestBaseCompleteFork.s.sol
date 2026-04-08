@@ -82,7 +82,8 @@ interface IJACKsLPVault {
         address[][] calldata winnersPerRound
     ) external returns (uint256);
     
-    function getExpiredRounds() external view returns (uint256[] memory);
+    function getExpiredRoundsInRange(uint256 fromRound, uint256 toRound) external view returns (uint256[] memory);
+	function currentRound() external view returns (uint256);
 }
 
 interface IJACKsLPManager {
@@ -763,7 +764,7 @@ contract TestBaseCompleteFork is Script, Test {
 		vm.startBroadcast(deployer);
 
 		// Get expired rounds (if any)
-		uint256[] memory expiredRounds = lpVault.getExpiredRounds();
+		uint256[] memory expiredRounds = lpVault.getExpiredRoundsInRange(0, lpVault.currentRound());
 
 		if (expiredRounds.length > 0) {
 			console.log("  Found", expiredRounds.length, "expired rounds");
