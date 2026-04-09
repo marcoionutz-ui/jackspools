@@ -1,82 +1,9 @@
-Compiling 1 files with Solc 0.8.33
-Solc 0.8.33 finished in 3.54s
-Compiler run successful with warnings:
-Warning (2519): This declaration shadows an existing declaration.
-   --> script/TestBaseCompleteFork.s.sol:640:5:
-    |
-640 | 				uint256 gasStart = gasleft();
-    | 				^^^^^^^^^^^^^^^^
-Note: The shadowed declaration is here:
-   --> script/TestBaseCompleteFork.s.sol:617:3:
-    |
-617 | 		uint256 gasStart = gasleft();
-    | 		^^^^^^^^^^^^^^^^
-
-Warning (2519): This declaration shadows an existing declaration.
-   --> script/TestBaseCompleteFork.s.sol:642:5:
-    |
-642 | 				uint256 gasUsed = gasStart - gasleft();
-    | 				^^^^^^^^^^^^^^^
-Note: The shadowed declaration is here:
-   --> script/TestBaseCompleteFork.s.sol:619:3:
-    |
-619 | 		uint256 gasUsed = gasStart - gasleft();
-    | 		^^^^^^^^^^^^^^^
-
-Warning (2519): This declaration shadows an existing declaration.
-   --> script/TestBaseCompleteFork.s.sol:757:5:
-    |
-757 | 				uint256 gasUsed = gasStart - gasleft();
-    | 				^^^^^^^^^^^^^^^
-Note: The shadowed declaration is here:
-   --> script/TestBaseCompleteFork.s.sol:745:3:
-    |
-745 | 		uint256 gasUsed = gasStart - gasleft();
-    | 		^^^^^^^^^^^^^^^
-
-Warning (2519): This declaration shadows an existing declaration.
-   --> script/TestBaseCompleteFork.s.sol:755:4:
-    |
-755 | 			uint256 gasStart = gasleft();
-    | 			^^^^^^^^^^^^^^^^
-Note: The shadowed declaration is here:
-   --> script/TestBaseCompleteFork.s.sol:743:3:
-    |
-743 | 		uint256 gasStart = gasleft();
-    | 		^^^^^^^^^^^^^^^^
-
-Warning (2519): This declaration shadows an existing declaration.
-   --> script/TestBaseCompleteFork.s.sol:806:4:
-    |
-806 | 			uint256 gasStart = gasleft();
-    | 			^^^^^^^^^^^^^^^^
-Note: The shadowed declaration is here:
-   --> script/TestBaseCompleteFork.s.sol:783:3:
-    |
-783 | 		uint256 gasStart = gasleft();
-    | 		^^^^^^^^^^^^^^^^
-
-Warning (2519): This declaration shadows an existing declaration.
-   --> script/TestBaseCompleteFork.s.sol:808:4:
-    |
-808 | 			uint256 gasUsed = gasStart - gasleft();
-    | 			^^^^^^^^^^^^^^^
-Note: The shadowed declaration is here:
-   --> script/TestBaseCompleteFork.s.sol:785:3:
-    |
-785 | 		uint256 gasUsed = gasStart - gasleft();
-    | 		^^^^^^^^^^^^^^^
-
-Warning (2018): Function state mutability can be restricted to view
-    --> script/TestBaseCompleteFork.s.sol:1142:5:
-     |
-1142 |     function phase16_FinalReport() internal {
-     |     ^ (Relevant source part starts here and spans across multiple lines).
-
+[⠊] Compiling...
+No files changed, compilation skipped
 Script ran successfully.
 
 == Logs ==
-  
+
 =============================================================================
       JACKS POOLS - BASE L2 COMPLETE FORK TEST (ENHANCED)
   =============================================================================
@@ -94,7 +21,7 @@ Script ran successfully.
   Pair address: 0xBb5F6de7115d1f1532eB1EaadCFD9170a6cd1A94
   Vault deployed: 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496
   LPVault deployed: 0x34A1D3fff3958843C43aD80F30b94c510645C316
-  LPManager deployed: 0x90193C961A926261B756D1E5bb255e67ff9498A1 
+  LPManager deployed: 0x90193C961A926261B756D1E5bb255e67ff9498A1
 
   Configuring contracts...
   Configuration complete
@@ -102,7 +29,7 @@ Script ran successfully.
   Adding initial liquidity (0.5 ETH)...
   LP Value: 1000000000000000000
   Trading enabled: true
-  
+
 Phase 1 complete!
 
   =============================================================================
@@ -111,29 +38,29 @@ Phase 1 complete!
 
   Executing 20 buys ( 1 finney each)...
 
-    [GAS] Buy: 416032
-    [GAS] Buy: 323248
-    [GAS] Buy: 279448
-    [GAS] Buy: 279448
-    [GAS] Buy: 279449
-    [GAS] Buy: 279449
-    [GAS] Buy: 279450
-    [GAS] Buy: 279450
-    [GAS] Buy: 279450
-    [GAS] Buy: 279450
-    [GAS] Buy: 279450
-    [GAS] Buy: 279451
-    [GAS] Buy: 279451
-    [GAS] Buy: 279452
-    [GAS] Buy: 279452
-    [GAS] Buy: 279452
-    [GAS] Buy: 279452
-    [GAS] Buy: 279453
-    [GAS] Buy: 279453
-    [GAS] Buy: 279454
+    [GAS] Buy: 416176
+    [GAS] Buy: 323393
+    [GAS] Buy: 279593
+    [GAS] Buy: 279594
+    [GAS] Buy: 279594
+    [GAS] Buy: 279595
+    [GAS] Buy: 279595
+    [GAS] Buy: 279595
+    [GAS] Buy: 279595
+    [GAS] Buy: 279596
+    [GAS] Buy: 279596
+    [GAS] Buy: 279596
+    [GAS] Buy: 279597
+    [GAS] Buy: 279597
+    [GAS] Buy: 279597
+    [GAS] Buy: 279598
+    [GAS] Buy: 279598
+    [GAS] Buy: 279598
+    [GAS] Buy: 279599
+    [GAS] Buy: 279599
   20 buys completed
   Buyer pool size: 0
-  
+
 Phase 2 complete!
 
   =============================================================================
@@ -141,11 +68,11 @@ Phase 2 complete!
   =============================================================================
 
   Processing accumulated taxes...
-    [GAS] Process Taxes: 239454
+    [GAS] Process Taxes: 277643
   Tax processing complete
   Pool before: 0
-  Pool after: 1596697781753996
-  
+  Pool after: 1591907688408735
+
 Phase 3 complete!
 
   =============================================================================
@@ -154,24 +81,24 @@ Phase 3 complete!
 
   Testing sell taxes fund LP pot + Auto LP burn...
 
-  DEAD's LP tokens before: 22369565707076107889117
-  
+  DEAD's LP tokens before: 22369543385945119431181
+
 Waiting 2 hours for sell lock to expire...
   Executing 5 sells...
-    [GAS] Sell: 134485
-    [GAS] Sell: 91869
-    [GAS] Sell: 91869
-    [GAS] Sell: 91870
-    [GAS] Sell: 91869
-    [GAS] Process Taxes: 228666
-  
-LP Reward pool: 23741381628113
+    [GAS] Sell: 134481
+    [GAS] Sell: 91866
+    [GAS] Sell: 91866
+    [GAS] Sell: 91866
+    [GAS] Sell: 91867
+    [GAS] Process Taxes: 258984
+
+LP Reward pool: 23670157442400
   PASS: LP pot funded from sell taxes
-  
-DEAD's LP tokens after: 22370078396321991738964
-  LP tokens burned: 512689245883849847
+
+DEAD's LP tokens after: 22370054542688700913081
+  LP tokens burned: 511156743581481900
   PASS: Auto LP burn VERIFIED!
-  
+
 Phase 4 complete!
 
   =============================================================================
@@ -181,30 +108,30 @@ Phase 4 complete!
   Testing NEW feature: Lifetime LP eligibility
 
   LP providers buying tokens from pool...
-    [GAS] Buy: 318446
-    [GAS] Buy: 279463
-    [GAS] Buy: 279463
-    [GAS] Buy: 279463
-    [GAS] Buy: 279463
-    [GAS] Buy: 279464
-    [GAS] Buy: 279464
-    [GAS] Buy: 279464
-    [GAS] Buy: 279464
-    [GAS] Buy: 279464
-    [GAS] Buy: 279465
-    [GAS] Buy: 279465
-    [GAS] Buy: 279465
-    [GAS] Buy: 279466
-    [GAS] Buy: 279466
+    [GAS] Buy: 318591
+    [GAS] Buy: 279608
+    [GAS] Buy: 279609
+    [GAS] Buy: 279609
+    [GAS] Buy: 279609
+    [GAS] Buy: 279609
+    [GAS] Buy: 279610
+    [GAS] Buy: 279610
+    [GAS] Buy: 279610
+    [GAS] Buy: 279610
+    [GAS] Buy: 279610
+    [GAS] Buy: 279610
+    [GAS] Buy: 279611
+    [GAS] Buy: 279611
+    [GAS] Buy: 279612
     All LP providers bought tokens
 
   Waiting 2 hours for sell lock to expire...
-    Test user token balance: 8290123319437022348760733
-  
+    Test user token balance: 8290123249616303813786862
+
 Test 1: First LP addition (below threshold)
-    Tokens used: 3316049327774808939504293
-    ETH used: 2328587217806043
-    Lifetime contributions: 2328587217806043
+    Tokens used: 3316049299846521525514744
+    ETH used: 2328587824375300
+    Lifetime contributions: 2328587824375300
     Eligible: false
     PASS: First LP added
 
@@ -212,16 +139,16 @@ Test 1: First LP addition (below threshold)
     All LPs added liquidity
 
   Test 3: First user adds second LP
-    Tokens used: 2487036995831106704628220
-    ETH used: 1746440413354532
-    Lifetime contributions: 4075027631160575
+    Tokens used: 2487036974884891144136059
+    ETH used: 1746440868281475
+    Lifetime contributions: 4075028692656775
     Eligible: false
     PASS: Lifetime eligibility system works!
     (Note: Pool too small to reach threshold in test)
     (In production with larger pools, threshold is reachable)
 
     Total LP participants: 0
-    LP pool balance: 23741381628113
+    LP pool balance: 23670157442400
     PASS: Multiple LPs added successfully
 
   Phase 5 complete!
@@ -231,618 +158,619 @@ Test 1: First LP addition (below threshold)
   =============================================================================
 
   Funding buyer pot to threshold via MORE BUYS...
-    Current pool: 1596697781753996
+    Current pool: 1591907688408735
     Threshold: 150000000000000000
-    [GAS] Buy: 278659
-    [GAS] Process Taxes: 218370
+    [GAS] Buy: 278805
+    [GAS] Process Taxes: 259623
       Processed taxes after buy 0
-      Pool now: 8613406609175393
-    [GAS] Buy: 318460
-    [GAS] Buy: 279476
-    [GAS] Buy: 279477
-    [GAS] Buy: 279478
-    [GAS] Buy: 279478
-    [GAS] Process Taxes: 238270
-      Processed taxes after buy 5
-      Pool now: 10604981198234168
-    [GAS] Buy: 318463
-    [GAS] Buy: 279480
-    [GAS] Buy: 279480
-    [GAS] Buy: 279481
-    [GAS] Buy: 279481
-    [GAS] Process Taxes: 238270
-      Processed taxes after buy 10
-      Pool now: 12594370044050079
-    [GAS] Buy: 318466
-    [GAS] Buy: 279483
-    [GAS] Buy: 279484
-    [GAS] Buy: 279484
-    [GAS] Buy: 279484
-    [GAS] Process Taxes: 238270
-      Processed taxes after buy 15
-      Pool now: 14581713743684927
-    [GAS] Buy: 318470
-    [GAS] Buy: 279486
-    [GAS] Buy: 279487
-    [GAS] Buy: 279487
-    [GAS] Buy: 279488
-    [GAS] Process Taxes: 224332
-      Processed taxes after buy 20
-      Pool now: 16567139762659433
-    [GAS] Buy: 318473
-    [GAS] Buy: 279489
-    [GAS] Buy: 279489
-    [GAS] Buy: 279490
-    [GAS] Buy: 279491
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 25
-      Pool now: 18550764020681564
-    [GAS] Buy: 318476
-    [GAS] Buy: 279492
-    [GAS] Buy: 279493
-    [GAS] Buy: 279494
-    [GAS] Buy: 279494
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 30
-      Pool now: 20532692244438475
-    [GAS] Buy: 318479
-    [GAS] Buy: 279495
-    [GAS] Buy: 279496
-    [GAS] Buy: 279497
-    [GAS] Buy: 279497
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 35
-      Pool now: 22513021127013703
-    [GAS] Buy: 318482
-    [GAS] Buy: 279499
-    [GAS] Buy: 279500
-    [GAS] Buy: 279499
-    [GAS] Buy: 279500
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 40
-      Pool now: 24491839327953019
-    [GAS] Buy: 318486
-    [GAS] Buy: 279502
-    [GAS] Buy: 279503
-    [GAS] Buy: 279503
-    [GAS] Buy: 279503
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 45
-      Pool now: 26469228338727645
-    [GAS] Buy: 318489
-    [GAS] Buy: 279505
-    [GAS] Buy: 279505
-    [GAS] Buy: 279506
-    [GAS] Buy: 279507
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 50
-      Pool now: 28445263234757172
-    [GAS] Buy: 318492
-    [GAS] Buy: 279508
-    [GAS] Buy: 279509
-    [GAS] Buy: 279509
-    [GAS] Buy: 279510
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 55
-      Pool now: 30420013331373140
-    [GAS] Buy: 318495
-    [GAS] Buy: 279511
-    [GAS] Buy: 279512
-    [GAS] Buy: 279512
-    [GAS] Buy: 279513
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 60
-      Pool now: 32393542758075587
-    [GAS] Buy: 318498
-    [GAS] Buy: 279514
-    [GAS] Buy: 279515
-    [GAS] Buy: 279516
-    [GAS] Buy: 279516
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 65
-      Pool now: 34365910962994609
-    [GAS] Buy: 318501
-    [GAS] Buy: 279518
-    [GAS] Buy: 279518
-    [GAS] Buy: 279519
-    [GAS] Buy: 279519
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 70
-      Pool now: 36337173157491492
-    [GAS] Buy: 318504
-    [GAS] Buy: 279520
-    [GAS] Buy: 279522
-    [GAS] Buy: 279522
-    [GAS] Buy: 279522
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 75
-      Pool now: 38307380709222906
-    [GAS] Buy: 318508
-    [GAS] Buy: 279524
-    [GAS] Buy: 279525
-    [GAS] Buy: 279525
-    [GAS] Buy: 279526
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 80
-      Pool now: 40276581490672330
-    [GAS] Buy: 318511
-    [GAS] Buy: 279527
-    [GAS] Buy: 279528
-    [GAS] Buy: 279528
-    [GAS] Buy: 279529
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 85
-      Pool now: 42244820189067211
-    [GAS] Buy: 318514
-    [GAS] Buy: 279531
-    [GAS] Buy: 279531
-    [GAS] Buy: 279531
-    [GAS] Buy: 279532
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 90
-      Pool now: 44212138582702795
-    [GAS] Buy: 318517
-    [GAS] Buy: 279533
-    [GAS] Buy: 279534
-    [GAS] Buy: 279535
-    [GAS] Buy: 279535
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 95
-      Pool now: 46178575787948247
-    [GAS] Buy: 318521
-    [GAS] Buy: 279537
-    [GAS] Buy: 279537
-    [GAS] Buy: 279538
-    [GAS] Buy: 279539
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 100
-      Pool now: 48144168480589131
-    [GAS] Buy: 318524
-    [GAS] Buy: 279540
-    [GAS] Buy: 279540
-    [GAS] Buy: 279541
-    [GAS] Buy: 279541
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 105
-      Pool now: 50108951094639936
-    [GAS] Buy: 318526
-    [GAS] Buy: 279543
-    [GAS] Buy: 279544
-    [GAS] Buy: 279544
-    [GAS] Buy: 279544
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 110
-      Pool now: 52072956001322917
-    [GAS] Buy: 318530
-    [GAS] Buy: 279546
-    [GAS] Buy: 279547
-    [GAS] Buy: 279547
-    [GAS] Buy: 279548
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 115
-      Pool now: 54036213670540519
-    [GAS] Buy: 318533
-    [GAS] Buy: 279549
-    [GAS] Buy: 279550
-    [GAS] Buy: 279550
-    [GAS] Buy: 279551
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 120
-      Pool now: 55998752816856236
-    [GAS] Buy: 318536
-    [GAS] Buy: 279553
-    [GAS] Buy: 279553
-    [GAS] Buy: 279554
-    [GAS] Buy: 279554
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 125
-      Pool now: 57960600531733371
-    [GAS] Buy: 318539
-    [GAS] Buy: 279556
-    [GAS] Buy: 279556
-    [GAS] Buy: 279557
-    [GAS] Buy: 279557
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 130
-      Pool now: 59921782403554980
-    [GAS] Buy: 318542
-    [GAS] Buy: 279558
-    [GAS] Buy: 279560
-    [GAS] Buy: 279560
-    [GAS] Buy: 279560
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 135
-      Pool now: 61882322626754889
-    [GAS] Buy: 318546
-    [GAS] Buy: 279562
-    [GAS] Buy: 279563
-    [GAS] Buy: 279563
-    [GAS] Buy: 279564
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 140
-      Pool now: 63842244101223865
-    [GAS] Buy: 318548
-    [GAS] Buy: 279565
-    [GAS] Buy: 279565
-    [GAS] Buy: 279566
-    [GAS] Buy: 279567
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 145
-      Pool now: 65801568523012395
-    [GAS] Buy: 318551
-    [GAS] Buy: 279569
-    [GAS] Buy: 279569
-    [GAS] Buy: 279570
-    [GAS] Buy: 279570
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 150
-      Pool now: 67760316467228545
-    [GAS] Buy: 318555
-    [GAS] Buy: 279571
-    [GAS] Buy: 279572
-    [GAS] Buy: 279573
-    [GAS] Buy: 279573
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 155
-      Pool now: 69718507463922996
-    [GAS] Buy: 318558
-    [GAS] Buy: 279574
-    [GAS] Buy: 279576
-    [GAS] Buy: 279576
-    [GAS] Buy: 279576
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 160
-      Pool now: 71676160067661173
-    [GAS] Buy: 318561
-    [GAS] Buy: 279578
-    [GAS] Buy: 279578
-    [GAS] Buy: 279579
-    [GAS] Buy: 279580
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 165
-      Pool now: 73633291921402209
-    [GAS] Buy: 318564
-    [GAS] Buy: 279581
-    [GAS] Buy: 279581
-    [GAS] Buy: 279582
-    [GAS] Buy: 279583
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 170
-      Pool now: 75589919815234677
-    [GAS] Buy: 318568
-    [GAS] Buy: 279584
-    [GAS] Buy: 279584
-    [GAS] Buy: 279585
-    [GAS] Buy: 279586
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 175
-      Pool now: 77546059740458034
-    [GAS] Buy: 318571
-    [GAS] Buy: 279587
-    [GAS] Buy: 279588
-    [GAS] Buy: 279588
-    [GAS] Buy: 279589
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 180
-      Pool now: 79501726939445357
-    [GAS] Buy: 318574
-    [GAS] Buy: 279591
-    [GAS] Buy: 279591
-    [GAS] Buy: 279591
-    [GAS] Buy: 279592
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 185
-      Pool now: 81456935951676119
-    [GAS] Buy: 318577
-    [GAS] Buy: 279594
-    [GAS] Buy: 279594
-    [GAS] Buy: 279595
-    [GAS] Buy: 279595
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 190
-      Pool now: 83411700656286614
-    [GAS] Buy: 318580
-    [GAS] Buy: 279597
-    [GAS] Buy: 279598
-    [GAS] Buy: 279598
-    [GAS] Buy: 279598
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 195
-      Pool now: 85366034311449370
-    [GAS] Buy: 318583
-    [GAS] Buy: 279600
-    [GAS] Buy: 279601
-    [GAS] Buy: 279601
-    [GAS] Buy: 279602
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 200
-      Pool now: 87319949590860917
-    [GAS] Buy: 318586
-    [GAS] Buy: 279603
-    [GAS] Buy: 279604
-    [GAS] Buy: 279604
-    [GAS] Buy: 279605
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 205
-      Pool now: 89273458617588966
-    [GAS] Buy: 318590
-    [GAS] Buy: 279606
-    [GAS] Buy: 279606
-    [GAS] Buy: 279608
-    [GAS] Buy: 279608
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 210
-      Pool now: 91226572995505004
-    [GAS] Buy: 318593
-    [GAS] Buy: 279609
-    [GAS] Buy: 279610
-    [GAS] Buy: 279611
-    [GAS] Buy: 279611
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 215
-      Pool now: 93179303838506057
-    [GAS] Buy: 318596
-    [GAS] Buy: 279612
-    [GAS] Buy: 279613
-    [GAS] Buy: 279613
-    [GAS] Buy: 279615
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 220
-      Pool now: 95131661797709591
-    [GAS] Buy: 318599
-    [GAS] Buy: 279616
-    [GAS] Buy: 279617
-    [GAS] Buy: 279617
-    [GAS] Buy: 279618
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 225
-      Pool now: 97083657086787930
-    [GAS] Buy: 318602
-    [GAS] Buy: 279619
-    [GAS] Buy: 279619
-    [GAS] Buy: 279620
-    [GAS] Buy: 279620
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 230
-      Pool now: 99035299505592822
+      Pool now: 8587567288677614
     [GAS] Buy: 318606
     [GAS] Buy: 279622
-    [GAS] Buy: 279622
+    [GAS] Buy: 279623
+    [GAS] Buy: 279623
     [GAS] Buy: 279624
-    [GAS] Buy: 279624
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 235
-      Pool now: 100986598462206772
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 5
+      Pool now: 10573167207465017
     [GAS] Buy: 318609
     [GAS] Buy: 279625
     [GAS] Buy: 279626
-    [GAS] Buy: 279626
     [GAS] Buy: 279627
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 240
-      Pool now: 102937562993545185
+    [GAS] Buy: 279627
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 10
+      Pool now: 12556588001127667
     [GAS] Buy: 318612
-    [GAS] Buy: 279628
+    [GAS] Buy: 279629
     [GAS] Buy: 279629
     [GAS] Buy: 279629
     [GAS] Buy: 279630
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 245
-      Pool now: 104888201784622102
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 15
+      Pool now: 14537969839443151
     [GAS] Buy: 318615
     [GAS] Buy: 279632
+    [GAS] Buy: 279633
     [GAS] Buy: 279632
     [GAS] Buy: 279633
-    [GAS] Buy: 279633
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 250
-      Pool now: 106838523186582211
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 20
+      Pool now: 16517439800552663
     [GAS] Buy: 318618
     [GAS] Buy: 279635
     [GAS] Buy: 279635
     [GAS] Buy: 279636
-    [GAS] Buy: 279636
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 255
-      Pool now: 108788535233592712
+    [GAS] Buy: 279637
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 25
+      Pool now: 18495113451055721
     [GAS] Buy: 318622
     [GAS] Buy: 279638
     [GAS] Buy: 279638
     [GAS] Buy: 279639
     [GAS] Buy: 279640
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 260
-      Pool now: 110738245658680462
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 30
+      Pool now: 20471096194814327
     [GAS] Buy: 318625
     [GAS] Buy: 279641
     [GAS] Buy: 279642
-    [GAS] Buy: 279642
-    [GAS] Buy: 279642
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 265
-      Pool now: 112687661908592427
-    [GAS] Buy: 318627
+    [GAS] Buy: 279643
+    [GAS] Buy: 279643
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 35
+      Pool now: 22445484429922144
+    [GAS] Buy: 318628
     [GAS] Buy: 279644
     [GAS] Buy: 279645
     [GAS] Buy: 279645
-    [GAS] Buy: 279645
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 270
-      Pool now: 114636791157750843
+    [GAS] Buy: 279646
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 40
+      Pool now: 24418366545661456
     [GAS] Buy: 318631
-    [GAS] Buy: 279647
+    [GAS] Buy: 279648
+    [GAS] Buy: 279648
     [GAS] Buy: 279648
     [GAS] Buy: 279649
-    [GAS] Buy: 279649
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 275
-      Pool now: 116585640321368440
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 45
+      Pool now: 26389823785279537
     [GAS] Buy: 318634
     [GAS] Buy: 279651
     [GAS] Buy: 279651
-    [GAS] Buy: 279651
     [GAS] Buy: 279652
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 280
-      Pool now: 118534216067783682
-    [GAS] Buy: 318637
+    [GAS] Buy: 279652
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 50
+      Pool now: 28359930995679868
+    [GAS] Buy: 318638
     [GAS] Buy: 279654
     [GAS] Buy: 279654
     [GAS] Buy: 279655
-    [GAS] Buy: 279655
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 285
-      Pool now: 120482524830071009
-    [GAS] Buy: 318640
-    [GAS] Buy: 279657
+    [GAS] Buy: 279656
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 55
+      Pool now: 30328757281354291
+    [GAS] Buy: 318641
     [GAS] Buy: 279657
     [GAS] Buy: 279658
     [GAS] Buy: 279658
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 290
-      Pool now: 122430572816976622
-    [GAS] Buy: 318644
+    [GAS] Buy: 279659
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 60
+      Pool now: 32296366576863197
+    [GAS] Buy: 318643
     [GAS] Buy: 279660
-    [GAS] Buy: 279660
-    [GAS] Buy: 279662
-    [GAS] Buy: 279662
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 295
-      Pool now: 124378366023226275
+    [GAS] Buy: 279661
+    [GAS] Buy: 279661
+    [GAS] Buy: 279661
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 65
+      Pool now: 34262818149738300
     [GAS] Buy: 318647
-    [GAS] Buy: 279663
+    [GAS] Buy: 279664
     [GAS] Buy: 279664
     [GAS] Buy: 279664
     [GAS] Buy: 279665
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 300
-      Pool now: 126325910239247850
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 70
+      Pool now: 36228167043711365
     [GAS] Buy: 318650
-    [GAS] Buy: 279666
+    [GAS] Buy: 279667
+    [GAS] Buy: 279667
     [GAS] Buy: 279667
     [GAS] Buy: 279668
-    [GAS] Buy: 279668
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 305
-      Pool now: 128273211060348141
-    [GAS] Buy: 318653
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 75
+      Pool now: 38192464470566268
+    [GAS] Buy: 318654
     [GAS] Buy: 279670
     [GAS] Buy: 279670
     [GAS] Buy: 279671
-    [GAS] Buy: 279671
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 310
-      Pool now: 130220273895380184
+    [GAS] Buy: 279672
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 80
+      Pool now: 40155758157596614
     [GAS] Buy: 318656
     [GAS] Buy: 279673
-    [GAS] Buy: 279673
     [GAS] Buy: 279674
     [GAS] Buy: 279674
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 315
-      Pool now: 132167103974934713
+    [GAS] Buy: 279675
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 85
+      Pool now: 42118092656568905
     [GAS] Buy: 318659
     [GAS] Buy: 279676
     [GAS] Buy: 279677
     [GAS] Buy: 279677
     [GAS] Buy: 279677
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 320
-      Pool now: 134113706359086731
-    [GAS] Buy: 318663
-    [GAS] Buy: 279679
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 90
+      Pool now: 44079509619196508
+    [GAS] Buy: 318662
     [GAS] Buy: 279679
     [GAS] Buy: 279680
     [GAS] Buy: 279680
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 325
-      Pool now: 136060085944725888
+    [GAS] Buy: 279681
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 95
+      Pool now: 46040048043386692
     [GAS] Buy: 318666
-    [GAS] Buy: 279683
     [GAS] Buy: 279682
     [GAS] Buy: 279683
+    [GAS] Buy: 279683
     [GAS] Buy: 279684
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 330
-      Pool now: 138006247472497206
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 100
+      Pool now: 47999744493903423
     [GAS] Buy: 318669
     [GAS] Buy: 279685
     [GAS] Buy: 279686
+    [GAS] Buy: 279686
     [GAS] Buy: 279687
-    [GAS] Buy: 279687
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 335
-      Pool now: 139952195533376739
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 105
+      Pool now: 49958633300569841
     [GAS] Buy: 318672
-    [GAS] Buy: 279688
+    [GAS] Buy: 279689
     [GAS] Buy: 279689
     [GAS] Buy: 279690
     [GAS] Buy: 279690
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 340
-      Pool now: 141897934574904965
-    [GAS] Buy: 318675
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 110
+      Pool now: 51916746736698299
+    [GAS] Buy: 318676
     [GAS] Buy: 279692
-    [GAS] Buy: 279693
-    [GAS] Buy: 279693
-    [GAS] Buy: 279693
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 345
-      Pool now: 143843468907099072
-    [GAS] Buy: 318678
-    [GAS] Buy: 279695
+    [GAS] Buy: 279692
+    [GAS] Buy: 279692
+    [GAS] Buy: 279694
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 115
+      Pool now: 53874115180067996
+    [GAS] Buy: 318679
     [GAS] Buy: 279695
     [GAS] Buy: 279696
     [GAS] Buy: 279696
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 350
-      Pool now: 145788802708063776
+    [GAS] Buy: 279697
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 120
+      Pool now: 55830767258458817
     [GAS] Buy: 318682
     [GAS] Buy: 279698
-    [GAS] Buy: 279698
+    [GAS] Buy: 279699
     [GAS] Buy: 279699
     [GAS] Buy: 279700
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 355
-      Pool now: 147733940029318928
-    [GAS] Buy: 318685
-    [GAS] Buy: 279701
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 125
+      Pool now: 57786729981485408
+    [GAS] Buy: 318684
     [GAS] Buy: 279702
     [GAS] Buy: 279702
     [GAS] Buy: 279703
-    [GAS] Process Taxes: 204432
-      Processed taxes after buy 360
-      Pool now: 149678884800860898
+    [GAS] Buy: 279703
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 130
+      Pool now: 59742028860250039
     [GAS] Buy: 318688
-    [GAS] Buy: 279704
+    [GAS] Buy: 279705
+    [GAS] Buy: 279705
     [GAS] Buy: 279705
     [GAS] Buy: 279706
-    [GAS] Buy: 279706
-    [GAS] Process Taxes: 345675
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 135
+      Pool now: 61696688016140051
+    [GAS] Buy: 318691
+    [GAS] Buy: 279707
+    [GAS] Buy: 279709
+    [GAS] Buy: 279709
+    [GAS] Buy: 279709
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 140
+      Pool now: 63650730279930341
+    [GAS] Buy: 318695
+    [GAS] Buy: 279711
+    [GAS] Buy: 279712
+    [GAS] Buy: 279712
+    [GAS] Buy: 279712
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 145
+      Pool now: 65604177282209201
+    [GAS] Buy: 318697
+    [GAS] Buy: 279714
+    [GAS] Buy: 279714
+    [GAS] Buy: 279715
+    [GAS] Buy: 279716
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 150
+      Pool now: 67557049536023191
+    [GAS] Buy: 318700
+    [GAS] Buy: 279718
+    [GAS] Buy: 279718
+    [GAS] Buy: 279718
+    [GAS] Buy: 279719
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 155
+      Pool now: 69509366512530717
+    [GAS] Buy: 318704
+    [GAS] Buy: 279720
+    [GAS] Buy: 279721
+    [GAS] Buy: 279721
+    [GAS] Buy: 279722
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 160
+      Pool now: 71461146710362051
+    [GAS] Buy: 318707
+    [GAS] Buy: 279723
+    [GAS] Buy: 279724
+    [GAS] Buy: 279725
+    [GAS] Buy: 279725
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 165
+      Pool now: 73412407719303638
+    [GAS] Buy: 318710
+    [GAS] Buy: 279727
+    [GAS] Buy: 279727
+    [GAS] Buy: 279728
+    [GAS] Buy: 279728
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 170
+      Pool now: 75363166278854921
+    [GAS] Buy: 318713
+    [GAS] Buy: 279730
+    [GAS] Buy: 279730
+    [GAS] Buy: 279730
+    [GAS] Buy: 279732
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 175
+      Pool now: 77313438332145136
+    [GAS] Buy: 318716
+    [GAS] Buy: 279733
+    [GAS] Buy: 279734
+    [GAS] Buy: 279734
+    [GAS] Buy: 279735
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 180
+      Pool now: 79263239075644293
+    [GAS] Buy: 318720
+    [GAS] Buy: 279736
+    [GAS] Buy: 279736
+    [GAS] Buy: 279737
+    [GAS] Buy: 279737
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 185
+      Pool now: 81212583005055923
+    [GAS] Buy: 318723
+    [GAS] Buy: 279739
+    [GAS] Buy: 279739
+    [GAS] Buy: 279741
+    [GAS] Buy: 279741
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 190
+      Pool now: 83161483957738112
+    [GAS] Buy: 318726
+    [GAS] Buy: 279743
+    [GAS] Buy: 279743
+    [GAS] Buy: 279743
+    [GAS] Buy: 279744
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 195
+      Pool now: 85109955151963213
+    [GAS] Buy: 318729
+    [GAS] Buy: 279745
+    [GAS] Buy: 279746
+    [GAS] Buy: 279746
+    [GAS] Buy: 279748
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 200
+      Pool now: 87058009223294744
+    [GAS] Buy: 318732
+    [GAS] Buy: 279749
+    [GAS] Buy: 279749
+    [GAS] Buy: 279750
+    [GAS] Buy: 279750
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 205
+      Pool now: 89005658258331759
+    [GAS] Buy: 318735
+    [GAS] Buy: 279752
+    [GAS] Buy: 279752
+    [GAS] Buy: 279753
+    [GAS] Buy: 279753
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 210
+      Pool now: 90952913826046001
+    [GAS] Buy: 318738
+    [GAS] Buy: 279756
+    [GAS] Buy: 279756
+    [GAS] Buy: 279756
+    [GAS] Buy: 279756
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 215
+      Pool now: 92899787006914966
+    [GAS] Buy: 318742
+    [GAS] Buy: 279758
+    [GAS] Buy: 279759
+    [GAS] Buy: 279759
+    [GAS] Buy: 279760
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 220
+      Pool now: 94846288420034285
+    [GAS] Buy: 318745
+    [GAS] Buy: 279762
+    [GAS] Buy: 279762
+    [GAS] Buy: 279763
+    [GAS] Buy: 279763
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 225
+      Pool now: 96792428248375292
+    [GAS] Buy: 318748
+    [GAS] Buy: 279765
+    [GAS] Buy: 279765
+    [GAS] Buy: 279766
+    [GAS] Buy: 279766
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 230
+      Pool now: 98738216262337954
+    [GAS] Buy: 318751
+    [GAS] Buy: 279768
+    [GAS] Buy: 279768
+    [GAS] Buy: 279769
+    [GAS] Buy: 279770
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 235
+      Pool now: 100683661841735351
+    [GAS] Buy: 318755
+    [GAS] Buy: 279771
+    [GAS] Buy: 279771
+    [GAS] Buy: 279772
+    [GAS] Buy: 279773
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 240
+      Pool now: 102628773996333385
+    [GAS] Buy: 318757
+    [GAS] Buy: 279774
+    [GAS] Buy: 279774
+    [GAS] Buy: 279775
+    [GAS] Buy: 279776
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 245
+      Pool now: 104573561385058145
+    [GAS] Buy: 318760
+    [GAS] Buy: 279777
+    [GAS] Buy: 279778
+    [GAS] Buy: 279778
+    [GAS] Buy: 279778
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 250
+      Pool now: 106518032333973299
+    [GAS] Buy: 318764
+    [GAS] Buy: 279781
+    [GAS] Buy: 279781
+    [GAS] Buy: 279781
+    [GAS] Buy: 279782
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 255
+      Pool now: 108462194853120810
+    [GAS] Buy: 318767
+    [GAS] Buy: 279784
+    [GAS] Buy: 279784
+    [GAS] Buy: 279784
+    [GAS] Buy: 279785
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 260
+      Pool now: 110406056652310139
+    [GAS] Buy: 318771
+    [GAS] Buy: 279787
+    [GAS] Buy: 279787
+    [GAS] Buy: 279788
+    [GAS] Buy: 279789
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 265
+      Pool now: 112349625155933724
+    [GAS] Buy: 318773
+    [GAS] Buy: 279790
+    [GAS] Buy: 279790
+    [GAS] Buy: 279791
+    [GAS] Buy: 279791
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 270
+      Pool now: 114292907516879907
+    [GAS] Buy: 318776
+    [GAS] Buy: 279793
+    [GAS] Buy: 279794
+    [GAS] Buy: 279794
+    [GAS] Buy: 279794
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 275
+      Pool now: 116235910629608499
+    [GAS] Buy: 318780
+    [GAS] Buy: 279796
+    [GAS] Buy: 279797
+    [GAS] Buy: 279797
+    [GAS] Buy: 279798
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 280
+      Pool now: 118178641142448703
+    [GAS] Buy: 318783
+    [GAS] Buy: 279800
+    [GAS] Buy: 279800
+    [GAS] Buy: 279800
+    [GAS] Buy: 279801
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 285
+      Pool now: 120121105469174256
+    [GAS] Buy: 318786
+    [GAS] Buy: 279803
+    [GAS] Buy: 279803
+    [GAS] Buy: 279804
+    [GAS] Buy: 279804
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 290
+      Pool now: 122063309799906161
+    [GAS] Buy: 318789
+    [GAS] Buy: 279805
+    [GAS] Buy: 279806
+    [GAS] Buy: 279807
+    [GAS] Buy: 279807
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 295
+      Pool now: 124005260111389318
+    [GAS] Buy: 318792
+    [GAS] Buy: 279809
+    [GAS] Buy: 279810
+    [GAS] Buy: 279810
+    [GAS] Buy: 279810
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 300
+      Pool now: 125946962176685732
+    [GAS] Buy: 318795
+    [GAS] Buy: 279812
+    [GAS] Buy: 279813
+    [GAS] Buy: 279813
+    [GAS] Buy: 279814
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 305
+      Pool now: 127888421574323567
+    [GAS] Buy: 318799
+    [GAS] Buy: 279816
+    [GAS] Buy: 279815
+    [GAS] Buy: 279816
+    [GAS] Buy: 279817
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 310
+      Pool now: 129829643696938304
+    [GAS] Buy: 318802
+    [GAS] Buy: 279819
+    [GAS] Buy: 279819
+    [GAS] Buy: 279819
+    [GAS] Buy: 279820
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 315
+      Pool now: 131770633759439456
+    [GAS] Buy: 318805
+    [GAS] Buy: 279821
+    [GAS] Buy: 279822
+    [GAS] Buy: 279823
+    [GAS] Buy: 279823
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 320
+      Pool now: 133711396806733757
+    [GAS] Buy: 318808
+    [GAS] Buy: 279825
+    [GAS] Buy: 279825
+    [GAS] Buy: 279826
+    [GAS] Buy: 279826
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 325
+      Pool now: 135651937721033410
+    [GAS] Buy: 318811
+    [GAS] Buy: 279828
+    [GAS] Buy: 279828
+    [GAS] Buy: 279829
+    [GAS] Buy: 279829
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 330
+      Pool now: 137592261228775870
+    [GAS] Buy: 318814
+    [GAS] Buy: 279831
+    [GAS] Buy: 279832
+    [GAS] Buy: 279832
+    [GAS] Buy: 279832
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 335
+      Pool now: 139532371907179657
+    [GAS] Buy: 318818
+    [GAS] Buy: 279834
+    [GAS] Buy: 279835
+    [GAS] Buy: 279835
+    [GAS] Buy: 279836
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 340
+      Pool now: 141472274190458951
+    [GAS] Buy: 318820
+    [GAS] Buy: 279838
+    [GAS] Buy: 279838
+    [GAS] Buy: 279838
+    [GAS] Buy: 279839
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 345
+      Pool now: 143411972375718035
+    [GAS] Buy: 318824
+    [GAS] Buy: 279841
+    [GAS] Buy: 279841
+    [GAS] Buy: 279842
+    [GAS] Buy: 279842
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 350
+      Pool now: 145351470628545201
+    [GAS] Buy: 318827
+    [GAS] Buy: 279844
+    [GAS] Buy: 279844
+    [GAS] Buy: 279845
+    [GAS] Buy: 279845
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 355
+      Pool now: 147290772988324291
+    [GAS] Buy: 318831
+    [GAS] Buy: 279847
+    [GAS] Buy: 279847
+    [GAS] Buy: 279848
+    [GAS] Buy: 279849
+    [GAS] Process Taxes: 254777
+      Processed taxes after buy 360
+      Pool now: 149229883373280820
+    [GAS] Buy: 318833
+    [GAS] Buy: 279850
+    [GAS] Buy: 279851
+    [GAS] Buy: 279851
+    [GAS] Buy: 279851
+    [GAS] Process Taxes: 421693
       Processed taxes after buy 365
-      Pool now: 151623640835973532
-    [GAS] Process Taxes: 2779
-  
-  Pool after natural funding: 151623640835973532
+      Pool now: 151168805585278435
+    [GAS] Process Taxes: 2461
+
+  Pool after natural funding: 151168805585278435
     Threshold: 150000000000000000
     PASS: Pool funded naturally!
 
   Triggering snapshot check with final buy...
-    [GAS] Buy: 380671
-    [GAS] Process Taxes: 203768
+    [GAS] Buy: 380817
+    [GAS] Process Taxes: 254113
     Snapshot should be triggered now!
     Round ready: true
-  
+
 Waiting 25 blocks for reveal...
   Finalizing buyer round...
-    [GAS] Buyer Finalize: 1142084
+    [GAS] Buyer Finalize: 1141569
     Round finalized
-  
+
 Checking for winners...
-    Winner found (fresh): 0xB6C3D635069f3867Ce1AaF05409d7681e2c14c78
-    Claimable: 152009568008686308
+    Winner found: 0xD7Ee130965c7fA24207C3F638d56795e4D4a9aB6
+    Claimable: 151553574994213720
+    [GAS] Buyer Claim: 55110
     PASS: Claimed successfully!
-  
+
 Phase 6 complete!
 
   =============================================================================
@@ -852,40 +780,40 @@ Phase 6 complete!
   LP Reward status:
     Round: 0
     Participants: 0
-    Pool: 23741381628113
+    Pool: 23670157442400
     Threshold: 200000000000000000
     Snapshot taken: false
-  
+
 Funding LP pot via SELLS (natural)...
     Need to reach: 200000000000000000
-    Current LP pot: 23741381628113
-    [GAS] Sell: 132077
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132077
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132078
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132079
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132080
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132081
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132082
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132083
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132083
-    [GAS] Process Taxes: 202766
-    [GAS] Sell: 132084
-    [GAS] Process Taxes: 202766
-    LP pot after sells: 3459098615607017
+    Current LP pot: 23670157442400
+    [GAS] Sell: 131964
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131965
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131965
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131967
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131967
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131969
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131969
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131970
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131971
+    [GAS] Process Taxes: 253202
+    [GAS] Sell: 131972
+    [GAS] Process Taxes: 253202
+    LP pot after sells: 3448838066203165
     Snapshot taken: false
-  
+
 LP Reward ready: false
     Note: Threshold not quite reached, but close enough for test
     (In production, more organic activity would trigger it)
-  
+
 Phase 7 complete!
 
   =============================================================================
@@ -898,7 +826,7 @@ Phase 7 complete!
     Time advanced
 
   Test 2: Buyer Vault cleanup
-    [GAS] Buyer Cleanup: 2768
+    [GAS] Buyer Cleanup: 5865
     Recovered from buyer vault: 0
     PASS: Cleanup executed
 
@@ -918,23 +846,23 @@ Phase 7 complete!
 
   Testing 0.25% buy tax burn mechanism...
 
-  Total supply before: 1097705610 tokens
-  
+  Total supply before: 1097705629 tokens
+
 Executing 10 buys ( 5 finney each)...
-    [GAS] Buy: 319621
-    [GAS] Buy: 279822
-    [GAS] Buy: 279822
-    [GAS] Buy: 279823
-    [GAS] Buy: 279823
-    [GAS] Buy: 279824
-    [GAS] Buy: 279824
-    [GAS] Buy: 279825
-    [GAS] Buy: 279825
-    [GAS] Buy: 279825
-  
-Total supply after: 1097690240 tokens
+    [GAS] Buy: 319674
+    [GAS] Buy: 279874
+    [GAS] Buy: 279875
+    [GAS] Buy: 279875
+    [GAS] Buy: 279876
+    [GAS] Buy: 279876
+    [GAS] Buy: 279876
+    [GAS] Buy: 279877
+    [GAS] Buy: 279878
+    [GAS] Buy: 279878
+
+Total supply after: 1097690259 tokens
   Burned tokens: 15370 tokens
-  
+
 PASS: Burn mechanism VERIFIED!
   Phase 9 complete!
 
@@ -945,14 +873,14 @@ PASS: Burn mechanism VERIFIED!
   Testing 31 second buy cooldown...
 
   Test 1: First buy (should succeed)
-    [GAS] Buy: 183391
+    [GAS] Buy: 183443
     PASS: First buy succeeded
 
   Test 2: Immediate second buy < 31 s (should REVERT)
     PASS: Buy correctly REVERTED
 
   Test 3: Wait 31 s and try again (should succeed)
-    [GAS] Buy: 115593
+    [GAS] Buy: 115645
     PASS: Buy after cooldown succeeded
 
   PASS: Buy cooldown VERIFIED!
@@ -965,10 +893,10 @@ PASS: Burn mechanism VERIFIED!
   Testing max wallet limit (Stage 1: 15M tokens)...
 
   Max wallet: 15000000 tokens
-  
+
 Test 1: Buy within limit ( 5 finney ~4.5M tokens)
-    [GAS] Buy: 279016
-    Balance after buy: 539452 tokens
+    [GAS] Buy: 279069
+    Balance after buy: 539434 tokens
     PASS: Buy within limit succeeded
 
   Test 2: Try to exceed max wallet (buy 0.5 ETH)
@@ -984,460 +912,466 @@ Test 1: Buy within limit ( 5 finney ~4.5M tokens)
   Testing cleanup with REAL expired claims...
 
   Step 1: Fund buyer vault to threshold
-    [GAS] Buy: 279835
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 318820
-    [GAS] Buy: 279021
-    [GAS] Buy: 279021
-    [GAS] Buy: 279021
-    [GAS] Buy: 279022
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 318823
-    [GAS] Buy: 279023
-    [GAS] Buy: 279024
-    [GAS] Buy: 279024
-    [GAS] Buy: 279025
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 318826
-    [GAS] Buy: 279026
-    [GAS] Buy: 279027
-    [GAS] Buy: 279027
-    [GAS] Buy: 279027
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 318828
-    [GAS] Buy: 279029
-    [GAS] Buy: 279029
-    [GAS] Buy: 279030
-    [GAS] Buy: 182593
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222394
-    [GAS] Buy: 182594
-    [GAS] Buy: 182595
-    [GAS] Buy: 182596
-    [GAS] Buy: 182596
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222396
-    [GAS] Buy: 182597
-    [GAS] Buy: 182598
-    [GAS] Buy: 182598
-    [GAS] Buy: 182599
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222400
-    [GAS] Buy: 182600
-    [GAS] Buy: 182601
-    [GAS] Buy: 182601
-    [GAS] Buy: 182601
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222402
-    [GAS] Buy: 182603
-    [GAS] Buy: 182604
-    [GAS] Buy: 182604
-    [GAS] Buy: 182605
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222405
-    [GAS] Buy: 182606
-    [GAS] Buy: 182606
-    [GAS] Buy: 182606
-    [GAS] Buy: 182607
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222408
-    [GAS] Buy: 182609
-    [GAS] Buy: 182609
-    [GAS] Buy: 182609
-    [GAS] Buy: 182609
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222411
-    [GAS] Buy: 182611
-    [GAS] Buy: 182611
-    [GAS] Buy: 182613
-    [GAS] Buy: 182613
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222413
-    [GAS] Buy: 182614
-    [GAS] Buy: 182615
-    [GAS] Buy: 182615
-    [GAS] Buy: 182616
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222416
-    [GAS] Buy: 182617
-    [GAS] Buy: 182617
-    [GAS] Buy: 182617
-    [GAS] Buy: 182618
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222419
-    [GAS] Buy: 182619
-    [GAS] Buy: 182620
-    [GAS] Buy: 182621
-    [GAS] Buy: 182621
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222421
-    [GAS] Buy: 182623
-    [GAS] Buy: 182623
-    [GAS] Buy: 182623
-    [GAS] Buy: 182624
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222424
-    [GAS] Buy: 182625
-    [GAS] Buy: 182626
-    [GAS] Buy: 182626
-    [GAS] Buy: 182626
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222427
-    [GAS] Buy: 182628
-    [GAS] Buy: 182628
-    [GAS] Buy: 182629
-    [GAS] Buy: 182629
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222430
-    [GAS] Buy: 182631
-    [GAS] Buy: 182631
-    [GAS] Buy: 182632
-    [GAS] Buy: 182632
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222433
-    [GAS] Buy: 182633
-    [GAS] Buy: 182634
-    [GAS] Buy: 182634
-    [GAS] Buy: 182635
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222436
-    [GAS] Buy: 182636
-    [GAS] Buy: 182636
-    [GAS] Buy: 182637
-    [GAS] Buy: 182638
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222438
-    [GAS] Buy: 182638
-    [GAS] Buy: 182639
-    [GAS] Buy: 182640
-    [GAS] Buy: 182640
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222441
-    [GAS] Buy: 182642
-    [GAS] Buy: 182642
-    [GAS] Buy: 182643
-    [GAS] Buy: 182643
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222444
-    [GAS] Buy: 182644
-    [GAS] Buy: 182645
+    [GAS] Buy: 279888
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 318872
+    [GAS] Buy: 279072
+    [GAS] Buy: 279073
+    [GAS] Buy: 279074
+    [GAS] Buy: 279074
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 318875
+    [GAS] Buy: 279075
+    [GAS] Buy: 279076
+    [GAS] Buy: 279077
+    [GAS] Buy: 279077
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 318877
+    [GAS] Buy: 279078
+    [GAS] Buy: 279079
+    [GAS] Buy: 279079
+    [GAS] Buy: 279079
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 318880
+    [GAS] Buy: 279081
+    [GAS] Buy: 279081
+    [GAS] Buy: 279082
     [GAS] Buy: 182646
-    [GAS] Buy: 182646
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222446
     [GAS] Buy: 182647
     [GAS] Buy: 182648
     [GAS] Buy: 182648
     [GAS] Buy: 182648
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222449
     [GAS] Buy: 182650
+    [GAS] Buy: 182650
+    [GAS] Buy: 182650
     [GAS] Buy: 182651
-    [GAS] Buy: 182651
-    [GAS] Buy: 182651
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222452
+    [GAS] Buy: 182652
     [GAS] Buy: 182653
     [GAS] Buy: 182653
-    [GAS] Buy: 182653
+    [GAS] Buy: 182654
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222454
     [GAS] Buy: 182655
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222455
     [GAS] Buy: 182655
     [GAS] Buy: 182656
     [GAS] Buy: 182657
-    [GAS] Buy: 182657
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222458
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222457
+    [GAS] Buy: 182658
     [GAS] Buy: 182658
     [GAS] Buy: 182659
     [GAS] Buy: 182659
-    [GAS] Buy: 182659
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222461
-    [GAS] Buy: 182661
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222460
+    [GAS] Buy: 182660
     [GAS] Buy: 182661
     [GAS] Buy: 182662
-    [GAS] Buy: 182663
-    [GAS] Process Taxes: 203616
+    [GAS] Buy: 182662
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222463
     [GAS] Buy: 182663
+    [GAS] Buy: 182663
     [GAS] Buy: 182665
     [GAS] Buy: 182665
-    [GAS] Buy: 182665
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222466
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222465
     [GAS] Buy: 182666
     [GAS] Buy: 182667
-    [GAS] Buy: 182668
-    [GAS] Buy: 182668
-    [GAS] Process Taxes: 203616
+    [GAS] Buy: 182667
+    [GAS] Buy: 182667
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222469
+    [GAS] Buy: 182669
     [GAS] Buy: 182669
     [GAS] Buy: 182670
     [GAS] Buy: 182670
-    [GAS] Buy: 182671
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222471
+    [GAS] Buy: 182671
     [GAS] Buy: 182672
     [GAS] Buy: 182673
     [GAS] Buy: 182673
-    [GAS] Buy: 182674
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222474
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222473
+    [GAS] Buy: 182675
     [GAS] Buy: 182675
     [GAS] Buy: 182675
     [GAS] Buy: 182676
-    [GAS] Buy: 182676
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222477
-    [GAS] Buy: 182678
-    [GAS] Buy: 182678
+    [GAS] Buy: 182677
+    [GAS] Buy: 182677
     [GAS] Buy: 182678
     [GAS] Buy: 182679
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222480
     [GAS] Buy: 182680
     [GAS] Buy: 182680
     [GAS] Buy: 182681
     [GAS] Buy: 182682
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222482
+    [GAS] Buy: 182682
     [GAS] Buy: 182683
     [GAS] Buy: 182684
     [GAS] Buy: 182684
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222485
     [GAS] Buy: 182685
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222486
     [GAS] Buy: 182686
     [GAS] Buy: 182686
     [GAS] Buy: 182687
-    [GAS] Buy: 182688
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222488
     [GAS] Buy: 182688
     [GAS] Buy: 182689
     [GAS] Buy: 182690
     [GAS] Buy: 182690
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222491
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222490
     [GAS] Buy: 182691
     [GAS] Buy: 182692
-    [GAS] Buy: 182693
-    [GAS] Buy: 182693
-    [GAS] Process Taxes: 203616
+    [GAS] Buy: 182692
+    [GAS] Buy: 182692
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222493
+    [GAS] Buy: 182694
     [GAS] Buy: 182694
     [GAS] Buy: 182695
     [GAS] Buy: 182695
-    [GAS] Buy: 182695
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222496
+    [GAS] Buy: 182696
     [GAS] Buy: 182697
     [GAS] Buy: 182697
     [GAS] Buy: 182698
-    [GAS] Buy: 182699
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222499
+    [GAS] Buy: 182699
     [GAS] Buy: 182700
     [GAS] Buy: 182700
     [GAS] Buy: 182701
-    [GAS] Buy: 182701
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222501
-    [GAS] Buy: 182703
-    [GAS] Buy: 182703
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222502
+    [GAS] Buy: 182702
+    [GAS] Buy: 182702
     [GAS] Buy: 182703
     [GAS] Buy: 182704
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222505
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222504
+    [GAS] Buy: 182705
     [GAS] Buy: 182705
     [GAS] Buy: 182705
     [GAS] Buy: 182707
-    [GAS] Buy: 182707
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222507
-    [GAS] Buy: 182708
+    [GAS] Buy: 182707
     [GAS] Buy: 182708
     [GAS] Buy: 182709
-    [GAS] Buy: 182710
-    [GAS] Process Taxes: 203616
+    [GAS] Buy: 182709
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222510
     [GAS] Buy: 182711
     [GAS] Buy: 182711
+    [GAS] Buy: 182711
     [GAS] Buy: 182712
-    [GAS] Buy: 182712
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222513
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222512
+    [GAS] Buy: 182713
     [GAS] Buy: 182713
     [GAS] Buy: 182714
     [GAS] Buy: 182715
-    [GAS] Buy: 182715
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222515
-    [GAS] Buy: 182716
+    [GAS] Buy: 182715
     [GAS] Buy: 182717
     [GAS] Buy: 182717
-    [GAS] Buy: 182718
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222518
+    [GAS] Buy: 182717
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222519
+    [GAS] Buy: 182719
+    [GAS] Buy: 182719
     [GAS] Buy: 182719
     [GAS] Buy: 182720
-    [GAS] Buy: 182720
-    [GAS] Buy: 182720
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222521
     [GAS] Buy: 182722
     [GAS] Buy: 182722
     [GAS] Buy: 182722
     [GAS] Buy: 182723
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222524
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222523
+    [GAS] Buy: 182724
     [GAS] Buy: 182724
     [GAS] Buy: 182725
     [GAS] Buy: 182726
-    [GAS] Buy: 182726
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222527
+    [GAS] Buy: 182727
+    [GAS] Buy: 182727
     [GAS] Buy: 182728
     [GAS] Buy: 182728
-    [GAS] Buy: 182728
-    [GAS] Buy: 182729
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222530
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222529
     [GAS] Buy: 182730
     [GAS] Buy: 182730
     [GAS] Buy: 182731
     [GAS] Buy: 182732
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222532
-    [GAS] Buy: 182733
+    [GAS] Buy: 182732
     [GAS] Buy: 182733
     [GAS] Buy: 182734
-    [GAS] Buy: 182735
-    [GAS] Process Taxes: 203616
+    [GAS] Buy: 182734
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222535
     [GAS] Buy: 182735
     [GAS] Buy: 182736
+    [GAS] Buy: 182736
     [GAS] Buy: 182737
-    [GAS] Buy: 182737
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222538
+    [GAS] Buy: 182738
     [GAS] Buy: 182738
     [GAS] Buy: 182739
     [GAS] Buy: 182739
-    [GAS] Buy: 182740
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222540
+    [GAS] Buy: 182741
     [GAS] Buy: 182741
     [GAS] Buy: 182742
     [GAS] Buy: 182742
-    [GAS] Buy: 182743
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222543
-    [GAS] Buy: 182743
+    [GAS] Buy: 182744
+    [GAS] Buy: 182744
+    [GAS] Buy: 182744
     [GAS] Buy: 182745
-    [GAS] Buy: 182745
-    [GAS] Buy: 182745
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222546
+    [GAS] Buy: 182746
     [GAS] Buy: 182747
     [GAS] Buy: 182747
     [GAS] Buy: 182747
-    [GAS] Buy: 182749
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222549
     [GAS] Buy: 182749
-    [GAS] Buy: 182750
+    [GAS] Buy: 182749
     [GAS] Buy: 182750
     [GAS] Buy: 182751
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222551
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222552
     [GAS] Buy: 182752
     [GAS] Buy: 182753
     [GAS] Buy: 182753
+    [GAS] Buy: 182753
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222554
     [GAS] Buy: 182754
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222555
     [GAS] Buy: 182755
     [GAS] Buy: 182755
     [GAS] Buy: 182756
-    [GAS] Buy: 182757
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222557
     [GAS] Buy: 182757
-    [GAS] Buy: 182758
+    [GAS] Buy: 182757
     [GAS] Buy: 182759
     [GAS] Buy: 182759
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222560
-    [GAS] Buy: 182760
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222559
     [GAS] Buy: 182761
-    [GAS] Buy: 182762
-    [GAS] Buy: 182762
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222562
+    [GAS] Buy: 182761
+    [GAS] Buy: 182761
+    [GAS] Buy: 182761
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222563
     [GAS] Buy: 182763
     [GAS] Buy: 182764
     [GAS] Buy: 182764
     [GAS] Buy: 182764
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222565
+    [GAS] Buy: 182765
     [GAS] Buy: 182766
     [GAS] Buy: 182766
     [GAS] Buy: 182767
-    [GAS] Buy: 182768
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222568
     [GAS] Buy: 182769
+    [GAS] Buy: 182769
+    [GAS] Buy: 182769
     [GAS] Buy: 182770
-    [GAS] Buy: 182770
-    [GAS] Buy: 182770
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222571
-    [GAS] Buy: 182772
+    [GAS] Buy: 182771
     [GAS] Buy: 182772
     [GAS] Buy: 182772
     [GAS] Buy: 182773
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222574
     [GAS] Buy: 182774
-    [GAS] Buy: 182775
+    [GAS] Buy: 182774
     [GAS] Buy: 182775
     [GAS] Buy: 182776
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222576
     [GAS] Buy: 182777
     [GAS] Buy: 182777
     [GAS] Buy: 182778
-    [GAS] Buy: 182779
-    [GAS] Process Taxes: 203616
+    [GAS] Buy: 182778
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222579
     [GAS] Buy: 182780
     [GAS] Buy: 182780
+    [GAS] Buy: 182780
     [GAS] Buy: 182781
-    [GAS] Buy: 182781
-    [GAS] Process Taxes: 203616
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222582
     [GAS] Buy: 182782
     [GAS] Buy: 182783
+    [GAS] Buy: 182783
     [GAS] Buy: 182784
-    [GAS] Buy: 182784
-    [GAS] Process Taxes: 203616
-    [GAS] Buy: 222585
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222584
     [GAS] Buy: 182785
-    [GAS] Buy: 182785
-    [GAS] Buy: 182787
-    [GAS] Buy: 182787
-    [GAS] Process Taxes: 203616
+    [GAS] Buy: 182786
+    [GAS] Buy: 182786
+    [GAS] Buy: 182786
+    [GAS] Process Taxes: 253961
     [GAS] Buy: 222587
+    [GAS] Buy: 182788
     [GAS] Buy: 182788
     [GAS] Buy: 182789
     [GAS] Buy: 182789
-    [GAS] Buy: 182789
-    [GAS] Process Taxes: 254759
-    [GAS] Process Taxes: 2779
-    Pool size: 150391097451146597
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222590
+    [GAS] Buy: 182791
+    [GAS] Buy: 182791
+    [GAS] Buy: 182791
+    [GAS] Buy: 182792
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222593
+    [GAS] Buy: 182794
+    [GAS] Buy: 182794
+    [GAS] Buy: 182795
+    [GAS] Buy: 182795
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222596
+    [GAS] Buy: 182796
+    [GAS] Buy: 182796
+    [GAS] Buy: 182797
+    [GAS] Buy: 182797
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222599
+    [GAS] Buy: 182799
+    [GAS] Buy: 182799
+    [GAS] Buy: 182799
+    [GAS] Buy: 182801
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222601
+    [GAS] Buy: 182801
+    [GAS] Buy: 182803
+    [GAS] Buy: 182803
+    [GAS] Buy: 182803
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222604
+    [GAS] Buy: 182805
+    [GAS] Buy: 182805
+    [GAS] Buy: 182806
+    [GAS] Buy: 182806
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222607
+    [GAS] Buy: 182807
+    [GAS] Buy: 182807
+    [GAS] Buy: 182808
+    [GAS] Buy: 182808
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222609
+    [GAS] Buy: 182810
+    [GAS] Buy: 182811
+    [GAS] Buy: 182811
+    [GAS] Buy: 182811
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222613
+    [GAS] Buy: 182813
+    [GAS] Buy: 182813
+    [GAS] Buy: 182814
+    [GAS] Buy: 182814
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222615
+    [GAS] Buy: 182816
+    [GAS] Buy: 182816
+    [GAS] Buy: 182816
+    [GAS] Buy: 182817
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222618
+    [GAS] Buy: 182818
+    [GAS] Buy: 182819
+    [GAS] Buy: 182819
+    [GAS] Buy: 182820
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222621
+    [GAS] Buy: 182821
+    [GAS] Buy: 182822
+    [GAS] Buy: 182822
+    [GAS] Buy: 182822
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222623
+    [GAS] Buy: 182824
+    [GAS] Buy: 182824
+    [GAS] Buy: 182825
+    [GAS] Buy: 182825
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222626
+    [GAS] Buy: 182826
+    [GAS] Buy: 182827
+    [GAS] Buy: 182828
+    [GAS] Buy: 182828
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222628
+    [GAS] Buy: 182829
+    [GAS] Buy: 182830
+    [GAS] Buy: 182830
+    [GAS] Buy: 182831
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222632
+    [GAS] Buy: 182832
+    [GAS] Buy: 182833
+    [GAS] Buy: 182833
+    [GAS] Buy: 182833
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222634
+    [GAS] Buy: 182835
+    [GAS] Buy: 182836
+    [GAS] Buy: 182836
+    [GAS] Buy: 182837
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222637
+    [GAS] Buy: 182838
+    [GAS] Buy: 182838
+    [GAS] Buy: 182838
+    [GAS] Buy: 182839
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222640
+    [GAS] Buy: 182841
+    [GAS] Buy: 182841
+    [GAS] Buy: 182841
+    [GAS] Buy: 182841
+    [GAS] Process Taxes: 253961
+    [GAS] Buy: 222643
+    [GAS] Buy: 182843
+    [GAS] Buy: 182843
+    [GAS] Buy: 182845
+    [GAS] Buy: 182845
+    [GAS] Process Taxes: 308777
+    [GAS] Process Taxes: 2461
+    Pool size: 151870810987543199
     Threshold: 150000000000000000
     Snapshot taken: true
     Pool funded and snapshot taken
@@ -1448,19 +1382,19 @@ Test 1: Buy within limit ( 5 finney ~4.5M tokens)
     Round finalized
 
   Step 3: Find winner (but DON'T claim)
-    Winner: 0x1100CE29097e8936abC66eDF13d129866F046124
-    Claimable: 150391097451146597
+    Winner: 0x9bD2fC4B503f09865FCd1db86000aAE4793E5626
+    Claimable: 151870810987543199
     Winner found but NOT claiming!
 
   Step 4: Advance 31 days to expire claim
     Claim expired
 
   Step 5: Execute cleanup
-    Recovered: 150391097451146597
-  
+    Recovered: 151870810987543199
+
 PASS: Real cleanup VERIFIED!
     - Winner didn't claim for 31 days
-    - Cleanup recovered 150391097451146597 wei
+    - Cleanup recovered 151870810987543199 wei
     - Funds available for future rounds
   Phase 12 complete!
 
@@ -1474,399 +1408,312 @@ PASS: Real cleanup VERIFIED!
   Current stage: 1 (LP < 10 ETH)
 
   Stage 1 threshold: 150000000000000000
-  
+
 Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
-    [GAS] Buy: 223413
-    [GAS] Buy: 182798
-    [GAS] Buy: 182798
-    [GAS] Buy: 182799
-    [GAS] Buy: 182799
-    [GAS] Buy: 182800
-    [GAS] Buy: 182801
-    [GAS] Buy: 182802
-    [GAS] Buy: 182802
-    [GAS] Buy: 182803
-    [GAS] Buy: 182803
-    [GAS] Buy: 182803
-    [GAS] Buy: 182804
-    [GAS] Buy: 182805
-    [GAS] Buy: 182806
-    [GAS] Buy: 182807
-    [GAS] Buy: 182807
-    [GAS] Buy: 182807
-    [GAS] Buy: 182808
-    [GAS] Buy: 182809
-    [GAS] Buy: 182810
-    [GAS] Buy: 182810
-    [GAS] Buy: 182811
-    [GAS] Buy: 182812
-    [GAS] Buy: 182812
-    [GAS] Buy: 182813
-    [GAS] Buy: 182814
-    [GAS] Buy: 182814
-    [GAS] Buy: 182815
-    [GAS] Buy: 182815
-    [GAS] Buy: 182816
-    [GAS] Buy: 182816
-    [GAS] Buy: 182817
-    [GAS] Buy: 182818
-    [GAS] Buy: 182818
-    [GAS] Buy: 182819
-    [GAS] Buy: 182819
-    [GAS] Buy: 182820
-    [GAS] Buy: 182821
-    [GAS] Buy: 182822
-    [GAS] Buy: 182822
-    [GAS] Buy: 182823
-    [GAS] Buy: 182823
-    [GAS] Buy: 182824
-    [GAS] Buy: 182825
-    [GAS] Buy: 182825
-    [GAS] Buy: 182826
-    [GAS] Buy: 182827
-    [GAS] Buy: 182827
-    [GAS] Buy: 182828
-    [GAS] Buy: 182829
-    [GAS] Buy: 182829
-    [GAS] Buy: 182830
-    [GAS] Buy: 182831
-    [GAS] Buy: 182831
-    [GAS] Buy: 182832
-    [GAS] Buy: 182832
-    [GAS] Buy: 182833
-    [GAS] Buy: 182834
-    [GAS] Buy: 182834
-    [GAS] Buy: 182835
-    [GAS] Buy: 182836
-    [GAS] Buy: 182836
-    [GAS] Buy: 182836
-    [GAS] Buy: 182837
-    [GAS] Buy: 182838
-    [GAS] Buy: 182839
-    [GAS] Buy: 182839
-    [GAS] Buy: 182840
-    [GAS] Buy: 182841
-    [GAS] Buy: 182842
-    [GAS] Buy: 182842
-    [GAS] Buy: 182842
-    [GAS] Buy: 182843
-    [GAS] Buy: 182844
-    [GAS] Buy: 182845
-    [GAS] Buy: 182845
-    [GAS] Buy: 182845
-    [GAS] Buy: 182847
-    [GAS] Buy: 182847
-    [GAS] Buy: 182847
-    [GAS] Buy: 182848
-    [GAS] Buy: 182849
-    [GAS] Buy: 182850
-    [GAS] Buy: 182850
-    [GAS] Buy: 182851
-    [GAS] Buy: 182851
-    [GAS] Buy: 182852
+    [GAS] Buy: 223468
     [GAS] Buy: 182852
     [GAS] Buy: 182853
     [GAS] Buy: 182854
     [GAS] Buy: 182854
     [GAS] Buy: 182855
     [GAS] Buy: 182856
-    [GAS] Buy: 182857
+    [GAS] Buy: 182856
     [GAS] Buy: 182857
     [GAS] Buy: 182857
     [GAS] Buy: 182858
+    [GAS] Buy: 182859
+    [GAS] Buy: 182859
+    [GAS] Buy: 182860
+    [GAS] Buy: 182861
+    [GAS] Buy: 182861
+    [GAS] Buy: 182862
+    [GAS] Buy: 182863
+    [GAS] Buy: 182863
+    [GAS] Buy: 182864
+    [GAS] Buy: 182865
+    [GAS] Buy: 182865
+    [GAS] Buy: 182866
+    [GAS] Buy: 182866
+    [GAS] Buy: 182867
+    [GAS] Buy: 182868
+    [GAS] Buy: 182869
+    [GAS] Buy: 182869
+    [GAS] Buy: 182870
+    [GAS] Buy: 182870
+    [GAS] Buy: 182871
+    [GAS] Buy: 182872
+    [GAS] Buy: 182872
+    [GAS] Buy: 182873
+    [GAS] Buy: 182873
+    [GAS] Buy: 182874
+    [GAS] Buy: 182874
+    [GAS] Buy: 182875
+    [GAS] Buy: 182876
+    [GAS] Buy: 182876
+    [GAS] Buy: 182877
+    [GAS] Buy: 182878
+    [GAS] Buy: 182878
+    [GAS] Buy: 182879
+    [GAS] Buy: 182880
+    [GAS] Buy: 182881
+    [GAS] Buy: 182881
+    [GAS] Buy: 182881
+    [GAS] Buy: 182882
+    [GAS] Buy: 182883
+    [GAS] Buy: 182884
+    [GAS] Buy: 182885
+    [GAS] Buy: 182885
+    [GAS] Buy: 182885
+    [GAS] Buy: 182886
+    [GAS] Buy: 182886
+    [GAS] Buy: 182887
+    [GAS] Buy: 182888
+    [GAS] Buy: 182889
+    [GAS] Buy: 182889
+    [GAS] Buy: 182890
+    [GAS] Buy: 182890
+    [GAS] Buy: 182891
+    [GAS] Buy: 182892
+    [GAS] Buy: 182892
+    [GAS] Buy: 182893
+    [GAS] Buy: 182894
+    [GAS] Buy: 182894
+    [GAS] Buy: 182895
+    [GAS] Buy: 182895
+    [GAS] Buy: 182897
+    [GAS] Buy: 182897
+    [GAS] Buy: 182897
+    [GAS] Buy: 182898
+    [GAS] Buy: 182899
+    [GAS] Buy: 182899
+    [GAS] Buy: 182900
+    [GAS] Buy: 182901
+    [GAS] Buy: 182902
+    [GAS] Buy: 182901
+    [GAS] Buy: 182902
+    [GAS] Buy: 182903
+    [GAS] Buy: 182904
+    [GAS] Buy: 182904
+    [GAS] Buy: 182905
+    [GAS] Buy: 182905
+    [GAS] Buy: 182906
+    [GAS] Buy: 182907
+    [GAS] Buy: 182907
+    [GAS] Buy: 182908
+    [GAS] Buy: 182909
+    [GAS] Buy: 182910
+    [GAS] Buy: 182910
+    [GAS] Buy: 182911
+    [GAS] Buy: 182912
+    [GAS] Buy: 182912
     New LP value: 10 ETH
     New threshold: 300000000000000000
     PASS: Stage 2 reached
 
   Step 2: Add liquidity to reach Stage 3 ( 50 ETH total)
-    [GAS] Buy: 182938
-    [GAS] Buy: 182939
-    [GAS] Buy: 182940
-    [GAS] Buy: 182940
-    [GAS] Buy: 182941
-    [GAS] Buy: 182941
-    [GAS] Buy: 182942
-    [GAS] Buy: 182942
-    [GAS] Buy: 182943
-    [GAS] Buy: 182944
-    [GAS] Buy: 182944
-    [GAS] Buy: 182945
-    [GAS] Buy: 182945
-    [GAS] Buy: 182946
-    [GAS] Buy: 182947
-    [GAS] Buy: 182948
-    [GAS] Buy: 182948
-    [GAS] Buy: 182949
-    [GAS] Buy: 182949
-    [GAS] Buy: 182950
-    [GAS] Buy: 182951
-    [GAS] Buy: 182951
-    [GAS] Buy: 182952
-    [GAS] Buy: 182953
-    [GAS] Buy: 182953
-    [GAS] Buy: 182954
-    [GAS] Buy: 182955
-    [GAS] Buy: 182955
-    [GAS] Buy: 182956
-    [GAS] Buy: 182957
-    [GAS] Buy: 182957
-    [GAS] Buy: 182958
-    [GAS] Buy: 182958
-    [GAS] Buy: 182959
-    [GAS] Buy: 182960
-    [GAS] Buy: 182960
-    [GAS] Buy: 182961
-    [GAS] Buy: 182962
-    [GAS] Buy: 182962
-    [GAS] Buy: 182962
-    [GAS] Buy: 182963
-    [GAS] Buy: 182964
-    [GAS] Buy: 182965
-    [GAS] Buy: 182965
-    [GAS] Buy: 182966
-    [GAS] Buy: 182967
-    [GAS] Buy: 182968
-    [GAS] Buy: 182968
-    [GAS] Buy: 182968
-    [GAS] Buy: 182969
-    [GAS] Buy: 182970
-    [GAS] Buy: 182971
-    [GAS] Buy: 182971
-    [GAS] Buy: 182971
-    [GAS] Buy: 182973
-    [GAS] Buy: 182973
-    [GAS] Buy: 182973
-    [GAS] Buy: 182974
-    [GAS] Buy: 182975
-    [GAS] Buy: 182976
-    [GAS] Buy: 182976
-    [GAS] Buy: 182977
-    [GAS] Buy: 182977
-    [GAS] Buy: 182978
-    [GAS] Buy: 182978
-    [GAS] Buy: 182979
-    [GAS] Buy: 182980
-    [GAS] Buy: 182980
-    [GAS] Buy: 182981
-    [GAS] Buy: 182982
-    [GAS] Buy: 182983
-    [GAS] Buy: 182983
-    [GAS] Buy: 182983
-    [GAS] Buy: 182984
-    [GAS] Buy: 182985
-    [GAS] Buy: 182986
-    [GAS] Buy: 182986
-    [GAS] Buy: 182987
-    [GAS] Buy: 182988
-    [GAS] Buy: 182988
-    [GAS] Buy: 182989
-    [GAS] Buy: 182989
-    [GAS] Buy: 182990
-    [GAS] Buy: 182990
-    [GAS] Buy: 182991
+    [GAS] Buy: 182992
     [GAS] Buy: 182992
     [GAS] Buy: 182993
-    [GAS] Buy: 182993
-    [GAS] Buy: 182993
+    [GAS] Buy: 182994
     [GAS] Buy: 182995
     [GAS] Buy: 182995
-    [GAS] Buy: 182995
+    [GAS] Buy: 182996
     [GAS] Buy: 182996
     [GAS] Buy: 182997
     [GAS] Buy: 182998
     [GAS] Buy: 182998
-    [GAS] Buy: 182998
+    [GAS] Buy: 182999
     [GAS] Buy: 182999
     [GAS] Buy: 183000
+    [GAS] Buy: 183000
     [GAS] Buy: 183001
-    [GAS] Buy: 183001
+    [GAS] Buy: 183002
     [GAS] Buy: 183002
     [GAS] Buy: 183003
     [GAS] Buy: 183004
     [GAS] Buy: 183004
-    [GAS] Buy: 183004
     [GAS] Buy: 183005
     [GAS] Buy: 183006
-    [GAS] Buy: 183006
+    [GAS] Buy: 183007
+    [GAS] Buy: 183007
     [GAS] Buy: 183007
     [GAS] Buy: 183008
-    [GAS] Buy: 183008
-    [GAS] Buy: 183009
     [GAS] Buy: 183009
     [GAS] Buy: 183010
     [GAS] Buy: 183011
     [GAS] Buy: 183011
+    [GAS] Buy: 183011
     [GAS] Buy: 183012
-    [GAS] Buy: 183013
+    [GAS] Buy: 183012
     [GAS] Buy: 183013
     [GAS] Buy: 183014
     [GAS] Buy: 183015
     [GAS] Buy: 183015
     [GAS] Buy: 183016
-    [GAS] Buy: 183017
+    [GAS] Buy: 183016
     [GAS] Buy: 183017
     [GAS] Buy: 183018
     [GAS] Buy: 183018
     [GAS] Buy: 183019
     [GAS] Buy: 183020
+    [GAS] Buy: 183020
     [GAS] Buy: 183021
     [GAS] Buy: 183021
-    [GAS] Buy: 183022
-    [GAS] Buy: 183022
+    [GAS] Buy: 183023
+    [GAS] Buy: 183023
     [GAS] Buy: 183023
     [GAS] Buy: 183024
-    [GAS] Buy: 183024
     [GAS] Buy: 183025
     [GAS] Buy: 183025
-    [GAS] Buy: 183026
     [GAS] Buy: 183026
     [GAS] Buy: 183027
     [GAS] Buy: 183028
+    [GAS] Buy: 183027
     [GAS] Buy: 183028
     [GAS] Buy: 183029
     [GAS] Buy: 183030
     [GAS] Buy: 183030
     [GAS] Buy: 183031
+    [GAS] Buy: 183031
     [GAS] Buy: 183032
-    [GAS] Buy: 183033
     [GAS] Buy: 183033
     [GAS] Buy: 183033
     [GAS] Buy: 183034
     [GAS] Buy: 183035
     [GAS] Buy: 183036
+    [GAS] Buy: 183036
     [GAS] Buy: 183037
-    [GAS] Buy: 183037
-    [GAS] Buy: 183037
+    [GAS] Buy: 183038
     [GAS] Buy: 183038
     [GAS] Buy: 183038
     [GAS] Buy: 183039
     [GAS] Buy: 183040
+    [GAS] Buy: 183040
     [GAS] Buy: 183041
-    [GAS] Buy: 183041
-    [GAS] Buy: 183042
     [GAS] Buy: 183042
     [GAS] Buy: 183043
+    [GAS] Buy: 183043
     [GAS] Buy: 183044
-    [GAS] Buy: 183044
+    [GAS] Buy: 183045
     [GAS] Buy: 183045
     [GAS] Buy: 183046
     [GAS] Buy: 183046
     [GAS] Buy: 183047
-    [GAS] Buy: 183047
+    [GAS] Buy: 183048
     [GAS] Buy: 183049
-    [GAS] Buy: 183049
+    [GAS] Buy: 183048
     [GAS] Buy: 183049
     [GAS] Buy: 183050
     [GAS] Buy: 183051
     [GAS] Buy: 183051
     [GAS] Buy: 183052
     [GAS] Buy: 183053
-    [GAS] Buy: 183054
     [GAS] Buy: 183053
-    [GAS] Buy: 183054
+    [GAS] Buy: 183053
+    [GAS] Buy: 183055
     [GAS] Buy: 183055
     [GAS] Buy: 183056
     [GAS] Buy: 183056
     [GAS] Buy: 183057
-    [GAS] Buy: 183057
+    [GAS] Buy: 183058
     [GAS] Buy: 183058
     [GAS] Buy: 183059
-    [GAS] Buy: 183059
+    [GAS] Buy: 183060
     [GAS] Buy: 183060
     [GAS] Buy: 183061
-    [GAS] Buy: 183062
+    [GAS] Buy: 183061
     [GAS] Buy: 183062
     [GAS] Buy: 183063
     [GAS] Buy: 183064
     [GAS] Buy: 183064
-    [GAS] Buy: 183064
     [GAS] Buy: 183065
-    [GAS] Buy: 183066
+    [GAS] Buy: 183065
+    [GAS] Buy: 183065
     [GAS] Buy: 183066
     [GAS] Buy: 183067
     [GAS] Buy: 183068
     [GAS] Buy: 183069
     [GAS] Buy: 183069
+    [GAS] Buy: 183069
     [GAS] Buy: 183070
-    [GAS] Buy: 183071
     [GAS] Buy: 183071
     [GAS] Buy: 183072
     [GAS] Buy: 183072
     [GAS] Buy: 183073
     [GAS] Buy: 183074
-    [GAS] Buy: 183075
     [GAS] Buy: 183074
     [GAS] Buy: 183075
+    [GAS] Buy: 183076
     [GAS] Buy: 183076
     [GAS] Buy: 183077
     [GAS] Buy: 183077
     [GAS] Buy: 183078
+    [GAS] Buy: 183078
     [GAS] Buy: 183079
-    [GAS] Buy: 183079
-    [GAS] Buy: 183079
+    [GAS] Buy: 183080
+    [GAS] Buy: 183080
     [GAS] Buy: 183081
     [GAS] Buy: 183081
-    [GAS] Buy: 183082
     [GAS] Buy: 183082
     [GAS] Buy: 183083
     [GAS] Buy: 183084
     [GAS] Buy: 183084
     [GAS] Buy: 183085
-    [GAS] Buy: 183086
+    [GAS] Buy: 183085
     [GAS] Buy: 183086
     [GAS] Buy: 183087
     [GAS] Buy: 183087
     [GAS] Buy: 183088
     [GAS] Buy: 183089
+    [GAS] Buy: 183089
     [GAS] Buy: 183090
-    [GAS] Buy: 183090
-    [GAS] Buy: 183091
     [GAS] Buy: 183091
     [GAS] Buy: 183091
     [GAS] Buy: 183092
     [GAS] Buy: 183093
+    [GAS] Buy: 183093
+    [GAS] Buy: 183094
     [GAS] Buy: 183094
     [GAS] Buy: 183095
-    [GAS] Buy: 183095
-    [GAS] Buy: 183095
+    [GAS] Buy: 183096
     [GAS] Buy: 183096
     [GAS] Buy: 183097
     [GAS] Buy: 183098
     [GAS] Buy: 183098
+    [GAS] Buy: 183098
     [GAS] Buy: 183099
     [GAS] Buy: 183100
-    [GAS] Buy: 183100
+    [GAS] Buy: 183101
     [GAS] Buy: 183101
     [GAS] Buy: 183102
-    [GAS] Buy: 183102
     [GAS] Buy: 183103
-    [GAS] Buy: 183103
+    [GAS] Buy: 183104
     [GAS] Buy: 183104
     [GAS] Buy: 183104
     [GAS] Buy: 183105
     [GAS] Buy: 183106
-    [GAS] Buy: 183106
     [GAS] Buy: 183107
     [GAS] Buy: 183107
-    [GAS] Buy: 183108
+    [GAS] Buy: 183107
+    [GAS] Buy: 183109
+    [GAS] Buy: 183109
     [GAS] Buy: 183109
     [GAS] Buy: 183110
-    [GAS] Buy: 183110
     [GAS] Buy: 183111
-    [GAS] Buy: 183111
+    [GAS] Buy: 183112
     [GAS] Buy: 183112
     [GAS] Buy: 183113
     [GAS] Buy: 183113
     [GAS] Buy: 183114
-    [GAS] Buy: 183115
+    [GAS] Buy: 183114
     [GAS] Buy: 183115
     [GAS] Buy: 183116
-    [GAS] Buy: 183117
+    [GAS] Buy: 183116
     [GAS] Buy: 183117
     [GAS] Buy: 183118
     [GAS] Buy: 183119
     [GAS] Buy: 183119
-    [GAS] Buy: 183120
+    [GAS] Buy: 183119
     [GAS] Buy: 183120
     [GAS] Buy: 183121
     [GAS] Buy: 183122
@@ -1874,30 +1721,30 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183123
     [GAS] Buy: 183124
     [GAS] Buy: 183124
-    [GAS] Buy: 183124
+    [GAS] Buy: 183125
     [GAS] Buy: 183125
     [GAS] Buy: 183126
-    [GAS] Buy: 183127
+    [GAS] Buy: 183126
     [GAS] Buy: 183127
     [GAS] Buy: 183128
     [GAS] Buy: 183129
-    [GAS] Buy: 183130
-    [GAS] Buy: 183130
-    [GAS] Buy: 183130
+    [GAS] Buy: 183129
+    [GAS] Buy: 183129
+    [GAS] Buy: 183131
+    [GAS] Buy: 183131
     [GAS] Buy: 183131
     [GAS] Buy: 183132
     [GAS] Buy: 183133
-    [GAS] Buy: 183133
-    [GAS] Buy: 183133
-    [GAS] Buy: 183135
-    [GAS] Buy: 183135
+    [GAS] Buy: 183134
+    [GAS] Buy: 183134
+    [GAS] Buy: 183134
     [GAS] Buy: 183135
     [GAS] Buy: 183136
     [GAS] Buy: 183137
-    [GAS] Buy: 183138
+    [GAS] Buy: 183137
     [GAS] Buy: 183138
     [GAS] Buy: 183139
-    [GAS] Buy: 183139
+    [GAS] Buy: 183140
     [GAS] Buy: 183140
     [GAS] Buy: 183140
     [GAS] Buy: 183141
@@ -1905,224 +1752,224 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183142
     [GAS] Buy: 183143
     [GAS] Buy: 183144
-    [GAS] Buy: 183145
+    [GAS] Buy: 183144
     [GAS] Buy: 183145
     [GAS] Buy: 183145
     [GAS] Buy: 183146
     [GAS] Buy: 183147
-    [GAS] Buy: 183148
+    [GAS] Buy: 183147
     [GAS] Buy: 183148
     [GAS] Buy: 183149
-    [GAS] Buy: 183150
+    [GAS] Buy: 183149
     [GAS] Buy: 183150
     [GAS] Buy: 183151
     [GAS] Buy: 183151
-    [GAS] Buy: 183152
     [GAS] Buy: 183152
     [GAS] Buy: 183153
+    [GAS] Buy: 183153
+    [GAS] Buy: 183154
     [GAS] Buy: 183154
     [GAS] Buy: 183155
-    [GAS] Buy: 183155
-    [GAS] Buy: 183155
+    [GAS] Buy: 183156
     [GAS] Buy: 183157
     [GAS] Buy: 183157
-    [GAS] Buy: 183157
+    [GAS] Buy: 183158
     [GAS] Buy: 183158
     [GAS] Buy: 183159
     [GAS] Buy: 183160
     [GAS] Buy: 183160
-    [GAS] Buy: 183160
+    [GAS] Buy: 183161
     [GAS] Buy: 183161
     [GAS] Buy: 183162
+    [GAS] Buy: 183162
     [GAS] Buy: 183163
-    [GAS] Buy: 183163
+    [GAS] Buy: 183164
     [GAS] Buy: 183164
     [GAS] Buy: 183165
     [GAS] Buy: 183166
     [GAS] Buy: 183166
-    [GAS] Buy: 183166
     [GAS] Buy: 183167
     [GAS] Buy: 183168
-    [GAS] Buy: 183168
+    [GAS] Buy: 183169
+    [GAS] Buy: 183169
     [GAS] Buy: 183169
     [GAS] Buy: 183170
-    [GAS] Buy: 183170
-    [GAS] Buy: 183171
     [GAS] Buy: 183171
     [GAS] Buy: 183172
     [GAS] Buy: 183173
     [GAS] Buy: 183173
+    [GAS] Buy: 183173
     [GAS] Buy: 183174
-    [GAS] Buy: 183175
+    [GAS] Buy: 183174
     [GAS] Buy: 183175
     [GAS] Buy: 183176
     [GAS] Buy: 183177
     [GAS] Buy: 183177
     [GAS] Buy: 183178
-    [GAS] Buy: 183179
+    [GAS] Buy: 183178
     [GAS] Buy: 183179
     [GAS] Buy: 183180
     [GAS] Buy: 183180
     [GAS] Buy: 183181
     [GAS] Buy: 183182
+    [GAS] Buy: 183182
     [GAS] Buy: 183183
     [GAS] Buy: 183183
-    [GAS] Buy: 183184
-    [GAS] Buy: 183184
+    [GAS] Buy: 183185
+    [GAS] Buy: 183185
     [GAS] Buy: 183185
     [GAS] Buy: 183186
-    [GAS] Buy: 183186
     [GAS] Buy: 183187
     [GAS] Buy: 183187
-    [GAS] Buy: 183188
     [GAS] Buy: 183188
     [GAS] Buy: 183189
     [GAS] Buy: 183190
+    [GAS] Buy: 183189
     [GAS] Buy: 183190
     [GAS] Buy: 183191
     [GAS] Buy: 183192
     [GAS] Buy: 183192
     [GAS] Buy: 183193
+    [GAS] Buy: 183193
     [GAS] Buy: 183194
-    [GAS] Buy: 183195
     [GAS] Buy: 183195
     [GAS] Buy: 183195
     [GAS] Buy: 183196
     [GAS] Buy: 183197
     [GAS] Buy: 183198
+    [GAS] Buy: 183198
     [GAS] Buy: 183199
-    [GAS] Buy: 183199
-    [GAS] Buy: 183199
+    [GAS] Buy: 183200
     [GAS] Buy: 183200
     [GAS] Buy: 183200
     [GAS] Buy: 183201
     [GAS] Buy: 183202
+    [GAS] Buy: 183202
     [GAS] Buy: 183203
-    [GAS] Buy: 183203
-    [GAS] Buy: 183204
     [GAS] Buy: 183204
     [GAS] Buy: 183205
+    [GAS] Buy: 183205
     [GAS] Buy: 183206
-    [GAS] Buy: 183206
+    [GAS] Buy: 183207
     [GAS] Buy: 183207
     [GAS] Buy: 183208
     [GAS] Buy: 183208
     [GAS] Buy: 183209
-    [GAS] Buy: 183209
+    [GAS] Buy: 183210
     [GAS] Buy: 183211
-    [GAS] Buy: 183211
+    [GAS] Buy: 183210
     [GAS] Buy: 183211
     [GAS] Buy: 183212
     [GAS] Buy: 183213
     [GAS] Buy: 183213
     [GAS] Buy: 183214
     [GAS] Buy: 183215
-    [GAS] Buy: 183216
     [GAS] Buy: 183215
-    [GAS] Buy: 183216
+    [GAS] Buy: 183215
+    [GAS] Buy: 183217
     [GAS] Buy: 183217
     [GAS] Buy: 183218
     [GAS] Buy: 183218
     [GAS] Buy: 183219
-    [GAS] Buy: 183219
+    [GAS] Buy: 183220
     [GAS] Buy: 183220
     [GAS] Buy: 183221
-    [GAS] Buy: 183221
+    [GAS] Buy: 183222
     [GAS] Buy: 183222
     [GAS] Buy: 183223
-    [GAS] Buy: 183224
+    [GAS] Buy: 183223
     [GAS] Buy: 183224
     [GAS] Buy: 183225
     [GAS] Buy: 183226
     [GAS] Buy: 183226
-    [GAS] Buy: 183226
     [GAS] Buy: 183227
-    [GAS] Buy: 183228
+    [GAS] Buy: 183227
+    [GAS] Buy: 183227
     [GAS] Buy: 183228
     [GAS] Buy: 183229
     [GAS] Buy: 183230
     [GAS] Buy: 183231
     [GAS] Buy: 183231
+    [GAS] Buy: 183231
     [GAS] Buy: 183232
-    [GAS] Buy: 183233
     [GAS] Buy: 183233
     [GAS] Buy: 183234
     [GAS] Buy: 183234
     [GAS] Buy: 183235
     [GAS] Buy: 183236
-    [GAS] Buy: 183237
     [GAS] Buy: 183236
     [GAS] Buy: 183237
+    [GAS] Buy: 183238
     [GAS] Buy: 183238
     [GAS] Buy: 183239
     [GAS] Buy: 183239
     [GAS] Buy: 183240
+    [GAS] Buy: 183240
     [GAS] Buy: 183241
-    [GAS] Buy: 183241
-    [GAS] Buy: 183241
+    [GAS] Buy: 183242
+    [GAS] Buy: 183242
     [GAS] Buy: 183243
     [GAS] Buy: 183243
-    [GAS] Buy: 183244
     [GAS] Buy: 183244
     [GAS] Buy: 183245
     [GAS] Buy: 183246
     [GAS] Buy: 183246
     [GAS] Buy: 183247
-    [GAS] Buy: 183248
+    [GAS] Buy: 183247
     [GAS] Buy: 183248
     [GAS] Buy: 183249
     [GAS] Buy: 183249
     [GAS] Buy: 183250
     [GAS] Buy: 183251
+    [GAS] Buy: 183251
     [GAS] Buy: 183252
-    [GAS] Buy: 183252
-    [GAS] Buy: 183253
     [GAS] Buy: 183253
     [GAS] Buy: 183253
     [GAS] Buy: 183254
     [GAS] Buy: 183255
+    [GAS] Buy: 183255
+    [GAS] Buy: 183256
     [GAS] Buy: 183256
     [GAS] Buy: 183257
-    [GAS] Buy: 183257
-    [GAS] Buy: 183257
+    [GAS] Buy: 183258
     [GAS] Buy: 183258
     [GAS] Buy: 183259
     [GAS] Buy: 183260
     [GAS] Buy: 183260
+    [GAS] Buy: 183260
     [GAS] Buy: 183261
     [GAS] Buy: 183262
-    [GAS] Buy: 183262
+    [GAS] Buy: 183263
     [GAS] Buy: 183263
     [GAS] Buy: 183264
-    [GAS] Buy: 183264
     [GAS] Buy: 183265
-    [GAS] Buy: 183265
+    [GAS] Buy: 183266
     [GAS] Buy: 183266
     [GAS] Buy: 183266
     [GAS] Buy: 183267
     [GAS] Buy: 183268
-    [GAS] Buy: 183268
     [GAS] Buy: 183269
     [GAS] Buy: 183269
-    [GAS] Buy: 183270
+    [GAS] Buy: 183269
+    [GAS] Buy: 183271
+    [GAS] Buy: 183271
     [GAS] Buy: 183271
     [GAS] Buy: 183272
-    [GAS] Buy: 183272
     [GAS] Buy: 183273
-    [GAS] Buy: 183273
+    [GAS] Buy: 183274
     [GAS] Buy: 183274
     [GAS] Buy: 183275
     [GAS] Buy: 183275
     [GAS] Buy: 183276
-    [GAS] Buy: 183277
+    [GAS] Buy: 183276
     [GAS] Buy: 183277
     [GAS] Buy: 183278
-    [GAS] Buy: 183279
+    [GAS] Buy: 183278
     [GAS] Buy: 183279
     [GAS] Buy: 183280
     [GAS] Buy: 183281
     [GAS] Buy: 183281
-    [GAS] Buy: 183282
+    [GAS] Buy: 183281
     [GAS] Buy: 183282
     [GAS] Buy: 183283
     [GAS] Buy: 183284
@@ -2130,30 +1977,30 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183285
     [GAS] Buy: 183286
     [GAS] Buy: 183286
-    [GAS] Buy: 183286
+    [GAS] Buy: 183287
     [GAS] Buy: 183287
     [GAS] Buy: 183288
-    [GAS] Buy: 183289
+    [GAS] Buy: 183288
     [GAS] Buy: 183289
     [GAS] Buy: 183290
     [GAS] Buy: 183291
-    [GAS] Buy: 183292
-    [GAS] Buy: 183292
-    [GAS] Buy: 183292
+    [GAS] Buy: 183291
+    [GAS] Buy: 183291
+    [GAS] Buy: 183293
+    [GAS] Buy: 183293
     [GAS] Buy: 183293
     [GAS] Buy: 183294
     [GAS] Buy: 183295
-    [GAS] Buy: 183295
-    [GAS] Buy: 183295
-    [GAS] Buy: 183297
-    [GAS] Buy: 183297
+    [GAS] Buy: 183296
+    [GAS] Buy: 183296
+    [GAS] Buy: 183296
     [GAS] Buy: 183297
     [GAS] Buy: 183298
     [GAS] Buy: 183299
-    [GAS] Buy: 183300
+    [GAS] Buy: 183299
     [GAS] Buy: 183300
     [GAS] Buy: 183301
-    [GAS] Buy: 183301
+    [GAS] Buy: 183302
     [GAS] Buy: 183302
     [GAS] Buy: 183302
     [GAS] Buy: 183303
@@ -2161,224 +2008,224 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183304
     [GAS] Buy: 183305
     [GAS] Buy: 183306
-    [GAS] Buy: 183307
+    [GAS] Buy: 183306
     [GAS] Buy: 183307
     [GAS] Buy: 183307
     [GAS] Buy: 183308
     [GAS] Buy: 183309
-    [GAS] Buy: 183310
+    [GAS] Buy: 183309
     [GAS] Buy: 183310
     [GAS] Buy: 183311
-    [GAS] Buy: 183312
+    [GAS] Buy: 183311
     [GAS] Buy: 183312
     [GAS] Buy: 183313
     [GAS] Buy: 183313
-    [GAS] Buy: 183314
     [GAS] Buy: 183314
     [GAS] Buy: 183315
+    [GAS] Buy: 183315
+    [GAS] Buy: 183316
     [GAS] Buy: 183316
     [GAS] Buy: 183317
-    [GAS] Buy: 183317
-    [GAS] Buy: 183317
+    [GAS] Buy: 183318
     [GAS] Buy: 183319
     [GAS] Buy: 183319
-    [GAS] Buy: 183319
+    [GAS] Buy: 183320
     [GAS] Buy: 183320
     [GAS] Buy: 183321
     [GAS] Buy: 183322
     [GAS] Buy: 183322
-    [GAS] Buy: 183322
+    [GAS] Buy: 183323
     [GAS] Buy: 183323
     [GAS] Buy: 183324
+    [GAS] Buy: 183324
     [GAS] Buy: 183325
-    [GAS] Buy: 183325
+    [GAS] Buy: 183326
     [GAS] Buy: 183326
     [GAS] Buy: 183327
     [GAS] Buy: 183328
     [GAS] Buy: 183328
-    [GAS] Buy: 183328
     [GAS] Buy: 183329
     [GAS] Buy: 183330
-    [GAS] Buy: 183330
+    [GAS] Buy: 183331
+    [GAS] Buy: 183331
     [GAS] Buy: 183331
     [GAS] Buy: 183332
-    [GAS] Buy: 183332
-    [GAS] Buy: 183333
     [GAS] Buy: 183333
     [GAS] Buy: 183334
     [GAS] Buy: 183335
     [GAS] Buy: 183335
+    [GAS] Buy: 183335
     [GAS] Buy: 183336
-    [GAS] Buy: 183337
+    [GAS] Buy: 183336
     [GAS] Buy: 183337
     [GAS] Buy: 183338
     [GAS] Buy: 183339
     [GAS] Buy: 183339
     [GAS] Buy: 183340
-    [GAS] Buy: 183341
+    [GAS] Buy: 183340
     [GAS] Buy: 183341
     [GAS] Buy: 183342
     [GAS] Buy: 183342
     [GAS] Buy: 183343
     [GAS] Buy: 183344
+    [GAS] Buy: 183344
     [GAS] Buy: 183345
     [GAS] Buy: 183345
-    [GAS] Buy: 183346
-    [GAS] Buy: 183346
+    [GAS] Buy: 183347
+    [GAS] Buy: 183347
     [GAS] Buy: 183347
     [GAS] Buy: 183348
-    [GAS] Buy: 183348
     [GAS] Buy: 183349
     [GAS] Buy: 183349
-    [GAS] Buy: 183350
     [GAS] Buy: 183350
     [GAS] Buy: 183351
     [GAS] Buy: 183352
+    [GAS] Buy: 183351
     [GAS] Buy: 183352
     [GAS] Buy: 183353
     [GAS] Buy: 183354
     [GAS] Buy: 183354
     [GAS] Buy: 183355
+    [GAS] Buy: 183355
     [GAS] Buy: 183356
-    [GAS] Buy: 183357
     [GAS] Buy: 183357
     [GAS] Buy: 183357
     [GAS] Buy: 183358
     [GAS] Buy: 183359
     [GAS] Buy: 183360
+    [GAS] Buy: 183360
     [GAS] Buy: 183361
-    [GAS] Buy: 183361
-    [GAS] Buy: 183361
+    [GAS] Buy: 183362
     [GAS] Buy: 183362
     [GAS] Buy: 183362
     [GAS] Buy: 183363
     [GAS] Buy: 183364
+    [GAS] Buy: 183364
     [GAS] Buy: 183365
-    [GAS] Buy: 183365
-    [GAS] Buy: 183366
     [GAS] Buy: 183366
     [GAS] Buy: 183367
+    [GAS] Buy: 183367
     [GAS] Buy: 183368
-    [GAS] Buy: 183368
+    [GAS] Buy: 183369
     [GAS] Buy: 183369
     [GAS] Buy: 183370
     [GAS] Buy: 183370
     [GAS] Buy: 183371
-    [GAS] Buy: 183371
+    [GAS] Buy: 183372
     [GAS] Buy: 183373
-    [GAS] Buy: 183373
+    [GAS] Buy: 183372
     [GAS] Buy: 183373
     [GAS] Buy: 183374
     [GAS] Buy: 183375
     [GAS] Buy: 183375
     [GAS] Buy: 183376
     [GAS] Buy: 183377
-    [GAS] Buy: 183378
     [GAS] Buy: 183377
-    [GAS] Buy: 183378
+    [GAS] Buy: 183377
+    [GAS] Buy: 183379
     [GAS] Buy: 183379
     [GAS] Buy: 183380
     [GAS] Buy: 183380
     [GAS] Buy: 183381
-    [GAS] Buy: 183381
+    [GAS] Buy: 183382
     [GAS] Buy: 183382
     [GAS] Buy: 183383
-    [GAS] Buy: 183383
+    [GAS] Buy: 183384
     [GAS] Buy: 183384
     [GAS] Buy: 183385
-    [GAS] Buy: 183386
+    [GAS] Buy: 183385
     [GAS] Buy: 183386
     [GAS] Buy: 183387
     [GAS] Buy: 183388
     [GAS] Buy: 183388
-    [GAS] Buy: 183388
     [GAS] Buy: 183389
-    [GAS] Buy: 183390
+    [GAS] Buy: 183389
+    [GAS] Buy: 183389
     [GAS] Buy: 183390
     [GAS] Buy: 183391
     [GAS] Buy: 183392
     [GAS] Buy: 183393
     [GAS] Buy: 183393
+    [GAS] Buy: 183393
     [GAS] Buy: 183394
-    [GAS] Buy: 183395
     [GAS] Buy: 183395
     [GAS] Buy: 183396
     [GAS] Buy: 183396
     [GAS] Buy: 183397
     [GAS] Buy: 183398
-    [GAS] Buy: 183399
     [GAS] Buy: 183398
     [GAS] Buy: 183399
+    [GAS] Buy: 183400
     [GAS] Buy: 183400
     [GAS] Buy: 183401
     [GAS] Buy: 183401
     [GAS] Buy: 183402
+    [GAS] Buy: 183402
     [GAS] Buy: 183403
-    [GAS] Buy: 183403
-    [GAS] Buy: 183403
+    [GAS] Buy: 183404
+    [GAS] Buy: 183404
     [GAS] Buy: 183405
     [GAS] Buy: 183405
-    [GAS] Buy: 183406
     [GAS] Buy: 183406
     [GAS] Buy: 183407
     [GAS] Buy: 183408
     [GAS] Buy: 183408
     [GAS] Buy: 183409
-    [GAS] Buy: 183410
+    [GAS] Buy: 183409
     [GAS] Buy: 183410
     [GAS] Buy: 183411
     [GAS] Buy: 183411
     [GAS] Buy: 183412
     [GAS] Buy: 183413
+    [GAS] Buy: 183413
     [GAS] Buy: 183414
-    [GAS] Buy: 183414
-    [GAS] Buy: 183415
     [GAS] Buy: 183415
     [GAS] Buy: 183415
     [GAS] Buy: 183416
     [GAS] Buy: 183417
+    [GAS] Buy: 183417
+    [GAS] Buy: 183418
     [GAS] Buy: 183418
     [GAS] Buy: 183419
-    [GAS] Buy: 183419
-    [GAS] Buy: 183419
+    [GAS] Buy: 183420
     [GAS] Buy: 183420
     [GAS] Buy: 183421
     [GAS] Buy: 183422
     [GAS] Buy: 183422
+    [GAS] Buy: 183422
     [GAS] Buy: 183423
     [GAS] Buy: 183424
-    [GAS] Buy: 183424
+    [GAS] Buy: 183425
     [GAS] Buy: 183425
     [GAS] Buy: 183426
-    [GAS] Buy: 183426
     [GAS] Buy: 183427
-    [GAS] Buy: 183427
+    [GAS] Buy: 183428
     [GAS] Buy: 183428
     [GAS] Buy: 183428
     [GAS] Buy: 183429
     [GAS] Buy: 183430
-    [GAS] Buy: 183430
     [GAS] Buy: 183431
     [GAS] Buy: 183431
-    [GAS] Buy: 183432
+    [GAS] Buy: 183431
+    [GAS] Buy: 183433
+    [GAS] Buy: 183433
     [GAS] Buy: 183433
     [GAS] Buy: 183434
-    [GAS] Buy: 183434
     [GAS] Buy: 183435
-    [GAS] Buy: 183435
+    [GAS] Buy: 183436
     [GAS] Buy: 183436
     [GAS] Buy: 183437
     [GAS] Buy: 183437
     [GAS] Buy: 183438
-    [GAS] Buy: 183439
+    [GAS] Buy: 183438
     [GAS] Buy: 183439
     [GAS] Buy: 183440
-    [GAS] Buy: 183441
+    [GAS] Buy: 183440
     [GAS] Buy: 183441
     [GAS] Buy: 183442
     [GAS] Buy: 183443
     [GAS] Buy: 183443
-    [GAS] Buy: 183444
+    [GAS] Buy: 183443
     [GAS] Buy: 183444
     [GAS] Buy: 183445
     [GAS] Buy: 183446
@@ -2386,30 +2233,30 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183447
     [GAS] Buy: 183448
     [GAS] Buy: 183448
-    [GAS] Buy: 183448
+    [GAS] Buy: 183449
     [GAS] Buy: 183449
     [GAS] Buy: 183450
-    [GAS] Buy: 183451
+    [GAS] Buy: 183450
     [GAS] Buy: 183451
     [GAS] Buy: 183452
     [GAS] Buy: 183453
-    [GAS] Buy: 183454
-    [GAS] Buy: 183454
-    [GAS] Buy: 183454
+    [GAS] Buy: 183453
+    [GAS] Buy: 183453
+    [GAS] Buy: 183455
+    [GAS] Buy: 183455
     [GAS] Buy: 183455
     [GAS] Buy: 183456
     [GAS] Buy: 183457
-    [GAS] Buy: 183457
-    [GAS] Buy: 183457
-    [GAS] Buy: 183459
-    [GAS] Buy: 183459
+    [GAS] Buy: 183458
+    [GAS] Buy: 183458
+    [GAS] Buy: 183458
     [GAS] Buy: 183459
     [GAS] Buy: 183460
     [GAS] Buy: 183461
-    [GAS] Buy: 183462
+    [GAS] Buy: 183461
     [GAS] Buy: 183462
     [GAS] Buy: 183463
-    [GAS] Buy: 183463
+    [GAS] Buy: 183464
     [GAS] Buy: 183464
     [GAS] Buy: 183464
     [GAS] Buy: 183465
@@ -2417,224 +2264,224 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183466
     [GAS] Buy: 183467
     [GAS] Buy: 183468
-    [GAS] Buy: 183469
+    [GAS] Buy: 183468
     [GAS] Buy: 183469
     [GAS] Buy: 183469
     [GAS] Buy: 183470
     [GAS] Buy: 183471
-    [GAS] Buy: 183472
+    [GAS] Buy: 183471
     [GAS] Buy: 183472
     [GAS] Buy: 183473
-    [GAS] Buy: 183474
+    [GAS] Buy: 183473
     [GAS] Buy: 183474
     [GAS] Buy: 183475
     [GAS] Buy: 183475
-    [GAS] Buy: 183476
     [GAS] Buy: 183476
     [GAS] Buy: 183477
+    [GAS] Buy: 183477
+    [GAS] Buy: 183478
     [GAS] Buy: 183478
     [GAS] Buy: 183479
-    [GAS] Buy: 183479
-    [GAS] Buy: 183479
+    [GAS] Buy: 183480
     [GAS] Buy: 183481
     [GAS] Buy: 183481
-    [GAS] Buy: 183481
+    [GAS] Buy: 183482
     [GAS] Buy: 183482
     [GAS] Buy: 183483
     [GAS] Buy: 183484
     [GAS] Buy: 183484
-    [GAS] Buy: 183484
+    [GAS] Buy: 183485
     [GAS] Buy: 183485
     [GAS] Buy: 183486
+    [GAS] Buy: 183486
     [GAS] Buy: 183487
-    [GAS] Buy: 183487
+    [GAS] Buy: 183488
     [GAS] Buy: 183488
     [GAS] Buy: 183489
     [GAS] Buy: 183490
     [GAS] Buy: 183490
-    [GAS] Buy: 183490
     [GAS] Buy: 183491
     [GAS] Buy: 183492
-    [GAS] Buy: 183492
+    [GAS] Buy: 183493
+    [GAS] Buy: 183493
     [GAS] Buy: 183493
     [GAS] Buy: 183494
-    [GAS] Buy: 183494
-    [GAS] Buy: 183495
     [GAS] Buy: 183495
     [GAS] Buy: 183496
     [GAS] Buy: 183497
     [GAS] Buy: 183497
+    [GAS] Buy: 183497
     [GAS] Buy: 183498
-    [GAS] Buy: 183499
+    [GAS] Buy: 183498
     [GAS] Buy: 183499
     [GAS] Buy: 183500
     [GAS] Buy: 183501
     [GAS] Buy: 183501
     [GAS] Buy: 183502
-    [GAS] Buy: 183503
+    [GAS] Buy: 183502
     [GAS] Buy: 183503
     [GAS] Buy: 183504
     [GAS] Buy: 183504
     [GAS] Buy: 183505
     [GAS] Buy: 183506
+    [GAS] Buy: 183506
     [GAS] Buy: 183507
     [GAS] Buy: 183507
-    [GAS] Buy: 183508
-    [GAS] Buy: 183508
+    [GAS] Buy: 183509
+    [GAS] Buy: 183509
     [GAS] Buy: 183509
     [GAS] Buy: 183510
-    [GAS] Buy: 183510
     [GAS] Buy: 183511
     [GAS] Buy: 183511
-    [GAS] Buy: 183512
     [GAS] Buy: 183512
     [GAS] Buy: 183513
     [GAS] Buy: 183514
+    [GAS] Buy: 183513
     [GAS] Buy: 183514
     [GAS] Buy: 183515
     [GAS] Buy: 183516
     [GAS] Buy: 183516
     [GAS] Buy: 183517
+    [GAS] Buy: 183517
     [GAS] Buy: 183518
-    [GAS] Buy: 183519
     [GAS] Buy: 183519
     [GAS] Buy: 183519
     [GAS] Buy: 183520
     [GAS] Buy: 183521
     [GAS] Buy: 183522
+    [GAS] Buy: 183522
     [GAS] Buy: 183523
-    [GAS] Buy: 183523
-    [GAS] Buy: 183523
+    [GAS] Buy: 183524
     [GAS] Buy: 183524
     [GAS] Buy: 183524
     [GAS] Buy: 183525
     [GAS] Buy: 183526
+    [GAS] Buy: 183526
     [GAS] Buy: 183527
-    [GAS] Buy: 183527
-    [GAS] Buy: 183528
     [GAS] Buy: 183528
     [GAS] Buy: 183529
+    [GAS] Buy: 183529
     [GAS] Buy: 183530
-    [GAS] Buy: 183530
+    [GAS] Buy: 183531
     [GAS] Buy: 183531
     [GAS] Buy: 183532
     [GAS] Buy: 183532
     [GAS] Buy: 183533
-    [GAS] Buy: 183533
+    [GAS] Buy: 183534
     [GAS] Buy: 183535
-    [GAS] Buy: 183535
+    [GAS] Buy: 183534
     [GAS] Buy: 183535
     [GAS] Buy: 183536
     [GAS] Buy: 183537
     [GAS] Buy: 183537
     [GAS] Buy: 183538
     [GAS] Buy: 183539
-    [GAS] Buy: 183540
     [GAS] Buy: 183539
-    [GAS] Buy: 183540
+    [GAS] Buy: 183539
+    [GAS] Buy: 183541
     [GAS] Buy: 183541
     [GAS] Buy: 183542
     [GAS] Buy: 183542
     [GAS] Buy: 183543
-    [GAS] Buy: 183543
+    [GAS] Buy: 183544
     [GAS] Buy: 183544
     [GAS] Buy: 183545
-    [GAS] Buy: 183545
+    [GAS] Buy: 183546
     [GAS] Buy: 183546
     [GAS] Buy: 183547
-    [GAS] Buy: 183548
+    [GAS] Buy: 183547
     [GAS] Buy: 183548
     [GAS] Buy: 183549
     [GAS] Buy: 183550
     [GAS] Buy: 183550
-    [GAS] Buy: 183550
     [GAS] Buy: 183551
-    [GAS] Buy: 183552
+    [GAS] Buy: 183551
+    [GAS] Buy: 183551
     [GAS] Buy: 183552
     [GAS] Buy: 183553
     [GAS] Buy: 183554
     [GAS] Buy: 183555
     [GAS] Buy: 183555
+    [GAS] Buy: 183555
     [GAS] Buy: 183556
-    [GAS] Buy: 183557
     [GAS] Buy: 183557
     [GAS] Buy: 183558
     [GAS] Buy: 183558
     [GAS] Buy: 183559
     [GAS] Buy: 183560
-    [GAS] Buy: 183561
     [GAS] Buy: 183560
     [GAS] Buy: 183561
+    [GAS] Buy: 183562
     [GAS] Buy: 183562
     [GAS] Buy: 183563
     [GAS] Buy: 183563
     [GAS] Buy: 183564
+    [GAS] Buy: 183564
     [GAS] Buy: 183565
-    [GAS] Buy: 183565
-    [GAS] Buy: 183565
+    [GAS] Buy: 183566
+    [GAS] Buy: 183566
     [GAS] Buy: 183567
     [GAS] Buy: 183567
-    [GAS] Buy: 183568
     [GAS] Buy: 183568
     [GAS] Buy: 183569
     [GAS] Buy: 183570
     [GAS] Buy: 183570
     [GAS] Buy: 183571
-    [GAS] Buy: 183572
+    [GAS] Buy: 183571
     [GAS] Buy: 183572
     [GAS] Buy: 183573
     [GAS] Buy: 183573
     [GAS] Buy: 183574
     [GAS] Buy: 183575
+    [GAS] Buy: 183575
     [GAS] Buy: 183576
-    [GAS] Buy: 183576
-    [GAS] Buy: 183577
     [GAS] Buy: 183577
     [GAS] Buy: 183577
     [GAS] Buy: 183578
     [GAS] Buy: 183579
+    [GAS] Buy: 183579
+    [GAS] Buy: 183580
     [GAS] Buy: 183580
     [GAS] Buy: 183581
-    [GAS] Buy: 183581
-    [GAS] Buy: 183581
+    [GAS] Buy: 183582
     [GAS] Buy: 183582
     [GAS] Buy: 183583
     [GAS] Buy: 183584
     [GAS] Buy: 183584
+    [GAS] Buy: 183584
     [GAS] Buy: 183585
     [GAS] Buy: 183586
-    [GAS] Buy: 183586
+    [GAS] Buy: 183587
     [GAS] Buy: 183587
     [GAS] Buy: 183588
-    [GAS] Buy: 183588
     [GAS] Buy: 183589
-    [GAS] Buy: 183589
+    [GAS] Buy: 183590
     [GAS] Buy: 183590
     [GAS] Buy: 183590
     [GAS] Buy: 183591
     [GAS] Buy: 183592
-    [GAS] Buy: 183592
     [GAS] Buy: 183593
     [GAS] Buy: 183593
-    [GAS] Buy: 183594
+    [GAS] Buy: 183593
+    [GAS] Buy: 183595
+    [GAS] Buy: 183595
     [GAS] Buy: 183595
     [GAS] Buy: 183596
-    [GAS] Buy: 183596
     [GAS] Buy: 183597
-    [GAS] Buy: 183597
+    [GAS] Buy: 183598
     [GAS] Buy: 183598
     [GAS] Buy: 183599
     [GAS] Buy: 183599
     [GAS] Buy: 183600
-    [GAS] Buy: 183601
+    [GAS] Buy: 183600
     [GAS] Buy: 183601
     [GAS] Buy: 183602
-    [GAS] Buy: 183603
+    [GAS] Buy: 183602
     [GAS] Buy: 183603
     [GAS] Buy: 183604
     [GAS] Buy: 183605
     [GAS] Buy: 183605
-    [GAS] Buy: 183606
+    [GAS] Buy: 183605
     [GAS] Buy: 183606
     [GAS] Buy: 183607
     [GAS] Buy: 183608
@@ -2642,30 +2489,30 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183609
     [GAS] Buy: 183610
     [GAS] Buy: 183610
-    [GAS] Buy: 183610
+    [GAS] Buy: 183611
     [GAS] Buy: 183611
     [GAS] Buy: 183612
-    [GAS] Buy: 183613
+    [GAS] Buy: 183612
     [GAS] Buy: 183613
     [GAS] Buy: 183614
     [GAS] Buy: 183615
-    [GAS] Buy: 183616
-    [GAS] Buy: 183616
-    [GAS] Buy: 183616
+    [GAS] Buy: 183615
+    [GAS] Buy: 183615
+    [GAS] Buy: 183617
+    [GAS] Buy: 183617
     [GAS] Buy: 183617
     [GAS] Buy: 183618
     [GAS] Buy: 183619
-    [GAS] Buy: 183619
-    [GAS] Buy: 183619
-    [GAS] Buy: 183621
-    [GAS] Buy: 183621
+    [GAS] Buy: 183620
+    [GAS] Buy: 183620
+    [GAS] Buy: 183620
     [GAS] Buy: 183621
     [GAS] Buy: 183622
     [GAS] Buy: 183623
-    [GAS] Buy: 183624
+    [GAS] Buy: 183623
     [GAS] Buy: 183624
     [GAS] Buy: 183625
-    [GAS] Buy: 183625
+    [GAS] Buy: 183626
     [GAS] Buy: 183626
     [GAS] Buy: 183626
     [GAS] Buy: 183627
@@ -2673,224 +2520,224 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183628
     [GAS] Buy: 183629
     [GAS] Buy: 183630
-    [GAS] Buy: 183631
+    [GAS] Buy: 183630
     [GAS] Buy: 183631
     [GAS] Buy: 183631
     [GAS] Buy: 183632
     [GAS] Buy: 183633
-    [GAS] Buy: 183634
+    [GAS] Buy: 183633
     [GAS] Buy: 183634
     [GAS] Buy: 183635
-    [GAS] Buy: 183636
+    [GAS] Buy: 183635
     [GAS] Buy: 183636
     [GAS] Buy: 183637
     [GAS] Buy: 183637
-    [GAS] Buy: 183638
     [GAS] Buy: 183638
     [GAS] Buy: 183639
+    [GAS] Buy: 183639
+    [GAS] Buy: 183640
     [GAS] Buy: 183640
     [GAS] Buy: 183641
-    [GAS] Buy: 183641
-    [GAS] Buy: 183641
+    [GAS] Buy: 183642
     [GAS] Buy: 183643
     [GAS] Buy: 183643
-    [GAS] Buy: 183643
+    [GAS] Buy: 183644
     [GAS] Buy: 183644
     [GAS] Buy: 183645
     [GAS] Buy: 183646
     [GAS] Buy: 183646
-    [GAS] Buy: 183646
+    [GAS] Buy: 183647
     [GAS] Buy: 183647
     [GAS] Buy: 183648
+    [GAS] Buy: 183648
     [GAS] Buy: 183649
-    [GAS] Buy: 183649
+    [GAS] Buy: 183650
     [GAS] Buy: 183650
     [GAS] Buy: 183651
     [GAS] Buy: 183652
     [GAS] Buy: 183652
-    [GAS] Buy: 183652
     [GAS] Buy: 183653
     [GAS] Buy: 183654
-    [GAS] Buy: 183654
+    [GAS] Buy: 183655
+    [GAS] Buy: 183655
     [GAS] Buy: 183655
     [GAS] Buy: 183656
-    [GAS] Buy: 183656
-    [GAS] Buy: 183657
     [GAS] Buy: 183657
     [GAS] Buy: 183658
     [GAS] Buy: 183659
     [GAS] Buy: 183659
+    [GAS] Buy: 183659
     [GAS] Buy: 183660
-    [GAS] Buy: 183661
+    [GAS] Buy: 183660
     [GAS] Buy: 183661
     [GAS] Buy: 183662
     [GAS] Buy: 183663
     [GAS] Buy: 183663
     [GAS] Buy: 183664
-    [GAS] Buy: 183665
+    [GAS] Buy: 183664
     [GAS] Buy: 183665
     [GAS] Buy: 183666
     [GAS] Buy: 183666
     [GAS] Buy: 183667
     [GAS] Buy: 183668
+    [GAS] Buy: 183668
     [GAS] Buy: 183669
     [GAS] Buy: 183669
-    [GAS] Buy: 183670
-    [GAS] Buy: 183670
+    [GAS] Buy: 183671
+    [GAS] Buy: 183671
     [GAS] Buy: 183671
     [GAS] Buy: 183672
-    [GAS] Buy: 183672
     [GAS] Buy: 183673
     [GAS] Buy: 183673
-    [GAS] Buy: 183674
     [GAS] Buy: 183674
     [GAS] Buy: 183675
     [GAS] Buy: 183676
+    [GAS] Buy: 183675
     [GAS] Buy: 183676
     [GAS] Buy: 183677
     [GAS] Buy: 183678
     [GAS] Buy: 183678
     [GAS] Buy: 183679
+    [GAS] Buy: 183679
     [GAS] Buy: 183680
-    [GAS] Buy: 183681
     [GAS] Buy: 183681
     [GAS] Buy: 183681
     [GAS] Buy: 183682
     [GAS] Buy: 183683
     [GAS] Buy: 183684
+    [GAS] Buy: 183684
     [GAS] Buy: 183685
-    [GAS] Buy: 183685
-    [GAS] Buy: 183685
+    [GAS] Buy: 183686
     [GAS] Buy: 183686
     [GAS] Buy: 183686
     [GAS] Buy: 183687
     [GAS] Buy: 183688
+    [GAS] Buy: 183688
     [GAS] Buy: 183689
-    [GAS] Buy: 183689
-    [GAS] Buy: 183690
     [GAS] Buy: 183690
     [GAS] Buy: 183691
+    [GAS] Buy: 183691
     [GAS] Buy: 183692
-    [GAS] Buy: 183692
+    [GAS] Buy: 183693
     [GAS] Buy: 183693
     [GAS] Buy: 183694
     [GAS] Buy: 183694
     [GAS] Buy: 183695
-    [GAS] Buy: 183695
+    [GAS] Buy: 183696
     [GAS] Buy: 183697
-    [GAS] Buy: 183697
+    [GAS] Buy: 183696
     [GAS] Buy: 183697
     [GAS] Buy: 183698
     [GAS] Buy: 183699
     [GAS] Buy: 183699
     [GAS] Buy: 183700
     [GAS] Buy: 183701
-    [GAS] Buy: 183702
     [GAS] Buy: 183701
-    [GAS] Buy: 183702
+    [GAS] Buy: 183701
+    [GAS] Buy: 183703
     [GAS] Buy: 183703
     [GAS] Buy: 183704
     [GAS] Buy: 183704
     [GAS] Buy: 183705
-    [GAS] Buy: 183705
+    [GAS] Buy: 183706
     [GAS] Buy: 183706
     [GAS] Buy: 183707
-    [GAS] Buy: 183707
+    [GAS] Buy: 183708
     [GAS] Buy: 183708
     [GAS] Buy: 183709
-    [GAS] Buy: 183710
+    [GAS] Buy: 183709
     [GAS] Buy: 183710
     [GAS] Buy: 183711
     [GAS] Buy: 183712
     [GAS] Buy: 183712
-    [GAS] Buy: 183712
     [GAS] Buy: 183713
-    [GAS] Buy: 183714
+    [GAS] Buy: 183713
+    [GAS] Buy: 183713
     [GAS] Buy: 183714
     [GAS] Buy: 183715
     [GAS] Buy: 183716
     [GAS] Buy: 183717
     [GAS] Buy: 183717
+    [GAS] Buy: 183717
     [GAS] Buy: 183718
-    [GAS] Buy: 183719
     [GAS] Buy: 183719
     [GAS] Buy: 183720
     [GAS] Buy: 183720
     [GAS] Buy: 183721
     [GAS] Buy: 183722
-    [GAS] Buy: 183723
     [GAS] Buy: 183722
     [GAS] Buy: 183723
+    [GAS] Buy: 183724
     [GAS] Buy: 183724
     [GAS] Buy: 183725
     [GAS] Buy: 183725
     [GAS] Buy: 183726
+    [GAS] Buy: 183726
     [GAS] Buy: 183727
-    [GAS] Buy: 183727
-    [GAS] Buy: 183727
+    [GAS] Buy: 183728
+    [GAS] Buy: 183728
     [GAS] Buy: 183729
     [GAS] Buy: 183729
-    [GAS] Buy: 183730
     [GAS] Buy: 183730
     [GAS] Buy: 183731
     [GAS] Buy: 183732
     [GAS] Buy: 183732
     [GAS] Buy: 183733
-    [GAS] Buy: 183734
+    [GAS] Buy: 183733
     [GAS] Buy: 183734
     [GAS] Buy: 183735
     [GAS] Buy: 183735
     [GAS] Buy: 183736
     [GAS] Buy: 183737
+    [GAS] Buy: 183737
     [GAS] Buy: 183738
-    [GAS] Buy: 183738
-    [GAS] Buy: 183739
     [GAS] Buy: 183739
     [GAS] Buy: 183739
     [GAS] Buy: 183740
     [GAS] Buy: 183741
+    [GAS] Buy: 183741
+    [GAS] Buy: 183742
     [GAS] Buy: 183742
     [GAS] Buy: 183743
-    [GAS] Buy: 183743
-    [GAS] Buy: 183743
+    [GAS] Buy: 183744
     [GAS] Buy: 183744
     [GAS] Buy: 183745
     [GAS] Buy: 183746
     [GAS] Buy: 183746
+    [GAS] Buy: 183746
     [GAS] Buy: 183747
     [GAS] Buy: 183748
-    [GAS] Buy: 183748
+    [GAS] Buy: 183749
     [GAS] Buy: 183749
     [GAS] Buy: 183750
-    [GAS] Buy: 183750
     [GAS] Buy: 183751
-    [GAS] Buy: 183751
+    [GAS] Buy: 183752
     [GAS] Buy: 183752
     [GAS] Buy: 183752
     [GAS] Buy: 183753
     [GAS] Buy: 183754
-    [GAS] Buy: 183754
     [GAS] Buy: 183755
     [GAS] Buy: 183755
-    [GAS] Buy: 183756
+    [GAS] Buy: 183755
+    [GAS] Buy: 183757
+    [GAS] Buy: 183757
     [GAS] Buy: 183757
     [GAS] Buy: 183758
-    [GAS] Buy: 183758
     [GAS] Buy: 183759
-    [GAS] Buy: 183759
+    [GAS] Buy: 183760
     [GAS] Buy: 183760
     [GAS] Buy: 183761
     [GAS] Buy: 183761
     [GAS] Buy: 183762
-    [GAS] Buy: 183763
+    [GAS] Buy: 183762
     [GAS] Buy: 183763
     [GAS] Buy: 183764
-    [GAS] Buy: 183765
+    [GAS] Buy: 183764
     [GAS] Buy: 183765
     [GAS] Buy: 183766
     [GAS] Buy: 183767
     [GAS] Buy: 183767
-    [GAS] Buy: 183768
+    [GAS] Buy: 183767
     [GAS] Buy: 183768
     [GAS] Buy: 183769
     [GAS] Buy: 183770
@@ -2898,30 +2745,30 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183771
     [GAS] Buy: 183772
     [GAS] Buy: 183772
-    [GAS] Buy: 183772
+    [GAS] Buy: 183773
     [GAS] Buy: 183773
     [GAS] Buy: 183774
-    [GAS] Buy: 183775
+    [GAS] Buy: 183774
     [GAS] Buy: 183775
     [GAS] Buy: 183776
     [GAS] Buy: 183777
-    [GAS] Buy: 183778
-    [GAS] Buy: 183778
-    [GAS] Buy: 183778
+    [GAS] Buy: 183777
+    [GAS] Buy: 183777
+    [GAS] Buy: 183779
+    [GAS] Buy: 183779
     [GAS] Buy: 183779
     [GAS] Buy: 183780
     [GAS] Buy: 183781
-    [GAS] Buy: 183781
-    [GAS] Buy: 183781
-    [GAS] Buy: 183783
-    [GAS] Buy: 183783
+    [GAS] Buy: 183782
+    [GAS] Buy: 183782
+    [GAS] Buy: 183782
     [GAS] Buy: 183783
     [GAS] Buy: 183784
     [GAS] Buy: 183785
-    [GAS] Buy: 183786
+    [GAS] Buy: 183785
     [GAS] Buy: 183786
     [GAS] Buy: 183787
-    [GAS] Buy: 183787
+    [GAS] Buy: 183788
     [GAS] Buy: 183788
     [GAS] Buy: 183788
     [GAS] Buy: 183789
@@ -2929,224 +2776,224 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183790
     [GAS] Buy: 183791
     [GAS] Buy: 183792
-    [GAS] Buy: 183793
+    [GAS] Buy: 183792
     [GAS] Buy: 183793
     [GAS] Buy: 183793
     [GAS] Buy: 183794
     [GAS] Buy: 183795
-    [GAS] Buy: 183796
+    [GAS] Buy: 183795
     [GAS] Buy: 183796
     [GAS] Buy: 183797
-    [GAS] Buy: 183798
+    [GAS] Buy: 183797
     [GAS] Buy: 183798
     [GAS] Buy: 183799
     [GAS] Buy: 183799
-    [GAS] Buy: 183800
     [GAS] Buy: 183800
     [GAS] Buy: 183801
+    [GAS] Buy: 183801
+    [GAS] Buy: 183802
     [GAS] Buy: 183802
     [GAS] Buy: 183803
-    [GAS] Buy: 183803
-    [GAS] Buy: 183803
+    [GAS] Buy: 183804
     [GAS] Buy: 183805
     [GAS] Buy: 183805
-    [GAS] Buy: 183805
+    [GAS] Buy: 183806
     [GAS] Buy: 183806
     [GAS] Buy: 183807
     [GAS] Buy: 183808
     [GAS] Buy: 183808
-    [GAS] Buy: 183808
+    [GAS] Buy: 183809
     [GAS] Buy: 183809
     [GAS] Buy: 183810
+    [GAS] Buy: 183810
     [GAS] Buy: 183811
-    [GAS] Buy: 183811
+    [GAS] Buy: 183812
     [GAS] Buy: 183812
     [GAS] Buy: 183813
     [GAS] Buy: 183814
     [GAS] Buy: 183814
-    [GAS] Buy: 183814
     [GAS] Buy: 183815
     [GAS] Buy: 183816
-    [GAS] Buy: 183816
+    [GAS] Buy: 183817
+    [GAS] Buy: 183817
     [GAS] Buy: 183817
     [GAS] Buy: 183818
-    [GAS] Buy: 183818
-    [GAS] Buy: 183819
     [GAS] Buy: 183819
     [GAS] Buy: 183820
     [GAS] Buy: 183821
     [GAS] Buy: 183821
+    [GAS] Buy: 183821
     [GAS] Buy: 183822
-    [GAS] Buy: 183823
+    [GAS] Buy: 183822
     [GAS] Buy: 183823
     [GAS] Buy: 183824
     [GAS] Buy: 183825
     [GAS] Buy: 183825
     [GAS] Buy: 183826
-    [GAS] Buy: 183827
+    [GAS] Buy: 183826
     [GAS] Buy: 183827
     [GAS] Buy: 183828
     [GAS] Buy: 183828
     [GAS] Buy: 183829
     [GAS] Buy: 183830
+    [GAS] Buy: 183830
     [GAS] Buy: 183831
     [GAS] Buy: 183831
-    [GAS] Buy: 183832
-    [GAS] Buy: 183832
+    [GAS] Buy: 183833
+    [GAS] Buy: 183833
     [GAS] Buy: 183833
     [GAS] Buy: 183834
-    [GAS] Buy: 183834
     [GAS] Buy: 183835
     [GAS] Buy: 183835
-    [GAS] Buy: 183836
     [GAS] Buy: 183836
     [GAS] Buy: 183837
     [GAS] Buy: 183838
+    [GAS] Buy: 183837
     [GAS] Buy: 183838
     [GAS] Buy: 183839
     [GAS] Buy: 183840
     [GAS] Buy: 183840
     [GAS] Buy: 183841
+    [GAS] Buy: 183841
     [GAS] Buy: 183842
-    [GAS] Buy: 183843
     [GAS] Buy: 183843
     [GAS] Buy: 183843
     [GAS] Buy: 183844
     [GAS] Buy: 183845
     [GAS] Buy: 183846
+    [GAS] Buy: 183846
     [GAS] Buy: 183847
-    [GAS] Buy: 183847
-    [GAS] Buy: 183847
+    [GAS] Buy: 183848
     [GAS] Buy: 183848
     [GAS] Buy: 183848
     [GAS] Buy: 183849
     [GAS] Buy: 183850
+    [GAS] Buy: 183850
     [GAS] Buy: 183851
-    [GAS] Buy: 183851
-    [GAS] Buy: 183852
     [GAS] Buy: 183852
     [GAS] Buy: 183853
+    [GAS] Buy: 183853
     [GAS] Buy: 183854
-    [GAS] Buy: 183854
+    [GAS] Buy: 183855
     [GAS] Buy: 183855
     [GAS] Buy: 183856
     [GAS] Buy: 183856
     [GAS] Buy: 183857
-    [GAS] Buy: 183857
+    [GAS] Buy: 183858
     [GAS] Buy: 183859
-    [GAS] Buy: 183859
+    [GAS] Buy: 183858
     [GAS] Buy: 183859
     [GAS] Buy: 183860
     [GAS] Buy: 183861
     [GAS] Buy: 183861
     [GAS] Buy: 183862
     [GAS] Buy: 183863
-    [GAS] Buy: 183864
     [GAS] Buy: 183863
-    [GAS] Buy: 183864
+    [GAS] Buy: 183863
+    [GAS] Buy: 183865
     [GAS] Buy: 183865
     [GAS] Buy: 183866
     [GAS] Buy: 183866
     [GAS] Buy: 183867
-    [GAS] Buy: 183867
+    [GAS] Buy: 183868
     [GAS] Buy: 183868
     [GAS] Buy: 183869
-    [GAS] Buy: 183869
+    [GAS] Buy: 183870
     [GAS] Buy: 183870
     [GAS] Buy: 183871
-    [GAS] Buy: 183872
+    [GAS] Buy: 183871
     [GAS] Buy: 183872
     [GAS] Buy: 183873
     [GAS] Buy: 183874
     [GAS] Buy: 183874
-    [GAS] Buy: 183874
     [GAS] Buy: 183875
-    [GAS] Buy: 183876
+    [GAS] Buy: 183875
+    [GAS] Buy: 183875
     [GAS] Buy: 183876
     [GAS] Buy: 183877
     [GAS] Buy: 183878
     [GAS] Buy: 183879
     [GAS] Buy: 183879
+    [GAS] Buy: 183879
     [GAS] Buy: 183880
-    [GAS] Buy: 183881
     [GAS] Buy: 183881
     [GAS] Buy: 183882
     [GAS] Buy: 183882
     [GAS] Buy: 183883
     [GAS] Buy: 183884
-    [GAS] Buy: 183885
     [GAS] Buy: 183884
     [GAS] Buy: 183885
+    [GAS] Buy: 183886
     [GAS] Buy: 183886
     [GAS] Buy: 183887
     [GAS] Buy: 183887
     [GAS] Buy: 183888
+    [GAS] Buy: 183888
     [GAS] Buy: 183889
-    [GAS] Buy: 183889
-    [GAS] Buy: 183889
+    [GAS] Buy: 183890
+    [GAS] Buy: 183890
     [GAS] Buy: 183891
     [GAS] Buy: 183891
-    [GAS] Buy: 183892
     [GAS] Buy: 183892
     [GAS] Buy: 183893
     [GAS] Buy: 183894
     [GAS] Buy: 183894
     [GAS] Buy: 183895
-    [GAS] Buy: 183896
+    [GAS] Buy: 183895
     [GAS] Buy: 183896
     [GAS] Buy: 183897
     [GAS] Buy: 183897
     [GAS] Buy: 183898
     [GAS] Buy: 183899
+    [GAS] Buy: 183899
     [GAS] Buy: 183900
-    [GAS] Buy: 183900
-    [GAS] Buy: 183901
     [GAS] Buy: 183901
     [GAS] Buy: 183901
     [GAS] Buy: 183902
     [GAS] Buy: 183903
+    [GAS] Buy: 183903
+    [GAS] Buy: 183904
     [GAS] Buy: 183904
     [GAS] Buy: 183905
-    [GAS] Buy: 183905
-    [GAS] Buy: 183905
+    [GAS] Buy: 183906
     [GAS] Buy: 183906
     [GAS] Buy: 183907
     [GAS] Buy: 183908
     [GAS] Buy: 183908
+    [GAS] Buy: 183908
     [GAS] Buy: 183909
     [GAS] Buy: 183910
-    [GAS] Buy: 183910
+    [GAS] Buy: 183911
     [GAS] Buy: 183911
     [GAS] Buy: 183912
-    [GAS] Buy: 183912
     [GAS] Buy: 183913
-    [GAS] Buy: 183913
+    [GAS] Buy: 183914
     [GAS] Buy: 183914
     [GAS] Buy: 183914
     [GAS] Buy: 183915
     [GAS] Buy: 183916
-    [GAS] Buy: 183916
     [GAS] Buy: 183917
     [GAS] Buy: 183917
-    [GAS] Buy: 183918
+    [GAS] Buy: 183917
+    [GAS] Buy: 183919
+    [GAS] Buy: 183919
     [GAS] Buy: 183919
     [GAS] Buy: 183920
-    [GAS] Buy: 183920
     [GAS] Buy: 183921
-    [GAS] Buy: 183921
+    [GAS] Buy: 183922
     [GAS] Buy: 183922
     [GAS] Buy: 183923
     [GAS] Buy: 183923
     [GAS] Buy: 183924
-    [GAS] Buy: 183925
+    [GAS] Buy: 183924
     [GAS] Buy: 183925
     [GAS] Buy: 183926
-    [GAS] Buy: 183927
+    [GAS] Buy: 183926
     [GAS] Buy: 183927
     [GAS] Buy: 183928
     [GAS] Buy: 183929
     [GAS] Buy: 183929
-    [GAS] Buy: 183930
+    [GAS] Buy: 183929
     [GAS] Buy: 183930
     [GAS] Buy: 183931
     [GAS] Buy: 183932
@@ -3154,30 +3001,30 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183933
     [GAS] Buy: 183934
     [GAS] Buy: 183934
-    [GAS] Buy: 183934
+    [GAS] Buy: 183935
     [GAS] Buy: 183935
     [GAS] Buy: 183936
-    [GAS] Buy: 183937
+    [GAS] Buy: 183936
     [GAS] Buy: 183937
     [GAS] Buy: 183938
     [GAS] Buy: 183939
-    [GAS] Buy: 183940
-    [GAS] Buy: 183940
-    [GAS] Buy: 183940
+    [GAS] Buy: 183939
+    [GAS] Buy: 183939
+    [GAS] Buy: 183941
+    [GAS] Buy: 183941
     [GAS] Buy: 183941
     [GAS] Buy: 183942
     [GAS] Buy: 183943
-    [GAS] Buy: 183943
-    [GAS] Buy: 183943
-    [GAS] Buy: 183945
-    [GAS] Buy: 183945
+    [GAS] Buy: 183944
+    [GAS] Buy: 183944
+    [GAS] Buy: 183944
     [GAS] Buy: 183945
     [GAS] Buy: 183946
     [GAS] Buy: 183947
-    [GAS] Buy: 183948
+    [GAS] Buy: 183947
     [GAS] Buy: 183948
     [GAS] Buy: 183949
-    [GAS] Buy: 183949
+    [GAS] Buy: 183950
     [GAS] Buy: 183950
     [GAS] Buy: 183950
     [GAS] Buy: 183951
@@ -3185,224 +3032,224 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 183952
     [GAS] Buy: 183953
     [GAS] Buy: 183954
-    [GAS] Buy: 183955
+    [GAS] Buy: 183954
     [GAS] Buy: 183955
     [GAS] Buy: 183955
     [GAS] Buy: 183956
     [GAS] Buy: 183957
-    [GAS] Buy: 183958
+    [GAS] Buy: 183957
     [GAS] Buy: 183958
     [GAS] Buy: 183959
-    [GAS] Buy: 183960
+    [GAS] Buy: 183959
     [GAS] Buy: 183960
     [GAS] Buy: 183961
     [GAS] Buy: 183961
-    [GAS] Buy: 183962
     [GAS] Buy: 183962
     [GAS] Buy: 183963
+    [GAS] Buy: 183963
+    [GAS] Buy: 183964
     [GAS] Buy: 183964
     [GAS] Buy: 183965
-    [GAS] Buy: 183965
-    [GAS] Buy: 183965
+    [GAS] Buy: 183966
     [GAS] Buy: 183967
     [GAS] Buy: 183967
-    [GAS] Buy: 183967
+    [GAS] Buy: 183968
     [GAS] Buy: 183968
     [GAS] Buy: 183969
     [GAS] Buy: 183970
     [GAS] Buy: 183970
-    [GAS] Buy: 183970
+    [GAS] Buy: 183971
     [GAS] Buy: 183971
     [GAS] Buy: 183972
+    [GAS] Buy: 183972
     [GAS] Buy: 183973
-    [GAS] Buy: 183973
+    [GAS] Buy: 183974
     [GAS] Buy: 183974
     [GAS] Buy: 183975
     [GAS] Buy: 183976
     [GAS] Buy: 183976
-    [GAS] Buy: 183976
     [GAS] Buy: 183977
     [GAS] Buy: 183978
-    [GAS] Buy: 183978
+    [GAS] Buy: 183979
+    [GAS] Buy: 183979
     [GAS] Buy: 183979
     [GAS] Buy: 183980
-    [GAS] Buy: 183980
-    [GAS] Buy: 183981
     [GAS] Buy: 183981
     [GAS] Buy: 183982
     [GAS] Buy: 183983
     [GAS] Buy: 183983
+    [GAS] Buy: 183983
     [GAS] Buy: 183984
-    [GAS] Buy: 183985
+    [GAS] Buy: 183984
     [GAS] Buy: 183985
     [GAS] Buy: 183986
     [GAS] Buy: 183987
     [GAS] Buy: 183987
     [GAS] Buy: 183988
-    [GAS] Buy: 183989
+    [GAS] Buy: 183988
     [GAS] Buy: 183989
     [GAS] Buy: 183990
     [GAS] Buy: 183990
     [GAS] Buy: 183991
     [GAS] Buy: 183992
+    [GAS] Buy: 183992
     [GAS] Buy: 183993
     [GAS] Buy: 183993
-    [GAS] Buy: 183994
-    [GAS] Buy: 183994
+    [GAS] Buy: 183995
+    [GAS] Buy: 183995
     [GAS] Buy: 183995
     [GAS] Buy: 183996
-    [GAS] Buy: 183996
     [GAS] Buy: 183997
     [GAS] Buy: 183997
-    [GAS] Buy: 183998
     [GAS] Buy: 183998
     [GAS] Buy: 183999
     [GAS] Buy: 184000
+    [GAS] Buy: 183999
     [GAS] Buy: 184000
     [GAS] Buy: 184001
     [GAS] Buy: 184002
     [GAS] Buy: 184002
     [GAS] Buy: 184003
+    [GAS] Buy: 184003
     [GAS] Buy: 184004
-    [GAS] Buy: 184005
     [GAS] Buy: 184005
     [GAS] Buy: 184005
     [GAS] Buy: 184006
     [GAS] Buy: 184007
     [GAS] Buy: 184008
+    [GAS] Buy: 184008
     [GAS] Buy: 184009
-    [GAS] Buy: 184009
-    [GAS] Buy: 184009
+    [GAS] Buy: 184010
     [GAS] Buy: 184010
     [GAS] Buy: 184010
     [GAS] Buy: 184011
     [GAS] Buy: 184012
+    [GAS] Buy: 184012
     [GAS] Buy: 184013
-    [GAS] Buy: 184013
-    [GAS] Buy: 184014
     [GAS] Buy: 184014
     [GAS] Buy: 184015
+    [GAS] Buy: 184015
     [GAS] Buy: 184016
-    [GAS] Buy: 184016
+    [GAS] Buy: 184017
     [GAS] Buy: 184017
     [GAS] Buy: 184018
     [GAS] Buy: 184018
     [GAS] Buy: 184019
-    [GAS] Buy: 184019
+    [GAS] Buy: 184020
     [GAS] Buy: 184021
-    [GAS] Buy: 184021
+    [GAS] Buy: 184020
     [GAS] Buy: 184021
     [GAS] Buy: 184022
     [GAS] Buy: 184023
     [GAS] Buy: 184023
     [GAS] Buy: 184024
     [GAS] Buy: 184025
-    [GAS] Buy: 184026
     [GAS] Buy: 184025
-    [GAS] Buy: 184026
+    [GAS] Buy: 184025
+    [GAS] Buy: 184027
     [GAS] Buy: 184027
     [GAS] Buy: 184028
     [GAS] Buy: 184028
     [GAS] Buy: 184029
-    [GAS] Buy: 184029
+    [GAS] Buy: 184030
     [GAS] Buy: 184030
     [GAS] Buy: 184031
-    [GAS] Buy: 184031
+    [GAS] Buy: 184032
     [GAS] Buy: 184032
     [GAS] Buy: 184033
-    [GAS] Buy: 184034
+    [GAS] Buy: 184033
     [GAS] Buy: 184034
     [GAS] Buy: 184035
     [GAS] Buy: 184036
     [GAS] Buy: 184036
-    [GAS] Buy: 184036
     [GAS] Buy: 184037
-    [GAS] Buy: 184038
+    [GAS] Buy: 184037
+    [GAS] Buy: 184037
     [GAS] Buy: 184038
     [GAS] Buy: 184039
     [GAS] Buy: 184040
     [GAS] Buy: 184041
     [GAS] Buy: 184041
+    [GAS] Buy: 184041
     [GAS] Buy: 184042
-    [GAS] Buy: 184043
     [GAS] Buy: 184043
     [GAS] Buy: 184044
     [GAS] Buy: 184044
     [GAS] Buy: 184045
     [GAS] Buy: 184046
-    [GAS] Buy: 184047
     [GAS] Buy: 184046
     [GAS] Buy: 184047
+    [GAS] Buy: 184048
     [GAS] Buy: 184048
     [GAS] Buy: 184049
     [GAS] Buy: 184049
     [GAS] Buy: 184050
+    [GAS] Buy: 184050
     [GAS] Buy: 184051
-    [GAS] Buy: 184051
-    [GAS] Buy: 184051
+    [GAS] Buy: 184052
+    [GAS] Buy: 184052
     [GAS] Buy: 184053
     [GAS] Buy: 184053
-    [GAS] Buy: 184054
     [GAS] Buy: 184054
     [GAS] Buy: 184055
     [GAS] Buy: 184056
     [GAS] Buy: 184056
     [GAS] Buy: 184057
-    [GAS] Buy: 184058
+    [GAS] Buy: 184057
     [GAS] Buy: 184058
     [GAS] Buy: 184059
     [GAS] Buy: 184059
     [GAS] Buy: 184060
     [GAS] Buy: 184061
+    [GAS] Buy: 184061
     [GAS] Buy: 184062
-    [GAS] Buy: 184062
-    [GAS] Buy: 184063
     [GAS] Buy: 184063
     [GAS] Buy: 184063
     [GAS] Buy: 184064
     [GAS] Buy: 184065
+    [GAS] Buy: 184065
+    [GAS] Buy: 184066
     [GAS] Buy: 184066
     [GAS] Buy: 184067
-    [GAS] Buy: 184067
-    [GAS] Buy: 184067
+    [GAS] Buy: 184068
     [GAS] Buy: 184068
     [GAS] Buy: 184069
     [GAS] Buy: 184070
     [GAS] Buy: 184070
+    [GAS] Buy: 184070
     [GAS] Buy: 184071
     [GAS] Buy: 184072
-    [GAS] Buy: 184072
+    [GAS] Buy: 184073
     [GAS] Buy: 184073
     [GAS] Buy: 184074
-    [GAS] Buy: 184074
     [GAS] Buy: 184075
-    [GAS] Buy: 184075
+    [GAS] Buy: 184076
     [GAS] Buy: 184076
     [GAS] Buy: 184076
     [GAS] Buy: 184077
     [GAS] Buy: 184078
-    [GAS] Buy: 184078
     [GAS] Buy: 184079
     [GAS] Buy: 184079
-    [GAS] Buy: 184080
+    [GAS] Buy: 184079
+    [GAS] Buy: 184081
+    [GAS] Buy: 184081
     [GAS] Buy: 184081
     [GAS] Buy: 184082
-    [GAS] Buy: 184082
     [GAS] Buy: 184083
-    [GAS] Buy: 184083
+    [GAS] Buy: 184084
     [GAS] Buy: 184084
     [GAS] Buy: 184085
     [GAS] Buy: 184085
     [GAS] Buy: 184086
-    [GAS] Buy: 184087
+    [GAS] Buy: 184086
     [GAS] Buy: 184087
     [GAS] Buy: 184088
-    [GAS] Buy: 184089
+    [GAS] Buy: 184088
     [GAS] Buy: 184089
     [GAS] Buy: 184090
     [GAS] Buy: 184091
     [GAS] Buy: 184091
-    [GAS] Buy: 184092
+    [GAS] Buy: 184091
     [GAS] Buy: 184092
     [GAS] Buy: 184093
     [GAS] Buy: 184094
@@ -3410,30 +3257,30 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 184095
     [GAS] Buy: 184096
     [GAS] Buy: 184096
-    [GAS] Buy: 184096
+    [GAS] Buy: 184097
     [GAS] Buy: 184097
     [GAS] Buy: 184098
-    [GAS] Buy: 184099
+    [GAS] Buy: 184098
     [GAS] Buy: 184099
     [GAS] Buy: 184100
     [GAS] Buy: 184101
-    [GAS] Buy: 184102
-    [GAS] Buy: 184102
-    [GAS] Buy: 184102
+    [GAS] Buy: 184101
+    [GAS] Buy: 184101
+    [GAS] Buy: 184103
+    [GAS] Buy: 184103
     [GAS] Buy: 184103
     [GAS] Buy: 184104
     [GAS] Buy: 184105
-    [GAS] Buy: 184105
-    [GAS] Buy: 184105
-    [GAS] Buy: 184107
-    [GAS] Buy: 184107
+    [GAS] Buy: 184106
+    [GAS] Buy: 184106
+    [GAS] Buy: 184106
     [GAS] Buy: 184107
     [GAS] Buy: 184108
     [GAS] Buy: 184109
-    [GAS] Buy: 184110
+    [GAS] Buy: 184109
     [GAS] Buy: 184110
     [GAS] Buy: 184111
-    [GAS] Buy: 184111
+    [GAS] Buy: 184112
     [GAS] Buy: 184112
     [GAS] Buy: 184112
     [GAS] Buy: 184113
@@ -3441,224 +3288,224 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 184114
     [GAS] Buy: 184115
     [GAS] Buy: 184116
-    [GAS] Buy: 184117
+    [GAS] Buy: 184116
     [GAS] Buy: 184117
     [GAS] Buy: 184117
     [GAS] Buy: 184118
     [GAS] Buy: 184119
-    [GAS] Buy: 184120
+    [GAS] Buy: 184119
     [GAS] Buy: 184120
     [GAS] Buy: 184121
-    [GAS] Buy: 184122
+    [GAS] Buy: 184121
     [GAS] Buy: 184122
     [GAS] Buy: 184123
     [GAS] Buy: 184123
-    [GAS] Buy: 184124
     [GAS] Buy: 184124
     [GAS] Buy: 184125
+    [GAS] Buy: 184125
+    [GAS] Buy: 184126
     [GAS] Buy: 184126
     [GAS] Buy: 184127
-    [GAS] Buy: 184127
-    [GAS] Buy: 184127
+    [GAS] Buy: 184128
     [GAS] Buy: 184129
     [GAS] Buy: 184129
-    [GAS] Buy: 184129
+    [GAS] Buy: 184130
     [GAS] Buy: 184130
     [GAS] Buy: 184131
     [GAS] Buy: 184132
     [GAS] Buy: 184132
-    [GAS] Buy: 184132
+    [GAS] Buy: 184133
     [GAS] Buy: 184133
     [GAS] Buy: 184134
+    [GAS] Buy: 184134
     [GAS] Buy: 184135
-    [GAS] Buy: 184135
+    [GAS] Buy: 184136
     [GAS] Buy: 184136
     [GAS] Buy: 184137
     [GAS] Buy: 184138
     [GAS] Buy: 184138
-    [GAS] Buy: 184138
     [GAS] Buy: 184139
     [GAS] Buy: 184140
-    [GAS] Buy: 184140
+    [GAS] Buy: 184141
+    [GAS] Buy: 184141
     [GAS] Buy: 184141
     [GAS] Buy: 184142
-    [GAS] Buy: 184142
-    [GAS] Buy: 184143
     [GAS] Buy: 184143
     [GAS] Buy: 184144
     [GAS] Buy: 184145
     [GAS] Buy: 184145
+    [GAS] Buy: 184145
     [GAS] Buy: 184146
-    [GAS] Buy: 184147
+    [GAS] Buy: 184146
     [GAS] Buy: 184147
     [GAS] Buy: 184148
     [GAS] Buy: 184149
     [GAS] Buy: 184149
     [GAS] Buy: 184150
-    [GAS] Buy: 184151
+    [GAS] Buy: 184150
     [GAS] Buy: 184151
     [GAS] Buy: 184152
     [GAS] Buy: 184152
     [GAS] Buy: 184153
     [GAS] Buy: 184154
+    [GAS] Buy: 184154
     [GAS] Buy: 184155
     [GAS] Buy: 184155
-    [GAS] Buy: 184156
-    [GAS] Buy: 184156
+    [GAS] Buy: 184157
+    [GAS] Buy: 184157
     [GAS] Buy: 184157
     [GAS] Buy: 184158
-    [GAS] Buy: 184158
     [GAS] Buy: 184159
     [GAS] Buy: 184159
-    [GAS] Buy: 184160
     [GAS] Buy: 184160
     [GAS] Buy: 184161
     [GAS] Buy: 184162
+    [GAS] Buy: 184161
     [GAS] Buy: 184162
     [GAS] Buy: 184163
     [GAS] Buy: 184164
     [GAS] Buy: 184164
     [GAS] Buy: 184165
+    [GAS] Buy: 184165
     [GAS] Buy: 184166
-    [GAS] Buy: 184167
     [GAS] Buy: 184167
     [GAS] Buy: 184167
     [GAS] Buy: 184168
     [GAS] Buy: 184169
     [GAS] Buy: 184170
+    [GAS] Buy: 184170
     [GAS] Buy: 184171
-    [GAS] Buy: 184171
-    [GAS] Buy: 184171
+    [GAS] Buy: 184172
     [GAS] Buy: 184172
     [GAS] Buy: 184172
     [GAS] Buy: 184173
     [GAS] Buy: 184174
+    [GAS] Buy: 184174
     [GAS] Buy: 184175
-    [GAS] Buy: 184175
-    [GAS] Buy: 184176
     [GAS] Buy: 184176
     [GAS] Buy: 184177
+    [GAS] Buy: 184177
     [GAS] Buy: 184178
-    [GAS] Buy: 184178
+    [GAS] Buy: 184179
     [GAS] Buy: 184179
     [GAS] Buy: 184180
     [GAS] Buy: 184180
     [GAS] Buy: 184181
-    [GAS] Buy: 184181
+    [GAS] Buy: 184182
     [GAS] Buy: 184183
-    [GAS] Buy: 184183
+    [GAS] Buy: 184182
     [GAS] Buy: 184183
     [GAS] Buy: 184184
     [GAS] Buy: 184185
     [GAS] Buy: 184185
     [GAS] Buy: 184186
     [GAS] Buy: 184187
-    [GAS] Buy: 184188
     [GAS] Buy: 184187
-    [GAS] Buy: 184188
+    [GAS] Buy: 184187
+    [GAS] Buy: 184189
     [GAS] Buy: 184189
     [GAS] Buy: 184190
     [GAS] Buy: 184190
     [GAS] Buy: 184191
-    [GAS] Buy: 184191
+    [GAS] Buy: 184192
     [GAS] Buy: 184192
     [GAS] Buy: 184193
-    [GAS] Buy: 184193
+    [GAS] Buy: 184194
     [GAS] Buy: 184194
     [GAS] Buy: 184195
-    [GAS] Buy: 184196
+    [GAS] Buy: 184195
     [GAS] Buy: 184196
     [GAS] Buy: 184197
     [GAS] Buy: 184198
     [GAS] Buy: 184198
-    [GAS] Buy: 184198
     [GAS] Buy: 184199
-    [GAS] Buy: 184200
+    [GAS] Buy: 184199
+    [GAS] Buy: 184199
     [GAS] Buy: 184200
     [GAS] Buy: 184201
     [GAS] Buy: 184202
     [GAS] Buy: 184203
     [GAS] Buy: 184203
+    [GAS] Buy: 184203
     [GAS] Buy: 184204
-    [GAS] Buy: 184205
     [GAS] Buy: 184205
     [GAS] Buy: 184206
     [GAS] Buy: 184206
     [GAS] Buy: 184207
     [GAS] Buy: 184208
-    [GAS] Buy: 184209
     [GAS] Buy: 184208
     [GAS] Buy: 184209
+    [GAS] Buy: 184210
     [GAS] Buy: 184210
     [GAS] Buy: 184211
     [GAS] Buy: 184211
     [GAS] Buy: 184212
+    [GAS] Buy: 184212
     [GAS] Buy: 184213
-    [GAS] Buy: 184213
-    [GAS] Buy: 184213
+    [GAS] Buy: 184214
+    [GAS] Buy: 184214
     [GAS] Buy: 184215
     [GAS] Buy: 184215
-    [GAS] Buy: 184216
     [GAS] Buy: 184216
     [GAS] Buy: 184217
     [GAS] Buy: 184218
     [GAS] Buy: 184218
     [GAS] Buy: 184219
-    [GAS] Buy: 184220
+    [GAS] Buy: 184219
     [GAS] Buy: 184220
     [GAS] Buy: 184221
     [GAS] Buy: 184221
     [GAS] Buy: 184222
     [GAS] Buy: 184223
+    [GAS] Buy: 184223
     [GAS] Buy: 184224
-    [GAS] Buy: 184224
-    [GAS] Buy: 184225
     [GAS] Buy: 184225
     [GAS] Buy: 184225
     [GAS] Buy: 184226
     [GAS] Buy: 184227
+    [GAS] Buy: 184227
+    [GAS] Buy: 184228
     [GAS] Buy: 184228
     [GAS] Buy: 184229
-    [GAS] Buy: 184229
-    [GAS] Buy: 184229
+    [GAS] Buy: 184230
     [GAS] Buy: 184230
     [GAS] Buy: 184231
     [GAS] Buy: 184232
     [GAS] Buy: 184232
+    [GAS] Buy: 184232
     [GAS] Buy: 184233
     [GAS] Buy: 184234
-    [GAS] Buy: 184234
+    [GAS] Buy: 184235
     [GAS] Buy: 184235
     [GAS] Buy: 184236
-    [GAS] Buy: 184236
     [GAS] Buy: 184237
-    [GAS] Buy: 184237
+    [GAS] Buy: 184238
     [GAS] Buy: 184238
     [GAS] Buy: 184238
     [GAS] Buy: 184239
     [GAS] Buy: 184240
-    [GAS] Buy: 184240
     [GAS] Buy: 184241
     [GAS] Buy: 184241
-    [GAS] Buy: 184242
+    [GAS] Buy: 184241
+    [GAS] Buy: 184243
+    [GAS] Buy: 184243
     [GAS] Buy: 184243
     [GAS] Buy: 184244
-    [GAS] Buy: 184244
     [GAS] Buy: 184245
-    [GAS] Buy: 184245
+    [GAS] Buy: 184246
     [GAS] Buy: 184246
     [GAS] Buy: 184247
     [GAS] Buy: 184247
     [GAS] Buy: 184248
-    [GAS] Buy: 184249
+    [GAS] Buy: 184248
     [GAS] Buy: 184249
     [GAS] Buy: 184250
-    [GAS] Buy: 184251
+    [GAS] Buy: 184250
     [GAS] Buy: 184251
     [GAS] Buy: 184252
     [GAS] Buy: 184253
     [GAS] Buy: 184253
-    [GAS] Buy: 184254
+    [GAS] Buy: 184253
     [GAS] Buy: 184254
     [GAS] Buy: 184255
     [GAS] Buy: 184256
@@ -3666,27 +3513,112 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [GAS] Buy: 184257
     [GAS] Buy: 184258
     [GAS] Buy: 184258
-    [GAS] Buy: 184258
+    [GAS] Buy: 184259
     [GAS] Buy: 184259
     [GAS] Buy: 184260
-    [GAS] Buy: 184261
+    [GAS] Buy: 184260
     [GAS] Buy: 184261
     [GAS] Buy: 184262
     [GAS] Buy: 184263
-    [GAS] Buy: 184264
-    [GAS] Buy: 184264
-    [GAS] Buy: 184264
+    [GAS] Buy: 184263
+    [GAS] Buy: 184263
+    [GAS] Buy: 184265
+    [GAS] Buy: 184265
     [GAS] Buy: 184265
     [GAS] Buy: 184266
     [GAS] Buy: 184267
-    [GAS] Buy: 184267
-    [GAS] Buy: 184267
-    [GAS] Buy: 184269
-    [GAS] Buy: 184269
+    [GAS] Buy: 184268
+    [GAS] Buy: 184268
+    [GAS] Buy: 184268
     [GAS] Buy: 184269
     [GAS] Buy: 184270
     [GAS] Buy: 184271
+    [GAS] Buy: 184271
     [GAS] Buy: 184272
+    [GAS] Buy: 184273
+    [GAS] Buy: 184274
+    [GAS] Buy: 184274
+    [GAS] Buy: 184274
+    [GAS] Buy: 184275
+    [GAS] Buy: 184276
+    [GAS] Buy: 184276
+    [GAS] Buy: 184277
+    [GAS] Buy: 184278
+    [GAS] Buy: 184278
+    [GAS] Buy: 184279
+    [GAS] Buy: 184279
+    [GAS] Buy: 184280
+    [GAS] Buy: 184281
+    [GAS] Buy: 184281
+    [GAS] Buy: 184282
+    [GAS] Buy: 184283
+    [GAS] Buy: 184283
+    [GAS] Buy: 184284
+    [GAS] Buy: 184285
+    [GAS] Buy: 184285
+    [GAS] Buy: 184286
+    [GAS] Buy: 184287
+    [GAS] Buy: 184287
+    [GAS] Buy: 184288
+    [GAS] Buy: 184288
+    [GAS] Buy: 184289
+    [GAS] Buy: 184290
+    [GAS] Buy: 184291
+    [GAS] Buy: 184291
+    [GAS] Buy: 184292
+    [GAS] Buy: 184292
+    [GAS] Buy: 184293
+    [GAS] Buy: 184294
+    [GAS] Buy: 184294
+    [GAS] Buy: 184295
+    [GAS] Buy: 184295
+    [GAS] Buy: 184296
+    [GAS] Buy: 184296
+    [GAS] Buy: 184297
+    [GAS] Buy: 184298
+    [GAS] Buy: 184298
+    [GAS] Buy: 184299
+    [GAS] Buy: 184300
+    [GAS] Buy: 184300
+    [GAS] Buy: 184301
+    [GAS] Buy: 184302
+    [GAS] Buy: 184303
+    [GAS] Buy: 184303
+    [GAS] Buy: 184303
+    [GAS] Buy: 184304
+    [GAS] Buy: 184305
+    [GAS] Buy: 184306
+    [GAS] Buy: 184307
+    [GAS] Buy: 184307
+    [GAS] Buy: 184307
+    [GAS] Buy: 184308
+    [GAS] Buy: 184308
+    [GAS] Buy: 184309
+    [GAS] Buy: 184310
+    [GAS] Buy: 184311
+    [GAS] Buy: 184311
+    [GAS] Buy: 184312
+    [GAS] Buy: 184312
+    [GAS] Buy: 184313
+    [GAS] Buy: 184314
+    [GAS] Buy: 184314
+    [GAS] Buy: 184315
+    [GAS] Buy: 184316
+    [GAS] Buy: 184316
+    [GAS] Buy: 184317
+    [GAS] Buy: 184317
+    [GAS] Buy: 184319
+    [GAS] Buy: 184319
+    [GAS] Buy: 184319
+    [GAS] Buy: 184320
+    [GAS] Buy: 184321
+    [GAS] Buy: 184321
+    [GAS] Buy: 184322
+    [GAS] Buy: 184323
+    [GAS] Buy: 184324
+    [GAS] Buy: 184323
+    [GAS] Buy: 184324
+    [GAS] Buy: 184325
     New LP value: 50 ETH
     New threshold: 750000000000000000
     PASS: Stage 3 reached
@@ -3705,16 +3637,16 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     PASS: Claim correctly reverted before finalize
 
   Test 2: Finalize before snapshot (should REVERT)
-    [GAS] Buy: 252843
-    [GAS] Buy: 191959
-    [GAS] Buy: 191959
-    [GAS] Buy: 191960
-    [GAS] Buy: 191960
+    [GAS] Buy: 252896
+    [GAS] Buy: 192013
+    [GAS] Buy: 192013
+    [GAS] Buy: 192013
+    [GAS] Buy: 192014
     PASS: Finalize correctly reverted before snapshot
 
   Test 3: Double claim (should REVERT or fail)
-    [GAS] Buy: 185173
-    [GAS] Process Taxes: 263544
+    [GAS] Buy: 185226
+    [GAS] Process Taxes: 308717
     First claim: SUCCESS
     Second claim: REVERTED (correct)
     PASS: Double claim protection works
@@ -3729,23 +3661,23 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
   =============================================================================
 
   Test 1: LP eligibility OVER threshold (cumulative)
-    [GAS] Buy: 382244
+    [GAS] Buy: 382298
     Adding LP multiple times to exceed threshold...
     After LP #1:
-      Lifetime: 27040427135148822
+      Lifetime: 27040362196820384
       Eligible: true
     After LP #2:
-      Lifetime: 45968726129752998
+      Lifetime: 45968615734594652
       Eligible: true
     After LP #3:
-      Lifetime: 59218535425975921
+      Lifetime: 59218393211036640
       Eligible: true
     PASS: Cumulative LP tracking works!
 
   Test 2: LP multi-round (Round 0 + Round 1)
     Current LP round: 1
     Participants: 1
-    Pool: 1013918402139805339
+    Pool: 1008184020752077106
     Threshold: 750000000000000000
     Finalizing current round first...
     New round: 1
@@ -3761,16 +3693,16 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     Token: 0x5b73C5498c1E3b4dbA84de0F1833c4a029d90519
     Trading enabled: true
     LP Value: 44 ETH
-  
+
     Buyer Vault: 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496
     Buyer Pool: 0
-  
+
     LP Vault: 0x34A1D3fff3958843C43aD80F30b94c510645C316
     LP Round: 1
     LP Participants: 1
-    LP Pool: 0
+    LP Pool: 403273608300830843
     Stage: 2
-  
+
   Core Tests Passed:
     [x] Phase 1:  Deployment & Setup
     [x] Phase 2:  Multiple Buyers (20)
@@ -3785,24 +3717,24 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
     [x] Phase 11: Max Wallet
     [x] Phase 12: Real Cleanup
     [x] Phase 13: Stage Progression
-  
+
   Enhanced Tests (NEW!):
     [x] Phase 14: Negative Tests (revert scenarios)
     [x] Phase 15: Edge Cases (LP cumulative eligibility, multi-round)
-  
+
     [x] Phase 16: Final Report (this phase)
-  
+
   All 16 phases executed in logical order!
   Advanced tests (400 LPs, buffer eviction) are in
   TestBaseAdvanced.s.sol with high initial LP.
-  
+
   SYSTEM VALIDATION: 100%
     - Buyer Reward: 100%
     - LP Reward: 100%
     - Token Economics: 100%
     - Security: 100%
-  
-  
+
+
 =============================================================================
                        ALL TESTS COMPLETED SUCCESSFULLY!
   =============================================================================
@@ -3812,4 +3744,4 @@ Step 1: Add liquidity to reach Stage 2 ( 10 ETH total)
 Error: Internal EVM error during simulation
 
 Context:
-- transaction validation error: lack of funds (1076149741222800) for max fee (500000000000000000)
+- transaction validation error: lack of funds (3076149741222800) for max fee (500000000000000000)

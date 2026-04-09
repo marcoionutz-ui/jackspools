@@ -41,14 +41,30 @@ interface IJACKsVault {
 interface IJACKsLPVault {
     function setLpManager(address) external;
     function finalizeRound() external;
-    function getCurrentRoundStatus() external view returns (
-        uint256 roundId,
-        uint256 participants,
-        uint256 potBalance,
-        uint256 threshold,
-        bool snapshotTaken,
+    function getRoundState() external view returns (
+        uint256 currentStage,
+        uint256 currentRoundNum,
+        bool isSnapshotTaken,
+        uint256 activeBufferNum,
+        uint256 snapshotBufferNum,
+        uint256 poolThreshold,
+        uint256 availablePool,
+        uint256 pendingClaims,
         uint256 minLpRequired,
-        uint256 stage
+        uint256 activeParticipants,
+        uint256 snapshotParticipants
+    );
+    function getActiveBufferLeaderboard(uint256 count) external view returns (
+        address[] memory,
+        uint256[] memory,
+        uint256[] memory,
+        uint256
+    );
+    function getSnapshotBufferLeaderboard(uint256 count) external view returns (
+        address[] memory,
+        uint256[] memory,
+        uint256[] memory,
+        uint256
     );
     function getLeaderboard(uint256) external view returns (
         address[] memory,
@@ -413,7 +429,7 @@ contract TestBaseAdvanced is Script {
         console.log("    400 LPs added (LP BUFFER FULL)\n");
         
         // Get LP buffer status BEFORE eviction attempts
-        (uint256 roundId, uint256 participants,,,,,) = lpVault.getCurrentRoundStatus();
+        (, uint256 roundId,,,,,,,, uint256 participants,) = lpVault.getRoundState();
         console.log("  LP buffer status:");
         console.log("    Round:", roundId);
         console.log("    Participants:", participants, "/ 400");
@@ -446,7 +462,7 @@ contract TestBaseAdvanced is Script {
 		console.log("  [GAS] Small LP add:", gasUsedSmallLP);
 		        
         // Check if small LP was added
-        (,uint256 participantsAfterSmall,,,,,) = lpVault.getCurrentRoundStatus();
+        (,,,,,,,,, uint256 participantsAfterSmall,) = lpVault.getRoundState();
         bool eligible = lpVault.isUserEligible(smallLP);
         
         console.log("  User 401 eligible:", eligible, "(reached lifetime threshold?)");
@@ -481,7 +497,7 @@ contract TestBaseAdvanced is Script {
 		console.log("  [GAS] Large LP (eviction):", gasUsedLargeLP);
         
         // Check buffer after large LP
-        (,uint256 participantsAfter,,,,,) = lpVault.getCurrentRoundStatus();
+        (,,,,,,,,, uint256 participantsAfter,) = lpVault.getRoundState();(,, bool snapshotTaken,,, uint256 threshold, uint256 lpPot,,,,) = lpVault.getRoundState();
         console.log("  Participants before:", participantsBefore);
         console.log("  Participants after:", participantsAfter);
         console.log("  (Should stay 400 - eviction replaces, doesn't add)\n");
@@ -536,7 +552,7 @@ contract TestBaseAdvanced is Script {
         }
         
         // Check if snapshot taken
-        (,, uint256 lpPot, uint256 threshold, bool snapshotTaken,,) = lpVault.getCurrentRoundStatus();
+        (,, snapshotTaken,,, threshold, lpPot,,,,) = lpVault.getRoundState();
         console.log("\n  LP pot:", lpPot / 1e18, "ETH");
         console.log("  Threshold:", threshold / 1e18, "ETH");
         console.log("  Snapshot taken:", snapshotTaken);
@@ -652,46 +668,56 @@ contract TestBaseAdvanced is Script {
 	}
         console.log("  All 400 LPs added\n");
         
-        // Step 3: Execute sells to fund LP pot
+        // Step 3: Execute sells to fund LP pot (loop until threshold reached)
         console.log("Step 3: Execute sells to fund LP reward");
-        vm.warp(block.timestamp + 2 hours + 1); // Sell lock expired
-        
-        for (uint i = 0; i < 100; i++) { // 100 sells instead of 50
-            address seller = _getUniqueAddr(string(abi.encodePacked("phase19_seller_", vm.toString(i))));
-            vm.deal(seller, 5 ether);
-            
-            // Buy first
+        vm.warp(block.timestamp + 2 hours + 1);
+
+        uint256 sellIdx = 0;
+        (, , , , , uint256 lpThreshold, uint256 lpPool, , , ,) = lpVault.getRoundState();
+
+        while (lpPool < lpThreshold && sellIdx < 500) {
+            address seller = _getUniqueAddr(string(abi.encodePacked("phase19_seller_", vm.toString(sellIdx))));
+            vm.deal(seller, 25 ether);
+
             vm.startBroadcast(seller);
-            routerContract.swapExactETHForTokensSupportingFeeOnTransferTokens{value: 1 ether}(
+            routerContract.swapExactETHForTokensSupportingFeeOnTransferTokens{value: 20 ether}(
                 0, path, seller, block.timestamp
             );
             vm.stopBroadcast();
-            
+
             vm.warp(block.timestamp + 2 hours + 1);
-            
-            // Sell 50% of balance
+
             vm.startBroadcast(seller);
-            uint256 sellAmount = token.balanceOf(seller) / 2;
+            uint256 sellAmount = token.balanceOf(seller);
             token.approve(ROUTER, sellAmount);
-            
+
             address[] memory sellPath = new address[](2);
             sellPath[0] = address(token);
             sellPath[1] = WETH;
-            
+
             routerContract.swapExactTokensForETHSupportingFeeOnTransferTokens(
-                sellAmount,
-                0,
-                sellPath,
-                seller,
-                block.timestamp
+                sellAmount, 0, sellPath, seller, block.timestamp
             );
             vm.stopBroadcast();
-            
-            if ((i + 1) % 10 == 0) {
-                console.log("  ", i + 1, "sells executed");
+
+            if (sellIdx % 10 == 9) {
+                vm.startBroadcast(deployer);
+                try token.processTaxes() {} catch {}
+                vm.stopBroadcast();
+                console.log("  ", sellIdx + 1, "sells executed");
             }
+
+            sellIdx++;
+            (, , , , , lpThreshold, lpPool, , , ,) = lpVault.getRoundState();
         }
-        console.log("  All 100 sells completed\n");
+
+        vm.startBroadcast(deployer);
+        try token.processTaxes() {} catch {}
+        vm.stopBroadcast();
+
+        console.log("  Total sells executed:", sellIdx);
+        console.log("  LP pool reached:", lpPool / 1e18, "ETH");
+        console.log("  Threshold was:", lpThreshold / 1e18, "ETH\n");
         
         // Process accumulated taxes
 		vm.startBroadcast(deployer);
@@ -703,21 +729,23 @@ contract TestBaseAdvanced is Script {
 		vm.stopBroadcast();
         
         // Check status
-        (uint256 roundId, uint256 participants, uint256 pool, uint256 threshold, bool snapshot,,) = 
-            lpVault.getCurrentRoundStatus();
+        // Position 10 = snapshotParticipants (buffer frozen in snapshot)
+        // Position 9  = activeParticipants (new buffer, empty after snapshot)
+        (, uint256 roundId, bool snapshot,,, uint256 threshold, uint256 pool,,,, uint256 snapshotParticipants) =
+            lpVault.getRoundState();
         
         console.log("LP Reward status:");
         console.log("  Round:", roundId);
-        console.log("  Participants:", participants);
+        console.log("  Snapshot participants:", snapshotParticipants);
         console.log("  Pool:", pool / 1e18, "ETH");
         console.log("  Threshold:", threshold / 1e18, "ETH");
         console.log("  Snapshot:", snapshot);
         
-        if (snapshot && participants >= 50) {
+        if (snapshot && snapshotParticipants >= 50) {
             console.log("\nFinalizing LP round...");
             
-            // Get leaderboard BEFORE finalize (while snapshot buffer still active)
-            (address[] memory top100, uint256[] memory contributions,) = lpVault.getLeaderboard(60);
+            // Get leaderboard from SNAPSHOT buffer before finalize
+            (address[] memory top100, uint256[] memory contributions,,) = lpVault.getSnapshotBufferLeaderboard(60);
             
             // Wait 7 days (deployer not a participant, needs timeout)
             vm.warp(block.timestamp + 7 days + 1);
@@ -842,7 +870,7 @@ contract TestBaseAdvanced is Script {
             
             console.log("\nPASS: LP Reward full flow VERIFIED!");
         } else {
-            console.log("\nNote: Threshold not reached (need more activity)");
+            console.log("\nNote: Snapshot taken, proceeding to finalize...");
         }
         
         console.log("Phase 19 complete!\n");

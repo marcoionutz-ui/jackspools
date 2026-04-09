@@ -1,8 +1,9 @@
+[⠊] Compiling...
 No files changed, compilation skipped
 Script ran successfully.
 
 == Logs ==
-  
+
 =============================================================================
              JACKS POOLS - SECURITY FIXES VALIDATION TEST
   =============================================================================
@@ -16,7 +17,7 @@ Script ran successfully.
     Vault: 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496
     LP Vault: 0x34A1D3fff3958843C43aD80F30b94c510645C316
     LP Manager: 0x90193C961A926261B756D1E5bb255e67ff9498A1
-  
+
 Setup complete!
 
   =============================================================================
@@ -26,7 +27,7 @@ Setup complete!
   Test 1.1: quoteEthForTokens() - Tokens to ETH
     Tokens: 1000000
     ETH needed: 25000000000000000
-    [GAS]: 3197
+    [GAS]: 3195
     PASS: quoteEthForTokens works!
 
   Test 1.2: quoteTokensForEth() - ETH -> Tokens
@@ -78,7 +79,7 @@ Setup complete!
   Test 3.1: LP provider sets payout address
     LP Provider: 0x9B6E219B8B1a64c3362a73BCd340167c484ECb72
     Payout EOA: 0x274e3aA6050a5454827F06ee492276ed2E357977
-    [GAS]: 24789
+    [GAS]: 24767
     PASS: LP payout address set!
 
   Test 3.2: Clear LP payout address
@@ -130,10 +131,10 @@ Setup complete!
 
   Test 5.3: Griefer calls processTaxes()
     (Reward payment will FAIL, but processing CONTINUES)
-    [GAS]: 226384
+    [GAS]: 279170
     Pool before: 500000000000000000
-    Pool after: 504632252772019785
-    Funded: 4632252772019785
+    Pool after: 504618356013703726
+    Funded: 4618356013703726
     PASS: Tax processing NOT blocked!
 
   Test 5.4: Verify vault received funds
@@ -152,44 +153,44 @@ Setup complete!
   =============================================================================
 
   Security Fixes Validated:
-  
+
     [x] Test 1: Quote Helpers (LPManager)
         - quoteEthForTokens() works
         - quoteTokensForEth() works
         - Bidirectional symmetry verified
         - 'Requote ETH' enforcement confirmed
-  
+
     [x] Test 2: Payout Address (Buyer Vault)
         - setPayoutAddress() works
         - clearPayoutAddress() works
         - Contract wallets can claim via redirect
         - Enhanced events (claimant + recipient)
-  
+
     [x] Test 3: Payout Address (LP Vault)
         - LP payout redirect works
         - Same functionality as Buyer Vault
-  
+
     [x] Test 4: Safe emergencyClaim
         - 2-pass implementation validated
         - Prevents permanent fund locks
         - Payout address provides recovery
-  
+
     [x] Test 5: Griefing Resistance
         - processTaxes() cannot be blocked
         - Silent failure for reward payments
         - Protocol remains operational
-  
+
   SECURITY VALIDATION: 100%
-  
+
   Attack Vectors Prevented:
     - Tax processing griefing (malicious caller)
     - LP addition griefing (ETH refund blocking)
     - Permanent fund locks (emergencyClaim failure)
     - Contract wallet incompatibility (no receive)
-  
+
   All critical security fixes VERIFIED and WORKING!
-  
-  
+
+
 =============================================================================
                 ALL SECURITY TESTS PASSED SUCCESSFULLY!
   =============================================================================
@@ -199,4 +200,4 @@ Setup complete!
 Error: Internal EVM error during simulation
 
 Context:
-- transaction validation error: lack of funds (1076149741222800) for max fee (25000000000000000000)
+- transaction validation error: lack of funds (3076149741222800) for max fee (25000000000000000000)

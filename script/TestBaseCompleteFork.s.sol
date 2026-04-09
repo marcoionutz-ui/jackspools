@@ -61,14 +61,18 @@ interface IJACKsLPVault {
     function setLpManager(address) external;
     function finalizeRound() external;
     function claimReward(uint256) external;
-    function getCurrentRoundStatus() external view returns (
-        uint256 roundId,
-        uint256 participants,
-        uint256 potBalance,
-        uint256 threshold,
-        bool snapshotTaken,
+    function getRoundState() external view returns (
+        uint256 currentStage,
+        uint256 currentRoundNum,
+        bool isSnapshotTaken,
+        uint256 activeBufferNum,
+        uint256 snapshotBufferNum,
+        uint256 poolThreshold,
+        uint256 availablePool,
+        uint256 pendingClaims,
         uint256 minLpRequired,
-        uint256 stage
+        uint256 activeParticipants,
+        uint256 snapshotParticipants
     );
     function lifetimeContributions(address) external view returns (uint256);
     function isUserEligible(address) external view returns (bool);
@@ -473,7 +477,7 @@ contract TestBaseCompleteFork is Script, Test {
         
         _processTaxes();
         
-        (,, uint256 lpPot,,,,) = lpVault.getCurrentRoundStatus();
+        (,,,,,, uint256 lpPot,,,,) = lpVault.getRoundState();
         console.log("\nLP Reward pool:", lpPot);
         assertGt(lpPot, 0, "LP pot should be funded");
         console.log("PASS: LP pot funded from sell taxes");
@@ -554,7 +558,7 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("  (Note: Pool too small to reach threshold in test)");
         console.log("  (In production with larger pools, threshold is reachable)\n");
         
-        (,uint256 participants, uint256 lpPot,,,,) = lpVault.getCurrentRoundStatus();
+        (,,,,,, uint256 lpPot,,, uint256 participants,) = lpVault.getRoundState();
         console.log("  Total LP participants:", participants);
         console.log("  LP pool balance:", lpPot);
         console.log("  PASS: Multiple LPs added successfully\n");
@@ -667,7 +671,7 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("                      PHASE 7: LP REWARD ROUND");
         console.log("=============================================================================\n");
         
-        (uint256 roundId, uint256 participants, uint256 lpPot, uint256 threshold, bool snapshotTaken,,) = lpVault.getCurrentRoundStatus();
+        (, uint256 roundId, bool snapshotTaken,,, uint256 threshold, uint256 lpPot,,, uint256 participants,) = lpVault.getRoundState();
         
         console.log("LP Reward status:");
         console.log("  Round:", roundId);
@@ -687,7 +691,7 @@ contract TestBaseCompleteFork is Script, Test {
                     _sell(buyers[i], balance / 2);
                     _processTaxes();
                     
-                    (,, lpPot,, snapshotTaken,,) = lpVault.getCurrentRoundStatus();
+                    (,, snapshotTaken,,,, lpPot,,,,) = lpVault.getRoundState();
                     if (lpPot >= threshold) {
                         console.log("  Threshold reached after", i - 9, "sells");
                         break;
@@ -695,7 +699,7 @@ contract TestBaseCompleteFork is Script, Test {
                 }
             }
             
-            (,, lpPot,, snapshotTaken,,) = lpVault.getCurrentRoundStatus();
+            (,, snapshotTaken,,,, lpPot,,,,) = lpVault.getRoundState();
             console.log("  LP pot after sells:", lpPot);
             console.log("  Snapshot taken:", snapshotTaken);
         }
@@ -1125,7 +1129,7 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("  Buyer Pool:", vault.getPoolSize());
         console.log("");
         console.log("  LP Vault:", address(lpVault));
-        (uint256 roundId, uint256 participants, uint256 lpPot,,,, uint256 stage) = lpVault.getCurrentRoundStatus();
+        (uint256 stage, uint256 roundId,,,,,uint256 lpPot,,, uint256 participants,) = lpVault.getRoundState();
         console.log("  LP Round:", roundId);
         console.log("  LP Participants:", participants);
         console.log("  LP Pool:", lpPot);
@@ -1255,7 +1259,7 @@ contract TestBaseCompleteFork is Script, Test {
         }
         
         console.log("Test 4: LP finalize before snapshot (should REVERT)");
-        (,,,, bool lpSnapshot,,) = lpVault.getCurrentRoundStatus();
+        (,, bool lpSnapshot,,,,,,,,) = lpVault.getRoundState();
         
         if (!lpSnapshot) {
             vm.startBroadcast(deployer);
@@ -1330,7 +1334,7 @@ contract TestBaseCompleteFork is Script, Test {
         
         console.log("Test 2: LP multi-round (Round 0 + Round 1)");
         
-        (uint256 currentRound, uint256 lpParticipants, uint256 lpPot, uint256 lpThreshold, bool lpSnapshot,,) = lpVault.getCurrentRoundStatus();
+        (, uint256 currentRound, bool lpSnapshot,,, uint256 lpThreshold, uint256 lpPot,,, uint256 lpParticipants,) = lpVault.getRoundState();
         
         console.log("  Current LP round:", currentRound);
         console.log("  Participants:", lpParticipants);
@@ -1344,7 +1348,7 @@ contract TestBaseCompleteFork is Script, Test {
             lpVault.finalizeRound();
             vm.stopBroadcast();
             
-            (uint256 newRound,,,,,,) = lpVault.getCurrentRoundStatus();
+            (, uint256 newRound,,,,,,,,,) = lpVault.getRoundState();
             console.log("  New round:", newRound);
             
             assertGt(newRound, 0, "Round should be valid");

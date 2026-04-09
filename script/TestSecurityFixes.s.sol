@@ -90,8 +90,8 @@ interface IJACKsLPVault {
     function setPayoutAddress(address payable) external;
     function clearPayoutAddress() external;
     function payoutAddress(address) external view returns (address);
-    function getCurrentRoundStatus() external view returns (
-        uint256, uint256, uint256, uint256, bool, uint256, uint256
+   function getRoundState() external view returns (
+        uint256, uint256, bool, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256
     );
     function roundRewards(uint256, address) external view returns (uint256);
     function hasClaimed(uint256, address) external view returns (bool);

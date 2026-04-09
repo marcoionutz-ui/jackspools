@@ -1,193 +1,168 @@
-Compiling 1 files with Solc 0.8.33
-Solc 0.8.33 finished in 8.59s
-Compiler run successful with warnings:
-Warning (2072): Unused local variable.
-   --> src/JACKsPools.sol:745:18:
-    |
-745 |                 (bool success,) = caller.call{value: reward}("");
-    |                  ^^^^^^^^^^^^
-
-Warning (2072): Unused local variable.
-   --> test/InvariantCore.t.sol:461:13:
-    |
-461 |         (,, uint256 checkPot, uint256 lpThreshold, bool snapshot,,) = lpVault.getCurrentRoundStatus();
-    |             ^^^^^^^^^^^^^^^^
-
-Warning (2072): Unused local variable.
-   --> test/InvariantCore.t.sol:534:9:
-    |
-534 |         uint256 buyerRoundId = buyerVault.payoutRound() - 1;
-    |         ^^^^^^^^^^^^^^^^^^^^
-
-Warning (2072): Unused local variable.
-   --> test/InvariantCore.t.sol:747:9:
-    |
-747 |         uint256 roundId = buyerVault.payoutRound() - 1;
-    |         ^^^^^^^^^^^^^^^
-
+[⠊] Compiling...
+No files changed, compilation skipped
 
 Ran 8 tests for test/InvariantCore.t.sol:CoreInvariantTest
-[PASS] test_Invariant_Accounting() (gas: 195861265)
+[PASS] test_Invariant_Accounting() (gas: 196092395)
 Logs:
-  
+
 === TEST 1: ACCOUNTING INVARIANTS ===
-  
+
 --- Buyer Vault Accounting ---
-  Pool funded: 157116023994597965
+  Pool funded: 156644675922614181
   Threshold: 150000000000000000
-  Buyer totalDistributed: 157116023994597965
+  Buyer totalDistributed: 156644675922614181
   Buyer totalClaimed: 0
-  Buyer balance: 157116023994597965
+  Buyer balance: 156644675922614181
   PASS: totalClaimed <= totalDistributed
   PASS: balance >= pending claims
-  
+
 --- LP Vault Accounting ---
   LP funding with BATCH approach ...
     Seeding wallets with tokens...
     Starting batch sells + processTaxes...
       Batch 0: lpPot = 0
-      Batch 1: lpPot = 691810154352932
-      Batch 2: lpPot = 1234650941301067
-      Batch 3: lpPot = 1663872488778228
-      Batch 4: lpPot = 2004068074165710
-      Batch 5: lpPot = 2274213919384194
-      Batch 6: lpPot = 2489056722156019
-      Batch 7: lpPot = 2660122222873217
-      Batch 8: lpPot = 2796460343631846
-      Batch 9: lpPot = 2905203385163987
-    Final lpPot: 2991989104017580 (threshold: 200000000000000000)
-  LP Pot: 2991989104017580
+      Batch 1: lpPot = 689734723889873
+      Batch 2: lpPot = 1230946987470226
+      Batch 3: lpPot = 1658880866195207
+      Batch 4: lpPot = 1998055858075430
+      Batch 5: lpPot = 2267391257483780
+      Batch 6: lpPot = 2481589523065340
+      Batch 7: lpPot = 2652141818710636
+      Batch 8: lpPot = 2788070917182937
+      Batch 9: lpPot = 2896487722527454
+    Final lpPot: 2983013078090648 (threshold: 200000000000000000)
+  LP Pot: 2983013078090648
   LP Threshold: 200000000000000000
   SKIP: LP snapshot not taken (not enough funding)
-  
+
 === RESULT: ACCOUNTING INVARIANTS PASS ===
 
-[PASS] test_Invariant_AccountingConservation() (gas: 170545775)
+[PASS] test_Invariant_AccountingConservation() (gas: 170682252)
 Logs:
-  
+
 === TEST 1A: ACCOUNTING CONSERVATION (DELTA-BASED) ===
-  
+
 --- Initial State ---
   Initial supply: 1100000000000000000000000000
   Initial distributed: 0
   Initial claimed: 0
   Initial vault balance: 0
-  
+
 --- Execute Operations ---
-  Buyer pool: 0 -> 157116023994597965
-  
+  Buyer pool: 0 -> 156644675922614181
+
 --- Verify Conservation (Delta-Based) ---
   PASS: Supply conservation (burns allowed)
     Initial: 1100000000000000000000000000
-    Final: 1097275025782691476204840435
-    Burned: 2724974217308523795159565
+    Final: 1097275025782691476204840434
+    Burned: 2724974217308523795159566
   PASS: Delta conservation verified
-    Delta Distributed: 157116023994597965
+    Delta Distributed: 156644675922614181
     Delta Claimed: 0
-    Delta Vault: 157116023994597965
-    Sum: 157116023994597965
+    Delta Vault: 156644675922614181
+    Sum: 156644675922614181
   PASS: Vault balance >= Pending claims
-    Vault: 157116023994597965
-    Pending: 157116023994597965
-  
+    Vault: 156644675922614181
+    Pending: 156644675922614181
+
 === RESULT: ACCOUNTING CONSERVATION PASS ===
 
-[PASS] test_Invariant_CompleteClaimLifecycle() (gas: 170775514)
+[PASS] test_Invariant_CompleteClaimLifecycle() (gas: 170746002)
 Logs:
-  
+
 === TEST 3A: COMPLETE CLAIM LIFECYCLE (NEW) ===
-  
+
 --- Pre-Claim State ---
-  Winner: 0xdF497730bbE2998acf5F8e642D2dAbd582a80817
-  Claimable: 157116023994597965
+  Winner: 0xAe4914eb186E75ca15Fd94876ef01CDCc4990Be5
+  Reward: 156644675922614181
   Winner balance: 998000000000000000
-  Vault balance: 157116023994597965
-  
+  Vault balance: 156644675922614181
+
 --- Execute Claim ---
   Claim executed
-  
+
 --- Post-Claim Verification ---
   PASS: Winner received exact amount
     Before: 998000000000000000
-    After: 1155116023994597965
-    Diff: 157116023994597965
+    After: 1154644675922614181
+    Diff: 156644675922614181
   PASS: Vault balance decreased correctly
-    Before: 157116023994597965
+    Before: 156644675922614181
     After: 0
-    Diff: 157116023994597965
-  PASS: Claimable cleared to 0
+    Diff: 156644675922614181
+  PASS: Round marked as claimed
   PASS: totalClaimed updated correctly
-  
+
 --- Double Claim Prevention ---
   PASS: Double claim reverted
   PASS: Balances unchanged after failed claim
-  
+
 === RESULT: COMPLETE CLAIM LIFECYCLE PASS ===
 
-[PASS] test_Invariant_Idempotency() (gas: 196093646)
+[PASS] test_Invariant_Idempotency() (gas: 196158281)
 Logs:
-  
+
 === TEST 2: IDEMPOTENCY INVARIANTS ===
-  
+
 --- Buyer Vault Idempotency ---
   First finalize succeeded, round: 0 -> 1
   PASS: Second finalize reverted (no snapshot)
   PASS: Round unchanged after failed finalize
-  First claim succeeded: 157116023994597965
+  First claim succeeded: 156644675922614181
   PASS: Second claim reverted
-  PASS: claimable reset to 0
-  
+  PASS: round marked as claimed
+
 --- LP Vault Idempotency ---
   LP funding with BATCH approach ...
     Seeding wallets with tokens...
     Starting batch sells + processTaxes...
       Batch 0: lpPot = 0
-      Batch 1: lpPot = 691810154352932
-      Batch 2: lpPot = 1234650941301067
-      Batch 3: lpPot = 1663872488778228
-      Batch 4: lpPot = 2004068074165710
-      Batch 5: lpPot = 2274213919384194
-      Batch 6: lpPot = 2489056722156019
-      Batch 7: lpPot = 2660122222873217
-      Batch 8: lpPot = 2796460343631846
-      Batch 9: lpPot = 2905203385163987
-    Final lpPot: 2991989104017580 (threshold: 200000000000000000)
+      Batch 1: lpPot = 689734723889873
+      Batch 2: lpPot = 1230946987470226
+      Batch 3: lpPot = 1658880866195207
+      Batch 4: lpPot = 1998055858075430
+      Batch 5: lpPot = 2267391257483780
+      Batch 6: lpPot = 2481589523065340
+      Batch 7: lpPot = 2652141818710636
+      Batch 8: lpPot = 2788070917182937
+      Batch 9: lpPot = 2896487722527454
+    Final lpPot: 2983013078090648 (threshold: 200000000000000000)
   SKIP: LP snapshot not taken
-  
+
 === RESULT: IDEMPOTENCY INVARIANTS PASS ===
 
-[PASS] test_Invariant_LPEligibilityMonotonic() (gas: 2555657)
+[PASS] test_Invariant_LPEligibilityMonotonic() (gas: 2551444)
 Logs:
-  
+
 === TEST 4: LP ELIGIBILITY MONOTONIC ===
   Testing LP eligibility directly (no DEX swaps)
-  
+
 --- Lifetime Monotonic ---
     PASS: Lifetime contributions monotonically increase
     Lifetime: 0 -> 10000000000000000
     PASS: Lifetime continues to increase
     Lifetime: 10000000000000000 -> 15000000000000000
-  
+
 --- Buffer Registration ---
     Testing buffer registration with direct calls...
     Eligible: 21 / 21
     In Buffer: 21 / 21
     PASS: Buffer registration working correctly
-  
+
 === RESULT: LP ELIGIBILITY INVARIANTS PASS ===
 
-[PASS] test_Invariant_LPEviction() (gas: 43329084)
+[PASS] test_Invariant_LPEviction() (gas: 43245074)
 Logs:
-  
+
 === TEST 4A: LP EVICTION (NEW) ===
-  
+
 --- Fill Buffer to Capacity (400) ---
   Buffer filled: 400 participants
-  
+
 --- Identify Lowest Contributor ---
   Lowest contributor: 0x0000000000000000000000000000000000010000
   Lowest amount: 8600000000000000
-  
+
 --- Eviction Test ---
   PASS: Lowest contributor evicted
   PASS: New user added to buffer
@@ -195,82 +170,82 @@ Logs:
     Old lowest: 8600000000000000
     New lowest: 8601000000000000
     Improvement: 1000000000000
-  
+
 --- Failed Eviction Test ---
   PASS: Weak contribution rejected (buffer quality maintained)
-  
+
 === RESULT: LP EVICTION INVARIANT PASS ===
 
-[PASS] test_Invariant_Lifecycle() (gas: 196088059)
+[PASS] test_Invariant_Lifecycle() (gas: 196150472)
 Logs:
-  
+
 === TEST 3: LIFECYCLE INVARIANTS ===
-  
+
 --- Buyer Vault Lifecycle ---
   STATE 1: Funding
   STATE 2: Snapshot taken
   STATE 3: Finalizing
   Round incremented: 0 -> 1
   STATE 4: Claiming
-  Claim successful, amount: 157116023994597965
+  Claim successful, amount: 156644675922614181
   STATE 5: Cleanup
   Cleanup recovered: 0
   PASS: Buyer lifecycle complete
-  
+
 --- LP Vault Lifecycle ---
   LP funding with BATCH approach ...
     Seeding wallets with tokens...
     Starting batch sells + processTaxes...
       Batch 0: lpPot = 0
-      Batch 1: lpPot = 691810154352932
-      Batch 2: lpPot = 1234650941301067
-      Batch 3: lpPot = 1663872488778228
-      Batch 4: lpPot = 2004068074165710
-      Batch 5: lpPot = 2274213919384194
-      Batch 6: lpPot = 2489056722156019
-      Batch 7: lpPot = 2660122222873217
-      Batch 8: lpPot = 2796460343631846
-      Batch 9: lpPot = 2905203385163987
-    Final lpPot: 2991989104017580 (threshold: 200000000000000000)
+      Batch 1: lpPot = 689734723889873
+      Batch 2: lpPot = 1230946987470226
+      Batch 3: lpPot = 1658880866195207
+      Batch 4: lpPot = 1998055858075430
+      Batch 5: lpPot = 2267391257483780
+      Batch 6: lpPot = 2481589523065340
+      Batch 7: lpPot = 2652141818710636
+      Batch 8: lpPot = 2788070917182937
+      Batch 9: lpPot = 2896487722527454
+    Final lpPot: 2983013078090648 (threshold: 200000000000000000)
   SKIP: LP snapshot not taken
-  
+
 === RESULT: LIFECYCLE INVARIANTS PASS ===
 
-[PASS] test_Invariant_NoPrivilegedPaths() (gas: 193313599)
+[PASS] test_Invariant_NoPrivilegedPaths() (gas: 193558234)
 Logs:
-  
+
 === TEST 5: NO PRIVILEGED PATHS ===
     Ownership renounced
-  
+
 --- Anyone Can Finalize ---
     Round ready: true
     PASS: Random user can finalize buyer round
-  
+
 --- Anyone Can Cleanup ---
     PASS: Random user can cleanup expired claims
-  
+
 --- LP Timeout Finalize ---
   Adding 1 real LP via LPManager (0.001 ETH)...
-    Wallet balance: 30992286945009073954671 tokens
+    Wallet balance: 30992286945009073954672 tokens
     SKIP: Not enough tokens for LP
   LP funding with BATCH approach ...
     Seeding wallets with tokens...
     Starting batch sells + processTaxes...
       Batch 0: lpPot = 0
-      Batch 1: lpPot = 720100506206294
-      Batch 2: lpPot = 1284729078030975
-      Batch 3: lpPot = 1730971032358444
-      Batch 4: lpPot = 2084526964018147
-      Batch 5: lpPot = 2365200404983634
-      Batch 6: lpPot = 2588364025580295
-      Batch 7: lpPot = 2766022169183535
-      Batch 8: lpPot = 2907593838268344
-      Batch 9: lpPot = 3020497959533877
-    Final lpPot: 3110596159675008 (threshold: 200000000000000000)
-  
+      Batch 1: lpPot = 717940204687675
+      Batch 2: lpPot = 1280874890748630
+      Batch 3: lpPot = 1725778116161471
+      Batch 4: lpPot = 2078273374130417
+      Batch 5: lpPot = 2358104787103305
+      Batch 6: lpPot = 2580598908447836
+      Batch 7: lpPot = 2757724069284504
+      Batch 8: lpPot = 2898871015564409
+      Batch 9: lpPot = 3011436417460340
+    Final lpPot: 3101264316882387 (threshold: 200000000000000000)
+
 --- No Hidden Privileges ---
     PASS: All ownerships properly renounced
-  
+
 --- Setters Blocked After Renounce ---
     PASS: setVault blocked (deployer)
     PASS: setVault blocked (randomUser)
@@ -281,9 +256,9 @@ Logs:
     PASS: setEmergencyPause blocked (deployer)
     PASS: setEmergencyPause blocked (randomUser)
     PASS: No privileged paths remain (verified for both deployer & random)
-  
+
 === RESULT: NO PRIVILEGED PATHS INVARIANTS PASS ===
 
-Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 219.67s (1235.35s CPU time)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 166.35s (962.05s CPU time)
 
-Ran 1 test suite in 219.81s (219.67s CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
+Ran 1 test suite in 219.99s (166.35s CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)
