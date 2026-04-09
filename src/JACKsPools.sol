@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.33;
+pragma solidity ^0.8.34;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -380,7 +380,9 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			// Contract gets only reward + lp (NOT burn!)
 			contractTax = taxAmount - burnTokens;
 			
-			_rewardTokens += rewardTokens;
+			// Assign dust to reward to avoid untracked wei accumulation
+			uint256 dust = contractTax - rewardTokens - lpTokens;
+			_rewardTokens += rewardTokens + dust;
 			_lpTokens += lpTokens;
 									
 			// Set sell lock for buyer
@@ -523,7 +525,9 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 					block.timestamp
 				) returns (uint256 tokenUsed, uint256 ethUsed, uint256 liquidity) {
 					emit AutoLiquify(tokenUsed, ethUsed, liquidity);
-				} catch {}
+				} catch {
+					_lpTokens += lpHalf;
+				}
 			}
 
 			// Reset router allowance (security hardening)
@@ -775,8 +779,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     // Only accept ETH from Router (LP operations) or Vaults (should never happen)
     require(
         msg.sender == address(ROUTER) || 
-        msg.sender == address(VAULT) || 
-        msg.sender == address(LP_VAULT),
+        msg.sender == address(VAULT),
         "No direct ETH - use swap/LP functions"
     );
 	}

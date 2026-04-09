@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.33;
+pragma solidity ^0.8.34;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -94,6 +94,8 @@ contract JACKsLPVault is ReentrancyGuard {
     event LPContributorEvicted(address indexed evicted, address indexed replacedBy, uint256 evictedAmount, uint256 newAmount, uint256 round);
 	event SnapshotTaken(uint256 indexed round, uint256 participants, uint256 totalContributed);
     event SnapshotReset(uint256 indexed round, string reason);
+	event LpSnapshotAutoResetTimeout(uint256 indexed round, uint256 snapshotTimestamp, uint256 resetTimestamp);
+	event ExpiredClaimsCleaned(uint256 indexed round, uint256 recoveredAmount, uint256 winnersProcessed);
 	event RoundFinalized(uint256 indexed round, uint256 totalDistributed, uint256 winnersCount, address[] winners);
     event RewardClaimed(address indexed claimant, address indexed recipient, uint256 indexed round, uint256 amount);
     event Funded(address indexed from, uint256 amount, uint256 poolAfter);
@@ -111,6 +113,12 @@ contract JACKsLPVault is ReentrancyGuard {
     }
     
     constructor(address _token) {
+        require(_token != address(0), "Zero token");
+        try IJACKsPools(_token).getLpValue() returns (uint256) {
+            // Token contract valid
+        } catch {
+            revert("Invalid token contract");
+        }
         TOKEN = IJACKsPools(_token);
         activeBuffer = 0;
         currentRound = 0;
@@ -182,6 +190,13 @@ contract JACKsLPVault is ReentrancyGuard {
 		// Check eligibility based on lifetime
 		bool isEligible = lifetimeContributions[user] >= getMinLpRequired();
 		
+		// Auto-reset snapshot if stuck for 14 days (outside eligibility check)
+		if (snapshotTaken && block.timestamp > snapshotTimestamp + 14 days) {
+			snapshotTaken = false;
+			emit LpSnapshotAutoResetTimeout(snapshotRound, snapshotTimestamp, block.timestamp);
+			emit SnapshotReset(snapshotRound, "14 day timeout");
+		}
+
 		if (isEligible) {
 			uint256 bufferIndex = activeBuffer;
 
@@ -226,14 +241,10 @@ contract JACKsLPVault is ReentrancyGuard {
 
 			emit LPContributed(user, ethAmount, currentRound);
 
-				// Auto-reset snapshot if stuck for 14 days (safety mechanism)
-				if (snapshotTaken && block.timestamp > snapshotTimestamp + 14 days) {
-					snapshotTaken = false;
-					emit SnapshotReset(snapshotRound, "14 day timeout");
-				}
-
 				// Check snapshot with availablePool (not raw balance!)
-				uint256 availablePool = address(this).balance - _getTotalPendingClaims();
+				uint256 _rcBal = address(this).balance;
+				uint256 _rcPending = _getTotalPendingClaims();
+				uint256 availablePool = _rcBal > _rcPending ? _rcBal - _rcPending : 0;
 				if (!snapshotTaken && availablePool >= getPoolThreshold()) {
 					if (bufferParticipants[activeBuffer].length > 0) {
 						_takeSnapshot();
@@ -295,10 +306,15 @@ contract JACKsLPVault is ReentrancyGuard {
 		);                          
 		
 		uint256 poolAmount = address(this).balance - _getTotalPendingClaims();
+		require(poolAmount > 0, "Nothing to distribute");
         
         // Get top 60 contributors
 		(address[] memory topContributors, uint256[] memory contributions) = _getTopContributors(buffer);		// Ensure we have at least 1 winner
-		require(topContributors.length > 0, "No valid contributions");
+		if (topContributors.length == 0) {
+			snapshotTaken = false;
+			emit SnapshotReset(snapshotRound, "No valid contributions");
+			return;
+		}
 
 		// Determine actual winner counts
 		uint256 topCount = topContributors.length < TOP_WINNERS ? topContributors.length : TOP_WINNERS;
@@ -631,7 +647,9 @@ contract JACKsLPVault is ReentrancyGuard {
         emit Funded(msg.sender, msg.value, address(this).balance);
         
         // Check if we should take snapshot
-        uint256 availablePool = address(this).balance - _getTotalPendingClaims();
+        uint256 _rcBal = address(this).balance;
+		uint256 _rcPending = _getTotalPendingClaims();
+		uint256 availablePool = _rcBal > _rcPending ? _rcBal - _rcPending : 0;
 		if (!snapshotTaken && availablePool >= getPoolThreshold()) {
             if (bufferParticipants[activeBuffer].length > 0) {
                 _takeSnapshot();
@@ -1065,6 +1083,7 @@ contract JACKsLPVault is ReentrancyGuard {
 		if (block.timestamp <= info.timestamp + CLAIM_DEADLINE) return 0;
 		
 		recovered = 0;
+		uint256 winnersProcessed = 0;
 		
 		for (uint256 i = 0; i < winners.length; i++) {
 			address user = winners[i];
@@ -1081,6 +1100,11 @@ contract JACKsLPVault is ReentrancyGuard {
 			totalClaimed += amount;
 			
 			recovered += amount;
+			winnersProcessed++;
+		}
+		
+		if (recovered > 0) {
+			emit ExpiredClaimsCleaned(roundId, recovered, winnersProcessed);
 		}
 		
 		return recovered;

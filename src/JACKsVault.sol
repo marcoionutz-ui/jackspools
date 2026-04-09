@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.33;
+pragma solidity ^0.8.34;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -49,6 +49,7 @@ contract JACKsVault is ReentrancyGuard {
 	uint256 public snapshotRound;
 	uint256 public snapshotBlockNumber;      // Block when snapshot taken
 	uint256 public snapshotRevealBlock;       // Block when can finalize
+	uint256 public snapshotThreshold;         // Threshold cached at snapshot time
 	mapping(uint256 => bytes32) public roundEntropy; // Community entropy per round
 
 	// Constants for buffer system
@@ -131,6 +132,10 @@ contract JACKsVault is ReentrancyGuard {
     event RewardClaimed(address indexed claimant, address indexed recipient, uint256 indexed roundId, uint256 amount);
 	event PayoutAddressSet(address indexed user, address indexed payoutAddress);
 	event SnapshotReset(uint256 indexed round, string reason);
+	event RoundSkippedNoEligibleWinners(uint256 indexed round, uint256 entriesChecked, uint256 poolReturned);
+	event RoundExpiredBlockhashStale(uint256 indexed round, uint256 snapshotBlock, uint256 currentBlock);
+	event SnapshotAutoResetTimeout(uint256 indexed round, uint256 snapshotTimestamp, uint256 resetTimestamp);
+	event ExpiredClaimCleaned(uint256 indexed round, uint256 recoveredAmount);
     event EmergencyPauseSet(bool paused);
     event OwnershipRenounced();
     
@@ -275,6 +280,7 @@ contract JACKsVault is ReentrancyGuard {
 		// Auto-reset snapshot if stuck for 7 days (safety mechanism)
 		if (snapshotTaken && block.timestamp > snapshotTimestamp + 7 days) {
 			snapshotTaken = false;
+			emit SnapshotAutoResetTimeout(snapshotRound, snapshotTimestamp, block.timestamp);
 			emit SnapshotReset(snapshotRound, "7 day timeout");
 		}
 		
@@ -294,6 +300,7 @@ contract JACKsVault is ReentrancyGuard {
 		snapshotRound = currentRound;
 		snapshotBlockNumber = block.number; // Save snapshot block
 		snapshotRevealBlock = block.number + REVEAL_DELAY_BLOCKS; // delayed reveal for extra entropy
+		snapshotThreshold = getCurrentThreshold();
 		
 		// Mark current buffer as snapshot
 		snapshotBufferNum = activeBufferNum;
@@ -391,11 +398,12 @@ contract JACKsVault is ReentrancyGuard {
 		require(snapshotTaken, "No snapshot taken");
 		
 		uint256 pool = address(this).balance - _getTotalPendingClaims();
-		require(pool >= getCurrentThreshold(), "Threshold not met");
+		require(pool >= snapshotThreshold, "Threshold not met");
 		
 		// Prevent stale blockhash (blockhash only works for last 256 blocks)
 		if (block.number > snapshotBlockNumber + 256) {
 			snapshotTaken = false;
+			emit RoundExpiredBlockhashStale(snapshotRound, snapshotBlockNumber, block.number);
 			emit SnapshotReset(snapshotRound, "Snapshot expired - take new snapshot");
 			return;
 		}
@@ -475,11 +483,13 @@ contract JACKsVault is ReentrancyGuard {
 			}
 		}
 
-		// FALLBACK: Linear scan for first eligible (using cached balances)
+		// FALLBACK: Randomized scan for first eligible (using cached balances)
 		if (!found) {
+			uint256 fallbackStart = uint256(keccak256(abi.encodePacked(randomSeed, "fallback"))) % validEntries.length;
 			for (uint256 i = 0; i < validEntries.length; i++) {
-				if (balances[i] >= minTokens) {
-					recipient = validEntries[i].buyer;
+				uint256 idx = (fallbackStart + i) % validEntries.length;
+				if (balances[idx] >= minTokens) {
+					recipient = validEntries[idx].buyer;
 					found = true;
 					break;
 				}
@@ -489,6 +499,8 @@ contract JACKsVault is ReentrancyGuard {
 		// If STILL not found, round has NO eligible winners
 		if (!found) {
 			snapshotTaken = false;
+			uint256 poolReturned = address(this).balance - _getTotalPendingClaims();
+			emit RoundSkippedNoEligibleWinners(snapshotRound, validEntries.length, poolReturned);
 			emit SnapshotReset(snapshotRound, "No eligible winners");
 			return;
 		}
@@ -625,7 +637,9 @@ contract JACKsVault is ReentrancyGuard {
 		totalClaimedAmount = totalClaimed;
 		uniqueRecipientCount = uniqueRecipients.length;
 		largestRewardAmount = largestReward;
-		currentPool = address(this).balance - _getTotalPendingClaims();
+		uint256 _bal = address(this).balance;
+		uint256 _pending = _getTotalPendingClaims();
+		currentPool = _bal > _pending ? _bal - _pending : 0;
 		currentThreshold = getCurrentThreshold();
 		roundReady = snapshotTaken;
 	}
@@ -889,7 +903,8 @@ contract JACKsVault is ReentrancyGuard {
 
 		RoundInfo storage info = rounds[roundId];
 
-		// Skip if already claimed or not yet expired
+		// Skip if no amount, already claimed, or not yet expired
+		if (info.amount == 0) return 0;
 		if (info.claimed || block.timestamp <= info.timestamp + MAX_CLAIM_DELAY) {
 			return 0;
 		}
@@ -898,6 +913,7 @@ contract JACKsVault is ReentrancyGuard {
 		info.claimed = true;
 		totalClaimed += info.amount;
 
+		emit ExpiredClaimCleaned(roundId, info.amount);
 		return info.amount;
 	}
 
@@ -1055,7 +1071,7 @@ contract JACKsVault is ReentrancyGuard {
 		canFinalizeByCooldown = block.timestamp >= lastFinalizeTime + FINALIZE_COOLDOWN;
 		
 		canFinalizeNow = snapshotTaken 
-			&& pool >= getCurrentThreshold()
+			&& pool >= snapshotThreshold
 			&& canFinalizeByBlock
 			&& canFinalizeByCooldown
 			&& !blockhashUnavailable;
