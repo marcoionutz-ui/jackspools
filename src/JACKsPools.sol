@@ -258,6 +258,10 @@ contract JACKsPools is IERC20, ReentrancyGuard {
         emit MinSwapTokensUpdated(old, _minSwapTokens);
     }
     
+	function name() external pure returns (string memory) { return NAME; }
+    function symbol() external pure returns (string memory) { return SYMBOL; }
+    function decimals() external pure returns (uint8) { return DECIMALS; }
+	
     function balanceOf(address account) public view override returns (uint256) {
         return _balances[account];
     }

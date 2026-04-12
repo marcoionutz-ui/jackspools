@@ -13,6 +13,10 @@ interface IJACKsPools {
     function vaultLocked() external view returns (bool);
 }
 
+interface IJACKsVault {
+    function emergencyPause() external view returns (bool);
+}
+
 contract RenounceOwnership is Script {
     // Base Sepolia addresses
     address constant TOKEN = 0xfEA677CA47b1EDD9508D2D943aa716b39dD37D7b;
@@ -46,6 +50,11 @@ contract RenounceOwnership is Script {
         require(vaultLocked, "Vault must be locked first");
         require(tokenOwner == deployer, "Deployer is not TOKEN owner");
         require(vaultOwner == deployer, "Deployer is not VAULT owner");
+		
+		// CRITICAL: vault paused = permanent lockout after renounce
+        bool vaultPaused = IJACKsVault(VAULT).emergencyPause();
+        console.log("VAULT emergencyPause:", vaultPaused);
+        require(!vaultPaused, "VAULT is paused - unpause before renounce");
         
         vm.startBroadcast(deployerPrivateKey);
         
