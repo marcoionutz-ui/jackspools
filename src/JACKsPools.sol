@@ -495,7 +495,10 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			_lpRewardTokens -= localLpReward;
 
 			uint256 ethReceived = address(this).balance - initialBalance;
-			if (ethReceived == 0) return 0;
+			if (ethReceived == 0) {
+				_approve(address(this), address(ROUTER), 0);
+				return 0;
+			}
 
 			// Reserve caller reward before any distribution
 			callerReward = (ethReceived * 30) / 10000; // 0.3%
@@ -770,7 +773,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 		if (caller != address(this) && caller != address(0)) {
 			if (reward > 0) {
 				(bool success,) = caller.call{value: reward}("");
-				// Intentionally ignore success - silent failure for griefing resistance
+				(success); // Intentionally ignore - silent failure for griefing resistance
 			}
 		}
     }
