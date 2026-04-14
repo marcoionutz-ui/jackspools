@@ -1172,15 +1172,6 @@ contract JACKsLPVault is ReentrancyGuard {
 	}
 
 	/**
-	 * @notice Check if user is eligible for LP Reward Round
-	 * @param user Address to check
-	 * @return eligible True if user has reached lifetime threshold
-	 */
-	function isUserEligible(address user) external view returns (bool eligible) {
-		return lifetimeContributions[user] >= getMinLpRequired();
-	}
-
-	/**
 	 * @notice Get user's eligibility progress
 	 * @param user Address to check
 	 * @return currentLifetime Total lifetime contributions
@@ -1206,16 +1197,8 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		return (currentLifetime, requiredForEligibility, isEligible, remainingToEligibility);
 	}
-    
+   
 	/**
-	 * @notice Get the round ID that is currently being finalized
-	 * @return roundId The round waiting for finalization (0 if none)
-	 */
-	function getFinalizingRound() external view returns (uint256) {
-		return snapshotTaken ? snapshotRound : 0;
-	}
-	
-		/**
 	 * @notice Set custom payout address (for contract wallets)
 	 * @param _payoutAddress Address to receive claim payouts
 	 */

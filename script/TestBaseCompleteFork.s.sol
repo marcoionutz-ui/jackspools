@@ -45,9 +45,9 @@ interface IJACKsVault {
     function finalizeRound() external;
     function claimReward(uint256 roundId) external;
     function claimMultipleRewards(uint256[] calldata roundIds) external;
-    function isRoundReady() external view returns (bool);
-    function getPoolSize() external view returns (uint256);
+    function snapshotTaken() external view returns (bool);
     function getCurrentThreshold() external view returns (uint256);
+    function getRoundState() external view returns (uint256, bool, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256);
     function cleanupExpiredClaimsForRound(uint256 roundId) external returns (uint256);
     function cleanupExpiredClaimsBatch(uint256 startRound, uint256 endRound) external returns (uint256);
     function payoutRound() external view returns (uint256);
@@ -75,7 +75,7 @@ interface IJACKsLPVault {
         uint256 snapshotParticipants
     );
     function lifetimeContributions(address) external view returns (uint256);
-    function isUserEligible(address) external view returns (bool);
+    function getUserEligibilityProgress(address) external view returns (uint256, uint256, bool, uint256);
     function cleanupExpiredClaimsForRound(
         uint256 roundId,
         address[] calldata winners
@@ -259,7 +259,11 @@ contract TestBaseCompleteFork is Script, Test {
         return vm.addr(uint256(keccak256(abi.encodePacked(seed))));
     }
 	
-	function _addLPExact(address user, uint256 tokenAmount) internal returns (uint256, uint256, uint256) {
+	function _getVaultPool() internal view returns (uint256 pool) {
+        (,,,,,,,, pool,,,,) = vault.getRoundState();
+    }
+
+    function _addLPExact(address user, uint256 tokenAmount) internal returns (uint256, uint256, uint256) {
 		vm.startBroadcast(user);
 		token.approve(address(lpManager), tokenAmount);
 		uint256 exactEth = lpManager.quoteEthForTokens(tokenAmount);
@@ -424,7 +428,7 @@ contract TestBaseCompleteFork is Script, Test {
         }
         
         console.log("20 buys completed");
-        console.log("Buyer pool size:", vault.getPoolSize());
+        console.log("Buyer pool size:", _getVaultPool());
         console.log("\nPhase 2 complete!\n");
     }
     
@@ -439,9 +443,9 @@ contract TestBaseCompleteFork is Script, Test {
         
         console.log("Processing accumulated taxes...");
         
-        uint256 poolBefore = vault.getPoolSize();
+        uint256 poolBefore = _getVaultPool();
         _processTaxes();
-        uint256 poolAfter = vault.getPoolSize();
+        uint256 poolAfter = _getVaultPool();
         
         assertGt(poolAfter, poolBefore, "Pool should grow after tax processing");
         
@@ -523,7 +527,7 @@ contract TestBaseCompleteFork is Script, Test {
 		(uint256 tokens1, uint256 eth1,) = _addLPExact(testUser, tokenAmount1);
         
         uint256 lifetime1 = lpVault.lifetimeContributions(testUser);
-        bool eligible1 = lpVault.isUserEligible(testUser);
+        (,, bool eligible1,) = lpVault.getUserEligibilityProgress(testUser);
         console.log("  Tokens used:", tokens1);
         console.log("  ETH used:", eth1);
         console.log("  Lifetime contributions:", lifetime1);
@@ -546,7 +550,7 @@ contract TestBaseCompleteFork is Script, Test {
 		(uint256 tokens2, uint256 eth2,) = _addLPExact(testUser, tokenAmount2);
         
         uint256 lifetime2 = lpVault.lifetimeContributions(testUser);
-        bool eligible2 = lpVault.isUserEligible(testUser);
+        (,, bool eligible2,) = lpVault.getUserEligibilityProgress(testUser);
         console.log("  Tokens used:", tokens2);
         console.log("  ETH used:", eth2);
         console.log("  Lifetime contributions:", lifetime2);
@@ -576,14 +580,14 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("=============================================================================\n");
         
         uint256 threshold = vault.getCurrentThreshold();
-        uint256 currentPool = vault.getPoolSize();
+        uint256 currentPool = _getVaultPool();
         
         console.log("Funding buyer pot to threshold via MORE BUYS...");
         console.log("  Current pool:", currentPool);
         console.log("  Threshold:", threshold);
         
         uint256 buyIdx = 0;
-		while (vault.getPoolSize() < threshold) {
+		while (_getVaultPool() < threshold) {
 			address freshBuyer = _getUniqueAddr(string(abi.encodePacked("phase6_fresh_", vm.toString(buyIdx))));
 			vm.deal(freshBuyer, 1 ether);
 			
@@ -593,13 +597,13 @@ contract TestBaseCompleteFork is Script, Test {
 			if (buyIdx % 5 == 0) {
 				_processTaxes();
 				console.log("    Processed taxes after buy", buyIdx);
-				console.log("    Pool now:", vault.getPoolSize());
+				console.log("    Pool now:", _getVaultPool());
 			}
 			buyIdx++;
 		}
 
 		_processTaxes();
-		currentPool = vault.getPoolSize();
+		currentPool = _getVaultPool();
 
 		console.log("\n  Pool after natural funding:", currentPool);
 		console.log("  Threshold:", threshold);
@@ -613,7 +617,7 @@ contract TestBaseCompleteFork is Script, Test {
         _processTaxes();
         console.log("  Snapshot should be triggered now!");
         
-        bool ready = vault.isRoundReady();
+        bool ready = vault.snapshotTaken();
         console.log("  Round ready:", ready);
         assertTrue(ready, "Round should be ready");
         
@@ -931,7 +935,7 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("Step 1: Fund buyer vault to threshold");
 
 		uint256 p12BuyIdx = 0;
-		while (!vault.isRoundReady()) {
+		while (!vault.snapshotTaken()) {
 			address buyer = _getUniqueAddr(string(abi.encodePacked("phase14_buyer_", vm.toString(p12BuyIdx))));
 			vm.deal(buyer, 1 ether);
 			
@@ -946,8 +950,8 @@ contract TestBaseCompleteFork is Script, Test {
 
 		_processTaxes();
 
-		bool snapshotTaken = vault.isRoundReady();
-		uint256 poolSize = vault.getPoolSize();
+		bool snapshotTaken = vault.snapshotTaken();
+		uint256 poolSize = _getVaultPool();
 		uint256 threshold = vault.getCurrentThreshold();
 
 		console.log("  Pool size:", poolSize);
@@ -959,7 +963,7 @@ contract TestBaseCompleteFork is Script, Test {
             console.log("  WARNING: Snapshot not taken yet, funding more...");
             
             uint256 buyCount = 0;
-            while (!vault.isRoundReady() && buyCount < 50) {
+            while (!vault.snapshotTaken() && buyCount < 50) {
                 address extraBuyer = _getUniqueAddr(string(abi.encodePacked("phase14_extra_", vm.toString(buyCount))));
                 vm.deal(extraBuyer, 1 ether);
                 
@@ -973,7 +977,7 @@ contract TestBaseCompleteFork is Script, Test {
                 buyCount++;
             }
             
-            snapshotTaken = vault.isRoundReady();
+            snapshotTaken = vault.snapshotTaken();
             assertTrue(snapshotTaken, "Snapshot should be taken");
         }
         
@@ -1126,7 +1130,7 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("  LP Value:", token.getLpValue() / 1 ether, "ETH");
         console.log("");
         console.log("  Buyer Vault:", address(vault));
-        console.log("  Buyer Pool:", vault.getPoolSize());
+        console.log("  Buyer Pool:", _getVaultPool());
         console.log("");
         console.log("  LP Vault:", address(lpVault));
         (uint256 stage, uint256 roundId,,,,,uint256 lpPot,,, uint256 participants,) = lpVault.getRoundState();
@@ -1195,7 +1199,7 @@ contract TestBaseCompleteFork is Script, Test {
             _skipCooldown();
         }
         
-        bool wasReady = vault.isRoundReady();
+        bool wasReady = vault.snapshotTaken();
         if (!wasReady) {
             vm.startBroadcast(deployer);
             vm.expectRevert();
@@ -1210,7 +1214,7 @@ contract TestBaseCompleteFork is Script, Test {
         
         // Try to fund pool to threshold (max 50 attempts)
         uint256 fundAttempts = 0;
-        while (!vault.isRoundReady() && fundAttempts < 50) {
+        while (!vault.snapshotTaken() && fundAttempts < 50) {
             address buyer = _getUniqueAddr(string(abi.encodePacked("phase14_funder_", vm.toString(fundAttempts))));
             vm.deal(buyer, 2 ether);
             _buy(buyer, LARGE_BUY);
@@ -1220,7 +1224,7 @@ contract TestBaseCompleteFork is Script, Test {
         }
         
         // Check if we managed to trigger snapshot
-        bool testReady = vault.isRoundReady();
+        bool testReady = vault.snapshotTaken();
         
         if (!testReady) {
             console.log("  SKIP: Could not reach threshold after", fundAttempts, "attempts");
@@ -1297,7 +1301,7 @@ contract TestBaseCompleteFork is Script, Test {
 		(, uint256 eth1,) = _addLPExact(lpPowerUser, tokens1);
         
         uint256 lifetime1 = lpVault.lifetimeContributions(lpPowerUser);
-        bool eligible1 = lpVault.isUserEligible(lpPowerUser);
+        (,, bool eligible1,) = lpVault.getUserEligibilityProgress(lpPowerUser);
         
         console.log("  After LP #1:");
         console.log("    Lifetime:", lifetime1);
@@ -1310,7 +1314,7 @@ contract TestBaseCompleteFork is Script, Test {
 		(, uint256 eth2,) = _addLPExact(lpPowerUser, tokens2);
         
         uint256 lifetime2 = lpVault.lifetimeContributions(lpPowerUser);
-        bool eligible2 = lpVault.isUserEligible(lpPowerUser);
+        (,, bool eligible2,) = lpVault.getUserEligibilityProgress(lpPowerUser);
         
         console.log("  After LP #2:");
         console.log("    Lifetime:", lifetime2);
@@ -1323,7 +1327,7 @@ contract TestBaseCompleteFork is Script, Test {
 		(, uint256 eth3,) = _addLPExact(lpPowerUser, tokens3);
         
         uint256 lifetime3 = lpVault.lifetimeContributions(lpPowerUser);
-        bool eligible3 = lpVault.isUserEligible(lpPowerUser);
+        (,, bool eligible3,) = lpVault.getUserEligibilityProgress(lpPowerUser);
         
         console.log("  After LP #3:");
         console.log("    Lifetime:", lifetime3);

@@ -181,7 +181,7 @@ contract CoreInvariantTest is Test {
     
     function _fundBuyerPotToThreshold() internal returns (uint256) {
         uint256 threshold = buyerVault.getCurrentThreshold();
-        uint256 currentPool = buyerVault.getPoolSize();
+        (,,,,,,,,uint256 currentPool,,,,) = buyerVault.getRoundState();
         
         // CRITICAL FIX: Each buy must be from DIFFERENT wallet
         // CRITICAL FIX #2: Calculate safe buy amount to avoid max wallet violations!
@@ -254,7 +254,7 @@ contract CoreInvariantTest is Test {
                 token.processTaxes();
                 
                 // Update current pool to check if we've reached threshold
-                currentPool = buyerVault.getPoolSize();
+                (,,,,,,,,currentPool,,,,) = buyerVault.getRoundState();
                 
                 // Break if threshold reached
                 if (currentPool >= threshold) {
@@ -272,7 +272,8 @@ contract CoreInvariantTest is Test {
             token.processTaxes();
         }
         
-        return buyerVault.getPoolSize();
+        (,,,,,,,,uint256 finalPool,,,,) = buyerVault.getRoundState();
+        return finalPool;
     }
     
     function _fundLPPotToThreshold() internal returns (uint256) {
@@ -347,9 +348,9 @@ contract CoreInvariantTest is Test {
         console.log("\n--- Execute Operations ---");
         
         // Fund buyer pot
-        uint256 poolSizeBefore = buyerVault.getPoolSize();
+        (,,,,,,,,uint256 poolSizeBefore,,,,) = buyerVault.getRoundState();
         _fundBuyerPotToThreshold();
-        uint256 poolSizeAfter = buyerVault.getPoolSize();
+        (,,,,,,,,uint256 poolSizeAfter,,,,) = buyerVault.getRoundState();
         
         console.log("Buyer pool: %s -> %s", poolSizeBefore, poolSizeAfter);
         
@@ -424,7 +425,7 @@ contract CoreInvariantTest is Test {
         assertGe(poolSize, threshold, "Pool should reach threshold");
         
         // FIX #4: Wait for reveal block
-        assertTrue(buyerVault.isRoundReady(), "Snapshot should be taken");
+        assertTrue(buyerVault.snapshotTaken(), "Snapshot should be taken");
         vm.roll(block.number + 30); // +5 for reveal + buffer
         
         // Finalize
@@ -511,7 +512,7 @@ contract CoreInvariantTest is Test {
         
         // Fund and finalize
         _fundBuyerPotToThreshold();
-        assertTrue(buyerVault.isRoundReady(), "Snapshot should be taken");
+        assertTrue(buyerVault.snapshotTaken(), "Snapshot should be taken");
         
         vm.roll(block.number + 30);
         
@@ -630,13 +631,13 @@ contract CoreInvariantTest is Test {
         
         // STATE 1: Funding
         console.log("STATE 1: Funding");
-        assertFalse(buyerVault.isRoundReady(), "Should not be ready before funding");
+        assertFalse(buyerVault.snapshotTaken(), "Should not be ready before funding");
         
         _fundBuyerPotToThreshold();
         
         // STATE 2: Snapshot taken
         console.log("STATE 2: Snapshot taken");
-        assertTrue(buyerVault.isRoundReady(), "Snapshot should be taken");
+        assertTrue(buyerVault.snapshotTaken(), "Snapshot should be taken");
         
         // FIX #4: Wait for reveal block
         vm.roll(block.number + 30);
@@ -867,7 +868,8 @@ contract CoreInvariantTest is Test {
         uint256 inBufferCount = 0;
         for (uint256 i = 0; i < 21; i++) {
             // Check eligibility
-            if (lpVault.isUserEligible(contributors[i])) {
+            (,, bool isEligible,) = lpVault.getUserEligibilityProgress(contributors[i]);
+            if (isEligible) {
                 eligibleCount++;
                 if (lpVault.isInBuffer(activeBuffer, contributors[i])) {
                     inBufferCount++;
@@ -1038,7 +1040,7 @@ contract CoreInvariantTest is Test {
         address randomUser = makeAddr("random");
         
         // FIX #4: Explicit checks before finalize
-        bool roundReady = buyerVault.isRoundReady();
+        bool roundReady = buyerVault.snapshotTaken();
         console.log("  Round ready:", roundReady);
         
         if (roundReady) {

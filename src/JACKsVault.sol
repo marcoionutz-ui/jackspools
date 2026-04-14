@@ -811,23 +811,7 @@ contract JACKsVault is ReentrancyGuard {
     function _getTotalPendingClaims() private view returns (uint256) {
         return totalDistributed - totalClaimed;
     }
-    
-    /**
-     * @notice Get current pool size (minus pending claims)
-     */
-    function getPoolSize() external view returns (uint256) {
-        uint256 balance = address(this).balance;
-        uint256 pending = _getTotalPendingClaims();
-        return balance > pending ? balance - pending : 0;
-    }
-    
-    /**
-     * @notice Check if round is ready to be finalized
-     */
-    function isRoundReady() external view returns (bool) {
-		return snapshotTaken;
-	}
-    
+   
     /**
      * @notice Get potential round reward
      */
