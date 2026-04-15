@@ -649,13 +649,13 @@ contract TestBaseCompleteFork is Script, Test {
 
             vm.startBroadcast(winner);
 
-            uint256 gasStart = gasleft();
+            uint256 gasStartClaim = gasleft();
             vault.claimReward(completedRoundId);
-            uint256 gasUsed = gasStart - gasleft();
+            uint256 gasUsedClaim = gasStartClaim - gasleft();
 
             vm.stopBroadcast();
 
-            console.log("  [GAS] Buyer Claim:", gasUsed);
+            console.log("  [GAS] Buyer Claim:", gasUsedClaim);
 
             (,,, bool claimed) = vault.getRoundInfo(completedRoundId);
             assertEq(claimed, true, "Round should be claimed");
@@ -731,10 +731,10 @@ contract TestBaseCompleteFork is Script, Test {
         console.log("\nChecking LP winners...");
         for (uint i = 0; i < lpProviders.length; i++) {
             vm.startBroadcast(lpProviders[i]);
-			uint256 gasStart = gasleft();
+			uint256 gasStartLPClaim = gasleft();
 			try lpVault.claimReward(0) {
-				uint256 gasUsed = gasStart - gasleft();
-				console.log("  LP Provider", i, "claimed - [GAS]:", gasUsed);
+				uint256 gasUsedLPClaim = gasStartLPClaim - gasleft();
+				console.log("  LP Provider", i, "claimed - [GAS]:", gasUsedLPClaim);
 			} catch {}
 			vm.stopBroadcast();
         }
@@ -783,10 +783,10 @@ contract TestBaseCompleteFork is Script, Test {
 				winnersPerRound[i] = new address[](0); // Empty in test
 			}
 			
-			uint256 gasStart = gasleft();
+			uint256 gasStartCleanup = gasleft();
 			uint256 recoveredLP = lpVault.cleanupExpiredClaimsBatch(expiredRounds, winnersPerRound);
-			uint256 gasUsed = gasStart - gasleft();
-			console.log("  [GAS] LP Cleanup Batch:", gasUsed);
+			uint256 gasUsedCleanup = gasStartCleanup - gasleft();
+			console.log("  [GAS] LP Cleanup Batch:", gasUsedCleanup);
 			console.log("  Recovered from LP vault:", recoveredLP);
 		} else {
 			console.log("  No expired rounds to cleanup");
@@ -1119,7 +1119,7 @@ contract TestBaseCompleteFork is Script, Test {
     // PHASE 16: FINAL REPORT
     // ============================================
     
-    function phase16_FinalReport() internal {
+    function phase16_FinalReport() internal view {
         console.log("=============================================================================");
         console.log("                         PHASE 16: FINAL REPORT");
         console.log("=============================================================================\n");

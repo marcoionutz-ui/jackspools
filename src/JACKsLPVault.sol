@@ -1216,19 +1216,6 @@ contract JACKsLPVault is ReentrancyGuard {
 		emit PayoutAddressSet(msg.sender, address(0));
 	}
 	
-    // ============================================
-    // EMERGENCY FUNCTIONS
-    // ============================================
-    
-    /**
-     * @notice Emergency snapshot trigger
-     */
-    function emergencySnapshot() external onlyOwner {
-        require(!snapshotTaken, "Snapshot already taken");
-        require(bufferParticipants[activeBuffer].length > 0, "No participants");
-        _takeSnapshot();
-    }
-    
     receive() external payable {
         revert("Use onLpTaxReceived");
     }

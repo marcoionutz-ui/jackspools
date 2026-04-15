@@ -720,15 +720,7 @@ contract JACKsPools is IERC20, ReentrancyGuard {
         owner = address(0);
         emit OwnershipRenounced();
     }
-    
-    // Recovery function for stuck ETH (owner only, before renounce)
-    function recoverEth() external onlyOwner {
-        uint256 balance = address(this).balance;
-        require(balance > 0, "No ETH");
-        (bool success,) = owner.call{value: balance}("");
-        require(success, "Transfer failed");
-    }
-    
+        
     // Check if max wallet limit is active
     function isMaxWalletActive() public view returns (bool) {
 		return getMaxWalletTokens() < type(uint256).max;

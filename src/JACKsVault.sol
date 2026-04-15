@@ -120,8 +120,7 @@ contract JACKsVault is ReentrancyGuard {
     
     // Security
     address public owner;
-    bool public emergencyPause;
-    
+        
     // Events
     event Funded(address indexed from, uint256 amount, uint256 poolAfter);
 	event BuyerAdded(address indexed buyer, uint256 amount, uint256 round);
@@ -136,7 +135,6 @@ contract JACKsVault is ReentrancyGuard {
 	event RoundExpiredBlockhashStale(uint256 indexed round, uint256 snapshotBlock, uint256 currentBlock);
 	event SnapshotAutoResetTimeout(uint256 indexed round, uint256 snapshotTimestamp, uint256 resetTimestamp);
 	event ExpiredClaimCleaned(uint256 indexed round, uint256 recoveredAmount);
-    event EmergencyPauseSet(bool paused);
     event OwnershipRenounced();
     
     modifier onlyToken() {
@@ -148,12 +146,7 @@ contract JACKsVault is ReentrancyGuard {
         require(msg.sender == owner, "Not owner");
         _;
     }
-         
-    modifier notPaused() {
-        require(!emergencyPause, "Paused");
-        _;
-    }
-    
+        
     constructor(address _token) {
         require(_token != address(0), "Zero token");
         
@@ -231,7 +224,7 @@ contract JACKsVault is ReentrancyGuard {
 	/**
 	 * @notice Add eligible buyer to buffer system
 	 */
-	function addEligibleBuyer(address buyer, uint256 ethAmount) external onlyToken notPaused {
+	function addEligibleBuyer(address buyer, uint256 ethAmount) external onlyToken {
 		require(buyer != address(0), "Zero buyer");
 		
 		// Check minimum buy requirement
@@ -373,7 +366,7 @@ contract JACKsVault is ReentrancyGuard {
    /**
 	 * @notice Receive tax funds from token contract
 	 */
-	function onTaxReceived() external payable onlyToken notPaused {
+	function onTaxReceived() external payable onlyToken {
 		require(msg.value > 0, "No value");
 		
 		uint256 poolAfter = address(this).balance;
@@ -394,7 +387,7 @@ contract JACKsVault is ReentrancyGuard {
     /**
 	 * @notice Finalize round and select random recipient from snapshot
 	 */
-	function finalizeRound() external nonReentrant notPaused {
+	function finalizeRound() external nonReentrant {
 		require(snapshotTaken, "No snapshot taken");
 		
 		uint256 pool = address(this).balance - _getTotalPendingClaims();
@@ -856,16 +849,6 @@ contract JACKsVault is ReentrancyGuard {
 		emit PayoutAddressSet(msg.sender, address(0));
 	}
 	
-    // Owner functions
-    
-    /**
-     * @notice Emergency pause (owner only)
-     */
-    function setEmergencyPause(bool _pause) external onlyOwner {
-        emergencyPause = _pause;
-        emit EmergencyPauseSet(_pause);
-    }
-    
     /**
      * @notice Renounce ownership
      */

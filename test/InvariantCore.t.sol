@@ -907,6 +907,8 @@ contract CoreInvariantTest is Test {
         uint256 minContribution = lpVault.getMinLpRequired();
         
         for (uint256 i = 0; i < 400; i++) {
+            // casting to 'uint160' is safe because 0x10000 + i < type(uint160).max for any realistic i
+            // forge-lint: disable-next-line(unsafe-typecast)
             contributors[i] = address(uint160(0x10000 + i));
             
             // Contributions range from min to min + 0.001 ETH
@@ -1161,17 +1163,6 @@ contract CoreInvariantTest is Test {
         vm.expectRevert();
         token.setLpManager(address(0x123));
         console.log("  PASS: setLpManager blocked (randomUser)");
-        
-        // Deployer tries setEmergencyPause
-        vm.expectRevert();
-        buyerVault.setEmergencyPause(true);
-        console.log("  PASS: setEmergencyPause blocked (deployer)");
-        
-        // Random user tries setEmergencyPause
-        vm.prank(randomUser);
-        vm.expectRevert();
-        buyerVault.setEmergencyPause(true);
-        console.log("  PASS: setEmergencyPause blocked (randomUser)");
         
         console.log("  PASS: No privileged paths remain (verified for both deployer & random)");
         

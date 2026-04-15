@@ -18,3 +18,8 @@ broadcast/
 
 # Logs & temporary
 *.log
+
+# Scripts
+script/DeployBase.s.sol
+script/RenounceOwnership.s.sol
+script/DeployBaseSepolia.s.sol

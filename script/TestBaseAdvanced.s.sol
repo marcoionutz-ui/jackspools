@@ -30,9 +30,9 @@ interface IJACKsPools {
 
 interface IJACKsVault {
     function finalizeRound() external;
-    function isRoundReady() external view returns (bool);
+    function snapshotTaken() external view returns (bool);
+    function getRoundState() external view returns (uint256, bool, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256);
     function getCurrentThreshold() external view returns (uint256);
-    function getPoolSize() external view returns (uint256);
     function round() external view returns (uint256);
     function getRoundInfo(uint256) external view returns (address, uint256, uint256, bool);
     function claimable(address) external view returns (uint256);
@@ -72,7 +72,7 @@ interface IJACKsLPVault {
         uint256[] memory
     );
     function roundRewards(uint256 round, address user) external view returns (uint256);
-    function isUserEligible(address user) external view returns (bool);
+    function getUserEligibilityProgress(address) external view returns (uint256, uint256, bool, uint256);
 }
 
 interface IJACKsLPManager {
@@ -151,6 +151,10 @@ contract TestBaseAdvanced is Script {
         vm.stopBroadcast();
         
         return (tokens, eth, liquidity);
+    }
+	
+	function _getVaultPool() internal view returns (uint256 pool) {
+        (,,,,,,,, pool,,,,) = vault.getRoundState();
     }
 	
     function run() external {
@@ -336,7 +340,7 @@ contract TestBaseAdvanced is Script {
         vm.stopBroadcast();
         
         // Verify snapshot
-        bool ready = vault.isRoundReady();
+        bool ready = vault.snapshotTaken();
         
         // If not ready, add more buys
         if (!ready) {
@@ -362,11 +366,11 @@ contract TestBaseAdvanced is Script {
 					vm.stopBroadcast();
 				}
                 
-                if (vault.isRoundReady()) break;
+                if (vault.snapshotTaken()) break;
             }
         }
         
-        require(vault.isRoundReady(), "Snapshot not triggered");
+        require(vault.snapshotTaken(), "Snapshot not triggered");
         
         // Finalize
         vm.roll(block.number + 25);
@@ -416,7 +420,7 @@ contract TestBaseAdvanced is Script {
 			uint256 lpBalance = token.balanceOf(lpUser);
 			
 			uint256 gasStartLP = gasleft();
-			(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(lpUser, lpBalance);
+			_addLPExact(lpUser, lpBalance);
 			uint256 gasUsedLP = gasStartLP - gasleft();
 			
 			if (i == 0) console.log("    [GAS] Add LP:", gasUsedLP);
@@ -456,14 +460,14 @@ contract TestBaseAdvanced is Script {
         uint256 balance = token.balanceOf(smallLP);
 
 		uint256 gasStartSmallLP = gasleft();
-		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(smallLP, balance);
+		_addLPExact(smallLP, balance);
 		uint256 gasUsedSmallLP = gasStartSmallLP - gasleft();
 
 		console.log("  [GAS] Small LP add:", gasUsedSmallLP);
 		        
         // Check if small LP was added
         (,,,,,,,,, uint256 participantsAfterSmall,) = lpVault.getRoundState();
-        bool eligible = lpVault.isUserEligible(smallLP);
+        (,, bool eligible,) = lpVault.getUserEligibilityProgress(smallLP);
         
         console.log("  User 401 eligible:", eligible, "(reached lifetime threshold?)");
         console.log("  Participants after small LP:", participantsAfterSmall);
@@ -491,7 +495,7 @@ contract TestBaseAdvanced is Script {
         balance = token.balanceOf(largeLP);
 
 		uint256 gasStartLargeLP = gasleft();
-		(addedTokens, addedEth, liquidity) = _addLPExact(largeLP, balance);
+		_addLPExact(largeLP, balance);
 		uint256 gasUsedLargeLP = gasStartLargeLP - gasleft();
 
 		console.log("  [GAS] Large LP (eviction):", gasUsedLargeLP);
@@ -660,7 +664,7 @@ contract TestBaseAdvanced is Script {
 		uint256 balance = token.balanceOf(user);
 		uint256 lpTokens = (balance * lpPercentage) / 100;
 		
-		(uint256 addedTokens, uint256 addedEth, uint256 liquidity) = _addLPExact(user, lpTokens);
+		_addLPExact(user, lpTokens);
 		
 		if ((i + 1) % 50 == 0) {
 			console.log("  ", i + 1, "LPs added");
