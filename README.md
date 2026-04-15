@@ -155,6 +155,12 @@ Fork, invariant, and static analysis outputs are included under `/docs/tests`:
   
 ## Base Sepolia Deployments
 
+⚠️ NOTE: The deployment addresses below are from a previous iteration.
+
+A new Base Sepolia deployment (v1.0.3) has been completed with the final autonomous design (no owner controls, fully renounced).
+
+Updated addresses and validation transactions will be added shortly.
+
 The protocol has been deployed and fully exercised on Base Sepolia:
 
 - JACKsPools (ERC20): `0xfEA677CA47b1EDD9508D2D943aa716b39dD37D7b`
