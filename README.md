@@ -155,7 +155,7 @@ Fork, invariant, and static analysis outputs are included under `/docs/tests`:
   
 ## Base Sepolia Deployment
 
-A new deployment has been completed with the final autonomous design (no owner controls, fully renounced).
+A new deployment has been completed with the final autonomous design.
 
 **Contracts:**
 
