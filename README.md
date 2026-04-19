@@ -153,56 +153,24 @@ Fork, invariant, and static analysis outputs are included under `/docs/tests`:
   Some findings are expected for this design (best-effort randomness, timestamp-gated rounds, ETH payouts via pull-payments).
   See `/docs/tests/README.md` for a short explanation.
   
-## Base Sepolia Deployments
+## Base Sepolia Deployment
 
-⚠️ NOTE: The deployment addresses below are from a previous iteration.
+A new deployment has been completed with the final autonomous design (no owner controls, fully renounced).
 
-A new Base Sepolia deployment (v1.0.3) has been completed with the final autonomous design (no owner controls, fully renounced).
+**Contracts:**
 
-Updated addresses and validation transactions will be added shortly.
+- JACKsPools (ERC20): https://sepolia.basescan.org/address/0x483968eeDaAD1A6A801d6E02599bc514549198ea  
+- JACKsVault (Buyer Rewards): https://sepolia.basescan.org/address/0x3A1478aaE9ecEa73abFf589048B6f321d215Da30  
+- JACKsLPVault (LP Rewards): https://sepolia.basescan.org/address/0xD90866ab0D616634efb1530C894Bd356acd3c4d5  
+- JACKsLPManager: https://sepolia.basescan.org/address/0x8158cfc37Dc6856cDdA4C15F6027C34F7aC0C86e  
+- Pair: https://sepolia.basescan.org/address/0xe3518e6AE4cCb99616183a5B04037107aEd487AE  
 
-The protocol has been deployed and fully exercised on Base Sepolia:
+---
 
-- JACKsPools (ERC20): `0xfEA677CA47b1EDD9508D2D943aa716b39dD37D7b`
-- JACKsVault (Buyer Rewards): `0x39cb5b7086B824Afb907c10904c7c935e9E74e41`
-- JACKsLPVault (LP Rewards): `0x84458eA7d67CF920D002D96a10F4ECb778AF3119`
-- JACKsLPManager: `0x5839Bf682CeB945B03C573AAa5E3ba7a82028ACC`
+## Status
 
-### On-chain Validation Transactions (Base Sepolia)
-
-The following transactions demonstrate the protocol lifecycle executed on Base Sepolia:
-
-**LP reward cycle**
-
-- LP round finalize  
-https://sepolia.basescan.org/tx/0x0e939d8de70eaacf397edbb8b748d0f018cf307816cffb2eee8fab86b2fb25ab
-
-- LP claims  
-https://sepolia.basescan.org/tx/0x9e1077218f22c1a96635d3e17933f96b3b554b442f6b8f32ecfbd17be3c54ca5  
-https://sepolia.basescan.org/tx/0x6756130c6dd2dbf8bef89ab3d31d64b8bd41bd1358dc2b4d5076e2848fe650b0  
-https://sepolia.basescan.org/tx/0x35a8518613f037ecbf5748c65e3f27c36caacc3c30ca8093c69789101740ef6b
-
-- LP eviction  
-https://sepolia.basescan.org/tx/0x0aaa068fa3c3b9ddc9ae865bbbcbe0e8280fb96b190d008a8c2047ac29dd5600  
-https://sepolia.basescan.org/tx/0x24aee254866f1fef4a10655e7f51cf56b6253622de1bef23dc5b155058a13672
-
-
-**Buyer reward cycle**
-
-- buyer reward finalize  
-https://sepolia.basescan.org/tx/0x9b9159257efb0baad099e66642925be5f22f540c6361f5bc7621f1a6f076f1d5
-
-- buyer reward claim  
-https://sepolia.basescan.org/tx/0xda98a1b63325b9000ab2377152bef34f490e3daad6076ea87c959664ac4b61a7
-
-- cleanup expired buyer rewards  
-https://sepolia.basescan.org/tx/0x3b5ba8ab3aa3b6e2f89137406ac8a1fc5db6bd000e91eb096d1185d1032998a7
-
-
-**Protocol maintenance**
-
-- process protocol taxes  
-https://sepolia.basescan.org/tx/0x7810934ea88342b9349a2c635a0065e0948e8a1de8910b59588a27599a6497c8
+Deployment completed.  
+On-chain validation and transaction proofs will be added in upcoming updates.
 
 
 ## Frontend (Base Sepolia)
