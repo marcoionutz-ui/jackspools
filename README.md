@@ -165,13 +165,28 @@ A new deployment has been completed with the final autonomous design.
 - JACKsLPManager: https://sepolia.basescan.org/address/0x8158cfc37Dc6856cDdA4C15F6027C34F7aC0C86e  
 - Pair: https://sepolia.basescan.org/address/0xe3518e6AE4cCb99616183a5B04037107aEd487AE  
 
+## On-chain Validation Transactions (Base Sepolia)
+
+The following transactions demonstrate the full protocol lifecycle executed on Base Sepolia.
+
+### Buyer Reward Cycle
+
+- Process protocol taxes  
+https://sepolia.basescan.org/tx/0x32dda62ecb9a5a968176967b1ddadae054e43ec27207f8ab4497f5849b9a01fb
+
+- Buyer reward finalize  
+https://sepolia.basescan.org/tx/0x0196ad9c3cea2eaca17cc349bff2d31ad605533be864542aa5b1dee0a256cdfa
+
+- Buyer reward claim  
+https://sepolia.basescan.org/tx/0x6348cbce9342eacb59e402f638391c7e1cf4c6b61217c95367e807c89c8d5a2a
+
+Additional validation transactions (including LP reward cycles and eviction scenarios) will be added progressively as testing continues.
+
 ---
 
 ## Status
 
-Deployment completed.  
-On-chain validation and transaction proofs will be added in upcoming updates.
-
+Mainnet candidate. On-chain validation in progress.
 
 ## Frontend (Base Sepolia)
 
