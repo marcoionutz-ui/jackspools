@@ -241,7 +241,7 @@ All mechanisms are executed and verifiable on-chain.
 
 ## Status
 
-Mainnet candidate. On-chain validation in progress.
+Mainnet candidate. Full on-chain lifecycle validation completed on Base Sepolia.
 
 ## Frontend (Base Sepolia)
 
