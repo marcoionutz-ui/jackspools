@@ -192,7 +192,50 @@ The following transactions demonstrate the full protocol lifecycle executed on B
   Demonstrates protocol recovery when a round is not finalized in time
   https://sepolia.basescan.org/tx/0xd7ba074dbfc20acbf2f8f8f01493f991567b2a145447f19073f42af517e9b6db
 
-Additional validation transactions (including LP reward cycles and eviction scenarios) will be added progressively as testing continues.
+### LP Competition & Reward Cycle (Fully Validated)
+
+The following transactions demonstrate the complete LP lifecycle, including buffer saturation, eviction mechanics, reward distribution, claims, and cleanup.
+
+#### Buffer Mechanics
+
+- Buffer full → low contribution rejected (not eligible for ranking)  
+  https://sepolia.basescan.org/tx/0xc215f57456552df5f3a994e104a214b27fba63adf6d9413a2825e40d40ae3992
+
+- Buffer full → lowest contributor replaced by higher contributor  
+  Demonstrates deterministic eviction and capped leaderboard (max 400 participants)  
+  https://sepolia.basescan.org/tx/0x6301f347d6e52015466249ddcfbf1b932323570bf042ea3772ba5091cc9d998a
+
+#### Round Lifecycle
+
+- LP round snapshot → contributors frozen for reward calculation  
+  Snapshot is automatically triggered when pool threshold is reached
+
+- LP round finalized by a participating wallet  
+  Demonstrates permissionless finalization (no admin required)  
+  https://sepolia.basescan.org/tx/0x0b993c4a866eccc2f4ed0f1a10afbc383264fb062e4379d0b41b791ab3b6df7b
+
+#### Reward Claims
+
+- Rewards claimed by multiple LP participants  
+  https://sepolia.basescan.org/tx/0xbde5535b437a28619a337c0286650ff2a284977f7d735200250588097fcf2622  
+  https://sepolia.basescan.org/tx/0x758cf44ba984e0c5246f70e9c067b88abad7f69f1944ee870ea40cd6bda47938  
+
+#### Cleanup (Full Lifecycle Completion)
+
+- Expired LP rewards cleaned and recycled back into pool  
+  Demonstrates long-term solvency and non-blocking reward system  
+  https://sepolia.basescan.org/tx/0x9c9fa773b035b8692203edabbfc2f259adfcd854fdc861d0ea041dc20a15d698
+
+#### What this demonstrates
+
+- Bounded LP participation (max 400 contributors per round)
+- Deterministic eviction based on contribution size
+- Fully permissionless round finalization
+- Proportional reward distribution across tiers
+- Claim-based payouts with no push transfers
+- Complete lifecycle closure via cleanup of expired rewards
+
+All mechanisms are executed and verifiable on-chain.
 
 ---
 
