@@ -19,6 +19,12 @@ JACKs Pools is now live and running autonomously on Base mainnet.
 - LP Manager: https://basescan.org/address/0x70176BE3766537239A72aC680B29Ed18D825bCbA  
 - Pair: https://basescan.org/address/0x4f54a47Eb7565cb36067e66D3cE3E105e8Cd1F96  
 
+## Links
+
+- Website: https://jackspools.lol  
+- X (Twitter): https://x.com/JACKsPools  
+- Telegram: https://t.me/JACKsPools
+
 ## On-Chain Proof (Base Mainnet)
 
 The following transactions demonstrate the deployed protocol running on Base mainnet.
