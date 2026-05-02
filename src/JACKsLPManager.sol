@@ -157,6 +157,8 @@ contract JACKsLPManager is ReentrancyGuard {
 			deadline
 		);
 		
+		// Frontend must quote immediately before tx.
+		// If reserves move and router uses less ETH, tx reverts instead of refunding ETH.
 		// CRITICAL: Force exact ETH usage (no refund = no griefing)
 		require(addedEth == msg.value, "Requote ETH");
 		
@@ -184,7 +186,8 @@ contract JACKsLPManager is ReentrancyGuard {
 	}
         
     receive() external payable {
-		// Accept ETH refund from Router during LP addition
+		// Accept ETH only from Router during addLiquidityETH execution.
+		// Normal flow requires exact ETH usage and should not leave refunds here.
 		// Reject direct ETH deposits from users
 		require(
 			msg.sender == address(ROUTER),

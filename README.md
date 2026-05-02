@@ -1,10 +1,74 @@
 # JACKs Pools – Autonomous Reward Distribution Protocol on Base
 
+## LIVE ON BASE MAINNET
+
+JACKs Pools is now live and running autonomously on Base mainnet.
+
+- Verified contracts  
+- Trading enabled  
+- Initial liquidity added and permanently burned (LP tokens burned) 
+- Ownership fully renounced  
+- Buyer and LP reward systems active  
+- No upgradeability, no admin control  
+
+**Mainnet Contracts:**
+
+- Token: https://basescan.org/address/0xdd763679EE46C3e0B28ce2f288C5f67ad0d75f67  
+- Buyer Vault: https://basescan.org/address/0xb538BB228c72C6c0b19C889a219A5cC3888F90ba  
+- LP Vault: https://basescan.org/address/0x85480427d187E56F314Fdb43961017f61902Aa12  
+- LP Manager: https://basescan.org/address/0x70176BE3766537239A72aC680B29Ed18D825bCbA  
+- Pair: https://basescan.org/address/0x4f54a47Eb7565cb36067e66D3cE3E105e8Cd1F96  
+
+## On-Chain Proof (Base Mainnet)
+
+The following transactions demonstrate the deployed protocol running on Base mainnet.
+
+### Deployment & Initialization
+
+- Initial liquidity added  
+  https://basescan.org/tx/0x69fe7fa8b79afdf78c6aabce593168bf4ce67659e3e43fa3b4e11596f5213648
+
+- Trading enabled  
+  https://basescan.org/tx/0x7d7118a45dff861ebf03f9c5bebbdfb6b7e68d569c4a1ba7f6f18c4a1fb7df05
+
+### Ownership Renounced
+
+- Token ownership renounced  
+  https://basescan.org/tx/0x3e8ffd4cb3740ebe5ef4193fa432c86a59078dbc49fcd51bbac82eb0104d3c7d
+
+- Buyer Vault ownership renounced  
+  https://basescan.org/tx/0xfe901c6201274f2131221ad0de0c06651660ec10fe517fc06d9bbf6f2aa5cdc0
+
+### Bootstrap Proof
+
+- Buy executed  
+  https://basescan.org/tx/0x3f5e0bac7e7e337252f0e5e2154b01c45fab248d00f7725e07c89502b4b737ad
+
+- Buyer added to reward system  
+  https://basescan.org/tx/0xae4faaf512304afc5c27a8f6fdf6d64635bdb741b496eea1727eb0dbb6bf18fb
+
+- Tax processing + Buyer Vault funding  
+  https://basescan.org/tx/0x0ebc1bc2d76b95b47eb3d217ade9524df934b23d3d5e4f0a6f3790d7fded8f00
+
+- LP add + contribution tracking  
+  https://basescan.org/tx/0x4f6787772059b2230e5a03e8a592b35cb97861efa2fc7d76f5e9444d88cc26da
+
+- LP eligibility + buffer entry  
+  https://basescan.org/tx/0x8126246e64885c6a453f2f3b6be80f09f2fd143192a55dc5c8021375d724773f
+
+- Sell after lock  
+  https://basescan.org/tx/0x5f0c0432565a6854994f95e29a750775abc7b3403af6902c07aa3709df0f688c
+
+- Tax processing + LP Vault funding  
+  https://basescan.org/tx/0x2bea9da9d7184ef4a3645d0e157608313058b2403017efc20ea6cacc6ff56be9
+
+Note: Full reward cycles (snapshot → finalize → claim → cleanup) will complete organically as protocol activity accumulates.
+
 ## Documentation
  **Whitepaper:** [whitepaper/WHITEPAPER.md](whitepaper/WHITEPAPER.md)  
  **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-JACKs Pools is an autonomous on-chain reward protocol designed for Base that turns
+JACKs Pools is an autonomous on-chain reward protocol live on Base that turns
 trading and liquidity activity into recurring reward rounds for participants.
 The protocol combines a buyer reward engine with a competitive liquidity leaderboard,
 creating two autonomous engagement loops for traders and liquidity providers.
@@ -22,9 +86,18 @@ The system is fully non-custodial and non-ruggable:
 - All rewards are claim-based (pull payments)  
 - All logic is deterministic, self-contained, and on-chain  
 
+**In simple terms:**
+
+- Buy → enter a reward round  
+- Provide liquidity → compete for LP rewards  
+- Sell → funds LP rewards  
+- Rewards are distributed automatically on-chain  
+
+No admin. No custody. No intervention.
+
 ---
 
-## Mainnet Candidate Status
+## Mainnet Status
 
 JACKs Pools has completed:
 
@@ -35,8 +108,7 @@ JACKs Pools has completed:
 All core flows have been executed using real transactions, multiple wallets,
 and without privileged access.
 
-The current repository state represents the final immutable mainnet candidate,
-pending deployment.
+The current repository state represents the deployed immutable Base mainnet version.
 
 ### Latest Patch
 
@@ -165,66 +237,11 @@ A new deployment has been completed with the final autonomous design.
 - JACKsLPManager: https://sepolia.basescan.org/address/0x8158cfc37Dc6856cDdA4C15F6027C34F7aC0C86e  
 - Pair: https://sepolia.basescan.org/address/0xe3518e6AE4cCb99616183a5B04037107aEd487AE  
 
-## On-chain Validation Transactions (Base Sepolia)
+## Testnet Validation (Base Sepolia)
 
-The following transactions demonstrate the full protocol lifecycle executed on Base Sepolia.
+Full validation transactions and lifecycle proofs are available here:
 
-### Core Flow (Buyer Rewards)
-
-- Process protocol taxes  
-  https://sepolia.basescan.org/tx/0x32dda62ecb9a5a968176967b1ddadae054e43ec27207f8ab4497f5849b9a01fb
-
-- Buyer reward finalize  
-  https://sepolia.basescan.org/tx/0x0196ad9c3cea2eaca17cc349bff2d31ad605533be864542aa5b1dee0a256cdfa
-
-- Buyer reward claim  
-  https://sepolia.basescan.org/tx/0x6348cbce9342eacb59e402f638391c7e1cf4c6b61217c95367e807c89c8d5a2a
-
-- Cleanup expired claims (funds recycled into pool)  
-  https://sepolia.basescan.org/tx/0xcde9b52cf35d30c14e0545d3d31f4e68d95e899bc65c0923e405bda379761b9e
-
-- Max wallet enforcement (Stage 1 revert)  
-  https://sepolia.basescan.org/tx/0xf3aa65157b9f574e9cc457370265e280fd78664d3571eb87ff2ed4faee893248
-
-### Edge Case Handling
-
-- Snapshot timeout → auto-reset (round safely restarted after inactivity)  
-  Demonstrates protocol recovery when a round is not finalized in time
-  https://sepolia.basescan.org/tx/0xd7ba074dbfc20acbf2f8f8f01493f991567b2a145447f19073f42af517e9b6db
-
-### LP Competition & Reward Cycle (Fully Validated)
-
-The following transactions demonstrate the complete LP lifecycle, including buffer saturation, eviction mechanics, reward distribution, claims, and cleanup.
-
-#### Buffer Mechanics
-
-- Buffer full → low contribution rejected (not eligible for ranking)  
-  https://sepolia.basescan.org/tx/0xc215f57456552df5f3a994e104a214b27fba63adf6d9413a2825e40d40ae3992
-
-- Buffer full → lowest contributor replaced by higher contributor  
-  Demonstrates deterministic eviction and capped leaderboard (max 400 participants)  
-  https://sepolia.basescan.org/tx/0x6301f347d6e52015466249ddcfbf1b932323570bf042ea3772ba5091cc9d998a
-
-#### Round Lifecycle
-
-- LP round snapshot → contributors frozen for reward calculation  
-  Snapshot is automatically triggered when pool threshold is reached
-
-- LP round finalized by a participating wallet  
-  Demonstrates permissionless finalization (no admin required)  
-  https://sepolia.basescan.org/tx/0x0b993c4a866eccc2f4ed0f1a10afbc383264fb062e4379d0b41b791ab3b6df7b
-
-#### Reward Claims
-
-- Rewards claimed by multiple LP participants  
-  https://sepolia.basescan.org/tx/0xbde5535b437a28619a337c0286650ff2a284977f7d735200250588097fcf2622  
-  https://sepolia.basescan.org/tx/0x758cf44ba984e0c5246f70e9c067b88abad7f69f1944ee870ea40cd6bda47938  
-
-#### Cleanup (Full Lifecycle Completion)
-
-- Expired LP rewards cleaned and recycled back into pool  
-  Demonstrates long-term solvency and non-blocking reward system  
-  https://sepolia.basescan.org/tx/0x9c9fa773b035b8692203edabbfc2f259adfcd854fdc861d0ea041dc20a15d698
+[docs/SEPOLIA_VALIDATION.md](docs/SEPOLIA_VALIDATION.md)
 
 #### What this demonstrates
 
@@ -241,13 +258,20 @@ All mechanisms are executed and verifiable on-chain.
 
 ## Status
 
-Mainnet candidate. Full on-chain lifecycle validation completed on Base Sepolia.
+Live on Base mainnet. Ownership renounced. Core protocol flows are live on-chain; full reward cycles will complete as activity accumulates.
 
-## Frontend (Base Sepolia)
+## Frontend
 
-A full frontend is available for interacting with the protocol on Base Sepolia:
+A full frontend is available:
 
-https://jackspoolswebsite.vercel.app/
+https://jackspools.lol
+
+The interface supports both Base mainnet and Base Sepolia.
+
+Users can switch between networks directly from their wallet.
+
+Mainnet is live and permissionless.  
+Testnet remains available for exploration and validation.
 
  **Note on testnet configuration**
 
@@ -258,7 +282,7 @@ https://jackspoolswebsite.vercel.app/
 > and easier on-chain validation under testnet conditions.
 >
 > Core logic, security assumptions, and lifecycle behavior are identical
-> between testnet and the mainnet candidate.
+> between testnet and the deployed mainnet version.
 
 ### `script/TestBaseCompleteFork.s.sol`
 
@@ -308,4 +332,4 @@ An example configuration is provided in ".env.example".
 
 ---
 
-This repository represents the final mainnet candidate state of the JACKs Pools protocol.
+This repository represents the live, immutable Base mainnet deployment of the JACKs Pools protocol.

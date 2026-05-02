@@ -90,11 +90,11 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     uint256 public totalSupply;
     
     // Tax configuration (immutable)
-	uint256 public constant BUY_TAX_REWARD_BPS = 775;  // 7.75%
-	uint256 public constant BUY_TAX_LP_BPS = 200;       // 2%
-	uint256 public constant BUY_TAX_BURN_BPS = 25;      // 0.25%
-	uint256 public constant TOTAL_BUY_TAX_BPS = 1000;   // 10% total
-	uint256 public constant SELL_TAX_LP_BPS = 1000;     // 10%
+	uint256 public constant BUY_TAX_REWARD_BPS = 775;  // 7.75% -> Buyer Vault
+	uint256 public constant BUY_TAX_LP_BPS = 200;      // 2% -> auto-LP
+	uint256 public constant BUY_TAX_BURN_BPS = 25;     // 0.25% -> true burn (reduces totalSupply)
+	uint256 public constant TOTAL_BUY_TAX_BPS = 1000;  // 10% total buy tax: 7.75% vault + 2% auto-LP + 0.25% burn
+	uint256 public constant SELL_TAX_LP_BPS = 1000;    // 10% total sell tax; split 50/50: 5% LP vault + 5% auto-LP
 	uint256 public constant BPS = 10000;
 	uint256 public constant SELL_LOCK_DURATION = 2 hours;
 	uint256 public constant BUY_COOLDOWN = 30; // 30 seconds between buys
@@ -569,7 +569,9 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 			}
 		} catch {}
 		
-		return 0; // Intentional: accepts sandwich risk for liveness when quote fails
+		// If router quote fails, allow swap with amountOutMin = 0.
+		// This preserves tax-processing liveness, accepting MEV/slippage risk only for protocol tax swaps.
+		return 0;
 	}
     
     function getLpValue() public view returns (uint256) {
@@ -589,8 +591,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
 
 			return ethReserve * 2; // Total LP value = 2x ETH reserve
 		} catch {
-			// Return high value to DISABLE max wallet limit on error
-			// This is safer than returning 0 which activates strictest limit
+			// If reserve reads fail, return Stage 4 LP value to avoid accidentally enforcing Stage 1 max-wallet limits.
+			// This is a fail-open compromise for UX/liveness, not a real LP reading.
 			return 300 ether; // force Stage 4 behavior on error (fail-safe compromise)
 		}
 	}
@@ -698,7 +700,8 @@ contract JACKsPools is IERC20, ReentrancyGuard {
         );
     }
     
-    // Emergency function to process stuck taxes (owner only, before renounce)
+    // Pre-renounce helper only: allows deployer to process accumulated taxes before ownership is renounced.
+    // After renounce, this function is permanently inaccessible.
 	function emergencyProcessTaxes() external onlyOwner {
 		require(!_swapping, "Already processing");
 		if (_rewardTokens + _lpTokens + _lpRewardTokens > 0) {
@@ -775,7 +778,9 @@ contract JACKsPools is IERC20, ReentrancyGuard {
     }
     
     receive() external payable {
-    // Only accept ETH from Router (LP operations) or Vaults (should never happen)
+    // Accept ETH from:
+    // - ROUTER: ETH refunds during LP add / swap operations
+    // - VAULT: defensive compatibility allowance; no current code path intentionally sends ETH from VAULT to TOKEN
     require(
         msg.sender == address(ROUTER) || 
         msg.sender == address(VAULT),

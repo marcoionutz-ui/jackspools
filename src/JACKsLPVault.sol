@@ -177,6 +177,8 @@ contract JACKsLPVault is ReentrancyGuard {
 	 * @notice Record LP contribution from user
 	 * @dev Called by LP_MANAGER (or token contract) when user adds LP through site
 	 * @dev Accepts any amount - eligibility based on lifetime contributions
+	 * @dev Lifetime eligibility only unlocks the ability to enter rounds.
+	 *      User must still add LP during the active round to appear in that round's buffer.
 	 */
 	function recordLpContribution(address user, uint256 ethAmount) external {
 		require(
@@ -295,8 +297,8 @@ contract JACKsLPVault is ReentrancyGuard {
 		
 		uint256 buffer = snapshotBuffer;
 		
-		// Anti-griefing: Only participants can finalize immediately          
-		// BUT: Anyone can finalize after 7 days (prevents eternal lockup post-renounce)  
+		// Finalization is participant-gated for 7 days to reduce griefing.
+		// After 7 days anyone can finalize to prevent stuck rewards after renounce. 
 		bool isParticipant = bufferContributions[buffer][msg.sender] > 0;       
 		bool isTimedOut = block.timestamp >= snapshotTimestamp + 7 days;               
 
