@@ -1,0 +1,256 @@
+~/jackspoolsagents$ npm run dev
+
+> jackspools-agents@1.0.0 dev
+> tsx src/runner.ts
+
+========================================
+  JACKSPOOLS AGENT ARENA — TESTNET
+  13 agents competing for ETH rewards
+========================================
+
+Agents:
+  Smart  (3): Alpha, Sigma, Hunter
+  Mid    (5): Defender, TopUp, Watcher, Steady, Rebuy
+  Chaos  (5): Chaos1-5
+
+Starting all agents...
+
+Starting 3 smart agents...
+[Alpha] Starting — goal: always #1
+[Alpha] Bootstrapping initial position
+[0x23Ac9F] Bought with 0.00008 ETH | tx: 0xecda4f1c62d6a020f0f3a206ee6c3059abc6867d43a149b7deac2982ea60d585
+[0x23Ac9F] Attempting addLP: ethAmount=0.00006, tokenNeeded=762894.013479288594401693, balance=11850460.6261580935128532
+[0x23Ac9F] Added LP: 0.00006 ETH | tx: 0xce226a369361f2c8215af71eb1a00b2d42b0d370ba8a19531cd142dfad704c15
+[Alpha] Initial position established
+[Alpha] Rank: 3, Contribution: 0.000359999999999994, Top10 cutoff: 0.000059999999999999
+[Alpha] Already competitive
+Starting 5 mid heuristic agents...
+[Defender] Starting
+[0x86860f] Bought with 0.00008 ETH | tx: 0xfa27c954140fb95d99e080c3f22c08af2cab378d3446c95b052accac419f320e
+[0x86860f] Attempting addLP: ethAmount=0.00006, tokenNeeded=761191.651638773410383438, balance=9883607.224178875583308144
+[0x86860f] Approved tokens
+[0x86860f] Added LP: 0.00006 ETH | tx: 0x3b092355d49f0fa743b82c54f3a72dcaf1589ec4e6aaa48e47674e64703bc3c4
+[0x86860f] Sell lock active — 282s remaining
+[Defender] Rank: 4, Tier: 1, Eligible: true
+[0x86860f] Buyer round not ready to finalize
+[0x86860f] LP round not ready to finalize
+Starting 5 chaos agents...
+[Chaos1] Starting - lpOnly: false
+[Chaos1] ETH balance: 0.00915782897892705
+[0xECEe59] Sold 75% of tokens | tx: 0x93a603fd98961b46f96fa8dda8124c2e1d753d1fecd322207e89c7cdd61ad6d6
+[0xECEe59] Bought with 0.00009 ETH | tx: 0x0b6ea137eebbd92c8db3ea5d9e94755c686db20af87221b58516d1e6eb12315e
+[Sigma] Starting — reactive #1 defender
+[Sigma] Establishing initial position
+[0x60ed6a] Bought with 0.0001 ETH | tx: 0x05cb873e0cb6e0ff679de48c3c5538bc65a07bd85db2071848ad4e021d6fa614
+[0xECEe59] Attempting addLP: ethAmount=0.00006, tokenNeeded=758686.843002955419571281, balance=1362532.112544046860252138
+[0xECEe59] Added LP: 0.00006 ETH | tx: 0xc5871ead4364e7598b0f9e0830a8570809b50442dae2f368e855a2615316c314
+[TopUp] Starting
+[0xECEe59] Taxes processed | tx: 0xd86d51d06fb798ea78847ef729cadb3fb42d9645a966ae2a7330eb76ab339ed0
+[0xECEe59] Buyer round not ready to finalize
+[0xECEe59] LP round not ready to finalize
+[Chaos1] Sleeping 239s until next cycle
+[0x3a5166] Bought with 0.00008 ETH | tx: 0x336dd38c5a59145a9274bc2db745d826721cd366803cf07cb9d293fbca6d487c
+[0x60ed6a] Attempting addLP: ethAmount=0.00008, tokenNeeded=1011582.457337273906851916, balance=8335555.316892811186550229
+[0x60ed6a] Added LP: 0.00008 ETH | tx: 0xbe390919b3ef1202f19e3b7d86fc0ec39c40bef6fcd81e430258ccfc80232137
+[Sigma] Position established
+[Sigma] Rank: 3, Contribution: 0.000369999999999995
+[Sigma] DETHRONED! Was #1, now #3 — retaliating with 2x
+[Sigma] Retaliation failed: The contract function "swapExactETHForTokensSupportingFeeOnTransferTokens" reverted with the following reason:
+UniswapV2: TRANSFER_FAILED
+[0x60ed6a] Buyer round not ready to finalize
+[0x60ed6a] LP round not ready to finalize
+[Chaos2] Starting - lpOnly: false
+[Chaos2] ETH balance: 0.013470928549989038
+[0x3a5166] Attempting addLP: ethAmount=0.00006, tokenNeeded=765276.385461880674538278, balance=968451.187451754610073235
+[0xAFFd68] Sold 75% of tokens | tx: 0x398f99b2e8969262082e0a73bcaadb9fdf56f1f784657b529c005adb49a5f31a
+[0xAFFd68] Bought with 0.00009 ETH | tx: 0xf13ac0cf8d7b8a6ac5beb8b2d70011ffc01f6b4cf314a035b798a20985679088
+[0x3a5166] Approved tokens
+[0x3a5166] Added LP: 0.00006 ETH | tx: 0x644f78d74113dada5f89851280dac6684accfe566261d642afc9bae712cf8529
+[0x3a5166] Sold 75% of tokens | tx: 0xc4255baf925e256e406ebdb554c4e3c5234748049bac9e7a69e50605aacb1e73
+[TopUp] Rank: 1, Contribution: 0.000059999999999999, Top10 cutoff: 0
+[TopUp] In top10 at rank 1 — holding
+[0x3a5166] Buyer round not ready to finalize
+[0x3a5166] LP round finalized | tx: 0xaed33200a15c7fca60fb7905a27946d8d2b7dbd69d5e1215ca24e6f11a244536
+[0xAFFd68] Attempting addLP: ethAmount=0.00006, tokenNeeded=765276.385461880685209081, balance=958673.62861071873883257
+[0xAFFd68] Added LP: 0.00006 ETH | tx: 0xad517ad3c66c183b48920ace90c41efebab9acb0c9debffa639de3f50aa984af
+[0xAFFd68] Taxes processed | tx: 0x12e8d6a83c3a3f1d0dd0a6938b7c980452ef8f4dac7954dbcd022354d12069d1
+[0xAFFd68] Buyer round not ready to finalize
+[0xAFFd68] LP round not ready to finalize
+[0xAFFd68] Claimed LP rewards for 1 rounds | tx: 0x7c6c401e720f62b5f6061d915eaf176fa2927f159479a6b554433ed019a214f9
+[Chaos2] Sleeping 286s until next cycle
+[Watcher] Starting — waiting for pool >= 70%
+[Chaos3] Starting - lpOnly: true
+[Chaos3] ETH balance: 0.013743387004225934
+[0xD0c39A] Bought with 0.00008 ETH | tx: 0x7a85f856ec54cd9c012c1a1813d061d15646123573d121d3e7444f99138a8da2
+[0xc3458d] Sold 75% of tokens | tx: 0xc9f616c18397213a096f656e7694886a45352b9bfba1cbfbaa72f52cd56fcacd
+[Chaos3] lpOnly: buying 0.000066 ETH worth of tokens for LP
+[0xc3458d] Bought with 0.000066 ETH | tx: 0xd61d74c677c3d14f8382df29c648e9bc78886de1c4bfa1e7f8bd72a48cb1fede
+[Alpha] Rank: 0, Contribution: 0, Top10 cutoff: 0
+[Alpha] Not #1 (rank 0) — adding 0.00006 ETH to claim top
+[Hunter] Starting — sniper, waits for 90% pool
+[0x23Ac9F] Bought with 0.000066 ETH | tx: 0x0afd2012b4113256c8b876c3e719208a496dcae7465893860cf0968cb01fcf29
+[0x873e17] Bought with 0.00008 ETH | tx: 0x7e0a2b4ac7b98204b6006f558c6176b6132a834c87f865cb1951620168e273cc
+[0xD0c39A] Attempting addLP: ethAmount=0.00006, tokenNeeded=761011.066569338334765647, balance=5355484.302364232402743401
+[0xD0c39A] Added LP: 0.00006 ETH | tx: 0x87006e8ac6fd853829942141e27e863d2318d851f86bc5dcd0eded5662149175
+[Watcher] Initial LP added for eligibility
+[0xD0c39A] Sell lock active — 285s remaining
+[Watcher] Pool progress: 0.0%
+[0xc3458d] Attempting addLP: ethAmount=0.00006, tokenNeeded=761011.066569338334765647, balance=804269.892143068111401602
+[0xc3458d] Added LP: 0.00006 ETH | tx: 0xf5b5d9c01bce561981336008e828583df8b5cc7590057088a10f2c0cb732ea8e
+[0xc3458d] Taxes processed | tx: 0x9e586cabc3bf6228442ed14a6eb4834ee4f3933346e5b58cec4fc835bc1a4085
+[0xc3458d] Buyer round not ready to finalize
+[0xc3458d] LP round not ready to finalize
+[0xc3458d] Claimed LP rewards for 1 rounds | tx: 0x7a15d15ce33fe2b980ada8821bd1f7c277782892d94ea5e10650b24f0f0469b9
+[Chaos3] Sleeping 165s until next cycle
+[0x23Ac9F] Attempting addLP: ethAmount=0.00006, tokenNeeded=761011.066569338345329662, balance=11839396.753506345164760243
+[0x873e17] Attempting addLP: ethAmount=0.00006, tokenNeeded=761011.066569338345329662, balance=4671276.940270617672109266
+[0x23Ac9F] Added LP: 0.00006 ETH | tx: 0xe894d02adc8605b0d32ee2fc6804034d8a2dd6755ba52d9cd66bd6fd1ac15e79
+[Alpha] Position updated — should be #1 now
+[0x873e17] Added LP: 0.00006 ETH | tx: 0xf366cda6265f2f4c52d8a71a13f3a681b7be14dc07685343b29acbeb3ffb3713
+[Hunter] Eligibility established, now watching...
+[0x23Ac9F] Buyer round not ready to finalize
+[Hunter] New round #6 — ready to hunt
+[Hunter] LP Pool: 0.0% — waiting for 90%
+[0x23Ac9F] LP round not ready to finalize
+[0x873e17] Buyer round not ready to finalize
+[0x873e17] LP round not ready to finalize
+[0x23Ac9F] Claimed LP rewards for 1 rounds | tx: 0x194f13a83d94701808c2af9a211e0179af38a3df7c1d2bc3649c9fb2080f2c31
+[0x873e17] Claimed LP rewards for 1 rounds | tx: 0x2a91e915414069f934e8d915656d9097405126636d52c4f36464ae208ac67303
+[Chaos4] Starting - lpOnly: false
+[Chaos4] ETH balance: 0.011921254486861022
+[0x7d3c1C] Sold 75% of tokens | tx: 0x0095c658ba9f7b84a596fac83baf4266747000fab7b850411fee6b8767f30454
+[0x7d3c1C] Bought with 0.00009 ETH | tx: 0xca3e2ce7db5a5cf5cb6975731c2bfe21e65dd7a55f130c0ffb302f0fd0de5b0d
+[Steady] Starting — small frequent contributions
+[0x751260] Sold 75% of tokens | tx: 0xb291c77b39b5d99e33c1d90278cc5785c0fd54b01f29528b6e9d428e14c4d042
+[Steady] ETH balance: 0.010491289664747497
+[0x751260] Bought with 0.00009 ETH | tx: 0xc0be3e2d627b4bf8db9998a4c204053d95e581809dc4a323153c4fb425278190
+[Hunter] LP Pool: 0.0% — waiting for 90%
+[0x873e17] Buyer round not ready to finalize
+[0x873e17] LP round not ready to finalize
+[0x7d3c1C] Attempting addLP: ethAmount=0.00006, tokenNeeded=762870.705315597153431927, balance=1458725.018460162464346508
+[0x7d3c1C] Added LP: 0.00006 ETH | tx: 0x18aa6b220ec56e3545ba055d4f6858b62c78991a6bda71c30b0f37b29d0975be
+[0x7d3c1C] Taxes processed | tx: 0x059ed0d1fbc8eb44792b20ef8bfbddba093226ab5929bc6d73ad07a247054bb1
+[0x7d3c1C] Buyer round not ready to finalize
+[0x7d3c1C] LP round not ready to finalize
+[Chaos4] Sleeping 580s until next cycle
+[0x751260] Attempting addLP: ethAmount=0.00006, tokenNeeded=764084.474225406294350069, balance=1857175.814212952629198765
+[0x751260] Added LP: 0.00006 ETH | tx: 0x4e29baf3115c029a2aed4b26dfc93c2050fa132f8efecd090fe2ecc1412997ea
+[0x751260] Buyer round not ready to finalize
+[0x751260] LP round not ready to finalize
+[Chaos5] Starting - lpOnly: false
+[Chaos5] ETH balance: 0.014201956320777088
+[0x751260] Claimed LP rewards for 1 rounds | tx: 0x567d2adb048198f0ce1a3967318e2d4d87bf66e5e58a5fd29a27433b7f2ec8bb
+[0xBae270] Sold 75% of tokens | tx: 0xeda507f9811405b8778324a1f21e4468bf7bbe0bca46b0ee4055c7b0dbd76428
+[0xBae270] Bought with 0.00009 ETH | tx: 0xd7c5d254ffb1e627bb3e809a4a93e3d31f9016038a55e9478f869479b0eb65bd
+[0xD0c39A] Sell lock active — 226s remaining
+[Watcher] Pool progress: 3.1%
+[Hunter] LP Pool: 3.1% — waiting for 90%
+[0x873e17] Buyer round not ready to finalize
+[0x873e17] LP round not ready to finalize
+[0x86860f] Sell lock active — 121s remaining
+[Defender] Rank: 0, Tier: 0, Eligible: true
+[Defender] Outside top60 or evicted — defending position!
+[0x86860f] Bought with 0.00006 ETH | tx: 0x8df1cf39dda942df121c1f45abafb9653941f29924f7103f05f8a19e18078a47
+[0xBae270] Attempting addLP: ethAmount=0.00006, tokenNeeded=762184.514291740276806455, balance=1904247.940832160161501814
+[0xBae270] Added LP: 0.00006 ETH | tx: 0xdb08f15b0a54de5f2cc28eaaa87f4190d905782bf4c13a1cd94a7e0dcd2401a5
+[0xBae270] Taxes processed | tx: 0xec6a2ab1a6191899034c85d143fdd0524c339b32b14810b7806cd4ccc444beba
+[0xBae270] Buyer round not ready to finalize
+[0xBae270] LP round not ready to finalize
+[0xBae270] Claimed LP rewards for 1 rounds | tx: 0x40107b79c50d3d696527772e7ca84d833bb4233cb78752af235e7336c39ced90
+[Chaos5] Sleeping 226s until next cycle
+[Rebuy] Starting — buys after every sell lock expiry
+[0x86860f] Attempting addLP: ethAmount=0.00006, tokenNeeded=761197.45247606930415306, balance=9805757.841238373176526053
+[Rebuy] ETH balance: 0.01358940585008113
+[Rebuy] Sell lock expired — buying!
+[0x86860f] Added LP: 0.00006 ETH | tx: 0x529e283401a3a7611dedf6d42c076673f3727a8fef70e5029681b338cf9b3e1a
+[0x86860f] Buyer round not ready to finalize
+[0x86860f] LP round not ready to finalize
+[0x444560] Bought with 0.00009 ETH | tx: 0xaa23949b632c6b94c932f2ab29f7c8347ed0eb2b1d0d74931ef341ff35afd1db
+[0x86860f] Claimed LP rewards for 1 rounds | tx: 0xbcde2859387e6a744b4ce371190cd22b6eba00a458c2f2d3d84f64bdffdfe002
+[Hunter] LP Pool: 3.1% — waiting for 90%
+[0x873e17] Buyer round not ready to finalize
+[0x873e17] LP round not ready to finalize
+[0x444560] Attempting addLP: ethAmount=0.00006, tokenNeeded=759309.853081315077773531, balance=2472158.53132983229528165
+[Sigma] Rank: 0, Contribution: 0
+[Sigma] New round — establishing position
+[0x444560] Added LP: 0.00006 ETH | tx: 0x53045512eeb8d0f2dd89cb79a5100c480c570ad085761d464cee63e48694d10e
+[Rebuy] Added LP from stash
+[0x444560] Buyer round not ready to finalize
+[0x444560] LP round not ready to finalize
+[0x60ed6a] Bought with 0.00006 ETH | tx: 0x56420fc72354347343ee54106daa40ecf492a58966aa9c0a8018769f7b92e13a
+[Hunter] LP Pool: 3.1% — waiting for 90%
+[0x60ed6a] Attempting addLP: ethAmount=0.00005, tokenNeeded=632758.210901095906873093, balance=7323972.859555537279698313
+[0x873e17] Buyer round not ready to finalize
+[0x873e17] LP round not ready to finalize
+[0xD0c39A] Sell lock active — 167s remaining
+[Watcher] Pool progress: 3.1%
+[0x60ed6a] Added LP: 0.00005 ETH | tx: 0x36c54f5f289ccc825d62c2da1a4eb0215b6383420b5363417ed420cce1fbe8f5
+[Hunter] LP Pool: 3.1% — waiting for 90%
+[0x873e17] Buyer round not ready to finalize
+[0x873e17] LP round not ready to finalize
+[Alpha] Rank: 4, Contribution: 0.000059999999999999, Top10 cutoff: 0.000049999999999999
+[Alpha] Not #1 (rank 4) — adding 0.000047999999999998 ETH to claim top
+[0x23Ac9F] Bought with 0.000052799999999997 ETH | tx: 0x48febeb574471e8e35f7557b7ff7e390ef8b5b2c7edf60bf5639a24e7ab2575e
+[Chaos3] ETH balance: 0.013688873096966362
+[0xc3458d] Sell lock active — 121s remaining
+[Chaos3] Already have enough tokens for LP
+[0xc3458d] Attempting addLP: ethAmount=0.00006, tokenNeeded=758207.401907364753140429, balance=804269.892143068111401602
+[0xc3458d] Added LP: 0.00006 ETH | tx: 0xb0e522d744457c563fda7d8862fc14dcd3a34b7d43a6b7ef834e2c1885ae9372
+[0x3a5166] Sold 75% of tokens | tx: 0x0630ab2bd27a672d3093eb20aa031ff000d87d095a1546b16dbb244703a625f3
+[Chaos1] ETH balance: 0.009072813496410362
+[0xECEe59] Sell lock active — 48s remaining
+[TopUp] Rank: 1, Contribution: 0.000059999999999999, Top10 cutoff: 0.000049999999999999
+[TopUp] In top10 at rank 1 — holding
+[0x3a5166] Buyer round not ready to finalize
+[0x3a5166] LP round not ready to finalize
+[0xc3458d] Taxes processed | tx: 0x521d73665193a6fedc33cf44ba90d0a42229d17c19be433c0cd0891637a73573
+[0xc3458d] Buyer round not ready to finalize
+[0xc3458d] LP round not ready to finalize
+[Chaos3] Sleeping 90s until next cycle
+[Hunter] LP Pool: 3.1% — waiting for 90%
+[0x873e17] Buyer round not ready to finalize
+[0xECEe59] Bought with 0.00009 ETH | tx: 0xbf5367dcffb4c6f6b458e482bde102d3fae36db6a6ce5887a1351112fa6b0ac2
+[0x873e17] LP round not ready to finalize
+[0x3a5166] Claimed LP rewards for 1 rounds | tx: 0xfb05032d43609ed7d9ae5be0a1c6efe4788715fb4202657427938856a5598625
+[0xD0c39A] Sell lock active — 108s remaining
+[Watcher] Pool progress: 3.1%
+[0x23Ac9F] Attempting addLP: ethAmount=0.000047999999999998, tokenNeeded=606746.868826055233056779, balance=11677520.204943683849022192
+[0x23Ac9F] Added LP: 0.000047999999999998 ETH | tx: 0x949ad321ff3d10c22b02c7697fd572da8f209191d442322081320bba1c4963a8
+[Alpha] Position updated — should be #1 now
+[0x23Ac9F] Buyer round not ready to finalize
+[0x23Ac9F] LP round not ready to finalize
+[0xECEe59] Insufficient tokens for LP: have 603845.269541091440680857, need 758433.586032600653153703
+[0xECEe59] Taxes processed | tx: 0x38e2cab99c0a86aa93e60cd92d3ce2a57835d9d756964dd0877b02e1ae8f135e
+[0xECEe59] Buyer round not ready to finalize
+[0xECEe59] LP round not ready to finalize
+[0xECEe59] Claimed LP rewards for 1 rounds | tx: 0x7219a9201d4415a15f227af3e24d25e9ac82ad3cbd2d34d0f2bc118113ffb370
+[Chaos1] Sleeping 184s until next cycle
+[Hunter] LP Pool: 3.2% — waiting for 90%
+[0x873e17] Buyer round not ready to finalize
+[0x873e17] LP round not ready to finalize
+[0x751260] Sell lock active — 121s remaining
+[Steady] ETH balance: 0.010520049951830242
+[0x751260] Bought with 0.00009 ETH | tx: 0x37447e9e5042d7dd6b2a1ce321412ddb09677b8e8fd64fa2a1a01b921a8c4a5b
+[0x751260] Attempting addLP: ethAmount=0.00006, tokenNeeded=756839.744977132846198595, balance=2113021.184854530578235895
+[0x751260] Approved tokens
+[0x751260] Added LP: 0.00006 ETH | tx: 0xd5e3d52f1025a18877a7e750d9a0a44b591c827f6a675065e3b57b230c0a1c40
+[0x751260] Buyer round not ready to finalize
+[0x751260] LP round not ready to finalize
+[Sigma] Rank: 11, Contribution: 0.000049999999999999
+[0xD0c39A] Sell lock active — 49s remaining
+[0x60ed6a] Buyer round not ready to finalize
+[Watcher] Pool progress: 3.2%
+[0x60ed6a] LP round not ready to finalize
+[0x60ed6a] Claimed LP rewards for 1 rounds | tx: 0x79bb2afe363d00aa50c8341906298df8fa32829cc0918dcaa34c3fa3c427ab41
+[0x444560] Sell lock active — 139s remaining
+[Rebuy] ETH balance: 0.013436044680080814
+[Rebuy] Sell lock active — waiting 138s
+[Chaos2] ETH balance: 0.013435885367522648
+[0xAFFd68] Sold 75% of tokens | tx: 0x17c3a13a37db42f7c38c263967b454af84669027834d0e09f54b652298003f48
+[0xAFFd68] Bought with 0.00009 ETH | tx: 0xcaa66c84e4c6da564bbcbb6da68858d7559085d1cb5dc0a2603aa1299c0d99f6
+[Hunter] LP Pool: 3.2% — waiting for 90%
+[0x873e17] Buyer round finalized | tx: 0x1e9e89e3183df46af01a02227fc9cf4be0ff44d66c56c64387f9c47f2c16cc72
+[0x873e17] LP round not ready to finalize
+[Chaos3] ETH balance: 0.013624759202966177
+[0xc3458d] Sell lock active — 29s remaining
+[Chaos3] lpOnly: buying 0.000066 ETH worth of tokens for LP

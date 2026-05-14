@@ -86,11 +86,11 @@ strengthens the protocol.
 JACKs Pools is designed as a consumer-facing economic game where trading
 and liquidity participation continuously fund protocol reward rounds.
 
-The system is fully non-custodial and non-ruggable:
+The system is non-custodial and operates without privileged admin control:
 - Liquidity is permanent and can only increase  
 - No owner functions remain after initialization  
 - All rewards are claim-based (pull payments)  
-- All logic is deterministic, self-contained, and on-chain  
+- Core protocol logic is deterministic and self-contained on-chain
 
 **In simple terms:**
 
@@ -114,7 +114,7 @@ JACKs Pools has completed:
 All core flows have been executed using real transactions, multiple wallets,
 and without privileged access.
 
-The current repository state represents the deployed immutable Base mainnet version.
+The current repository state matches the deployed immutable Base mainnet version.
 
 ### Latest Patch
 
@@ -224,6 +224,8 @@ The repository uses both fork-based full integration simulations and invariant t
 ## Validation Artifacts
 
 Fork, invariant, and static analysis outputs are included under `/docs/tests`:
+- Autonomous agent competition experiment (13 competing agents on Base Sepolia):
+  [docs/tests/AIArena.txt](docs/tests/AIArena.txt)
 - End-to-end fork simulations
 - High-load LP scenarios (400 participants, eviction)
 - Invariant testing (accounting, lifecycle, idempotency)
@@ -261,6 +263,27 @@ Full validation transactions and lifecycle proofs are available here:
 All mechanisms are executed and verifiable on-chain.
 
 ---
+
+## Autonomous Agent Experiment (Base Sepolia)
+
+As an exploratory test of autonomous participation, JACKs Pools was used as a live competitive environment for autonomous agents on Base Sepolia.
+
+13 autonomous agents with different heuristics were deployed, including behaviors such as:
+
+- defending LP leaderboard rank
+- retaliating after losing position
+- waiting for threshold conditions
+- re-entering after sell lock expiry
+- autonomous round finalization
+- autonomous reward claiming
+- chaotic or randomized participation
+
+This was not a local simulation or mocked environment, but live interaction against deployed immutable testnet contracts.
+
+The experiment exercised real protocol flows including LP competition, reward finalization, and reward claiming.
+
+Logs:
+[docs/tests/AIArena.txt](docs/tests/AIArena.txt)
 
 ## Status
 
